@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <TargetFramework>netstandard2.1</TargetFramework>
-        <RootNamespace>PolusGGMod</RootNamespace>
+        <RootNamespace>TestMod</RootNamespace>
         <LangVersion>9</LangVersion>
     </PropertyGroup>
 
@@ -12,9 +12,8 @@
         <GameVersion>2020.12.9s</GameVersion>
         <Mappings>NuclearPowered/Mappings:0.1.1</Mappings>
 
-        <Description>test mod lmoa</Description>
+        <Description>it's a fucking api</Description>
         <Authors>Sanae6</Authors>
-        <ModListing>G:\among us\mod-listing\</ModListing>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
@@ -22,13 +21,7 @@
         <PackageReference Include="Reactor.OxygenFilter.MSBuild" Version="0.2.4" />
     </ItemGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\PolusApi\PolusApi.csproj">
-            <ExcludeAssets>runtime</ExcludeAssets>
-        </ProjectReference>
-    </ItemGroup>
-
     <Target Name="Copy" AfterTargets="Reobfuscate">
-        <Copy SourceFiles="$(OutputPath)reobfuscated/$(AssemblyName)-$(GameVersion).dll" DestinationFolder="$(ModListing)" Condition="'$(Configuration)' == 'Debug'" />
+        <Copy SourceFiles="$(OutputPath)reobfuscated/$(AssemblyName)-$(GameVersion).dll" DestinationFiles="$(AmongUs)/BepInEx/plugins/$(AssemblyName).dll" Condition="'$(Configuration)' == 'Debug'" />
     </Target>
 </Project>

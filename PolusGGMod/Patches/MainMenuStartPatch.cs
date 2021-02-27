@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using System.Linq;
+using HarmonyLib;
 using Hazel;
 
 namespace PolusGGMod.Patches {
@@ -9,14 +10,8 @@ namespace PolusGGMod.Patches {
         [HarmonyPrefix]
         public static bool Start() {
             if (hasStarted) return true;
-            
-            MessageReader reader = MessageReader.GetSized(0);
-            
-            {
-				AmongUsClient.Instance.Method_16(reader, 0);
-            }
-            
             hasStarted = true;
+            ServerManager.DefaultRegions = ServerManager.DefaultRegions.Append(PggConstants.Region).ToArray();
             ServerManager._instance.CurrentRegion = PggConstants.Region;
             ServerManager._instance.SaveServers();
             return true;

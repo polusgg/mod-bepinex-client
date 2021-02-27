@@ -5,14 +5,6 @@ using HarmonyLib;
 namespace PolusGGMod.Patches {
     [HarmonyPatch(typeof(RegionMenu), nameof(RegionMenu.OnEnable))]
     public static class RegionMenuOnEnablePatch {
-        [HarmonyPrefix]
-        public static void Prefix() {
-            bool hasModded = ServerManager.DefaultRegions.Any(x => x.Name == PggConstants.Region.Name);
-            if (!hasModded) {
-                ServerManager.DefaultRegions = ServerManager.DefaultRegions.Append(PggConstants.Region).ToArray();
-            }
-        }
-
         [HarmonyPostfix]
         [PermanentPatch]
         public static void Postfix(RegionMenu __instance) {
@@ -20,14 +12,14 @@ namespace PolusGGMod.Patches {
                 ChatLanguageButton button = regionButton.Cast<ChatLanguageButton>();
                 button.SetSelected(DestroyableSingleton<ServerManager>.Instance.CurrentRegion.Name == button.Text.Text);
                 button.Button.OnClick.AddListener((Action) (() => {
-                    bool original = PggMod.IsPatched;
-                    if (button.Text.Text == PggConstants.Region.Name && !PggMod.IsPatched) {
-                        // PggMod.();//todo implement temporary patches
-                    } // else PggMod.Unpatch();
+                    bool original = PogusPlugin.AllPatched;
+                    if (button.Text.Text == PggConstants.Region.Name && !PogusPlugin.AllPatched) {
+                        PogusPlugin.PatchMods();//todo implement temporary patches
+                    } else PogusPlugin.UnpatchMods();
 
-                    PogusPlugin.Logger.LogInfo($"IsPatched = {PggMod.IsPatched}, original = {original}");
+                    PogusPlugin.Logger.LogInfo($"IsPatched = {PogusPlugin.AllPatched}, original = {original}");
 
-                    if (original != PggMod.IsPatched) {
+                    if (original != PogusPlugin.AllPatched) {
                         int sceneId = UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex;
                         UnityEngine.SceneManagement.SceneManager.LoadScene(sceneId);
                     }

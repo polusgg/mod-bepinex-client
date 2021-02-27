@@ -9,27 +9,13 @@ namespace PolusApi.Net {
 		{
 			get
 			{
-				return this.OwnerId == AmongUsClient.Instance.ClientId;
+				return OwnerId == AmongUsClient.Instance.ClientId;
 			}
 		}
 
 		public void Despawn()
 		{
-			IObjectManager.Instance.Despawn(this);
-			Object.Destroy(base.gameObject);
-		}
-
-		public virtual void OnDestroy()
-		{
-			if (AmongUsClient.Instance && this.NetId != 4294967295U)
-			{
-				if (this.DespawnOnDestroy && this.AmOwner)
-				{
-					IObjectManager.Instance.Despawn(this);
-					return;
-				}
-				IObjectManager.Instance.RemoveNetObject(this);
-			}
+			Destroy(gameObject);
 		}
 
 		public virtual void PreSerialize()
@@ -44,11 +30,11 @@ namespace PolusApi.Net {
 
 		public int CompareTo(InnerNetObject other)
 		{
-			if (this.NetId > other.NetId)
+			if (NetId > other.NetId)
 			{
 				return 1;
 			}
-			if (this.NetId < other.NetId)
+			if (NetId < other.NetId)
 			{
 				return -1;
 			}
@@ -57,11 +43,11 @@ namespace PolusApi.Net {
 
 		public int CompareTo(PolusNetObject other)
 		{
-			if (this.NetId > other.NetId)
+			if (NetId > other.NetId)
 			{
 				return 1;
 			}
-			if (this.NetId < other.NetId)
+			if (NetId < other.NetId)
 			{
 				return -1;
 			}
@@ -70,7 +56,7 @@ namespace PolusApi.Net {
 
 		protected void SetDirtyBit(uint val)
 		{
-			this.DirtyBits |= val;
+			DirtyBits |= val;
 		}
 
 		public uint SpawnId;

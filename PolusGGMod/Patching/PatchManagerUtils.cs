@@ -1,4 +1,5 @@
 ﻿using PolusGGMod.Patches;
+using UnityEngine;
 
 namespace PolusGGMod.Framework {
     using System;
@@ -20,7 +21,7 @@ namespace PolusGGMod.Framework {
             };
 
             public static List<PatchDetails>
-                ResolvePatchDetails(Type assemblyType) //TODO: change return type to PatchDetails
+                ResolvePatchDetails(Type assemblyType, bool patchPermanently) //TODO: change return type to PatchDetails
             {
                 List<PatchDetails> patchDetails = new();
 
@@ -52,19 +53,17 @@ namespace PolusGGMod.Framework {
                         string name = patchType.ToString();
 
                         if (name == method.Name || allHarmonyAttributes.Contains($"HarmonyLib.Harmony{name}")) {
+                            // Debug.Log($"Harmony lmoa {permanentPatch is null} {patchPermanently}");
                             switch (patchType) {
                                 case HarmonyPatchType.Prefix:
-                                    if (permanentPatch is not null)
-                                        continue;
-                                    // _permanentHarmony.Patch(originalMethod, new HarmonyMethod(method));
-                                    else prefixPatches.Add(method);
+                                    if ((permanentPatch is not null || !patchPermanently) &&
+                                        (permanentPatch is null || patchPermanently))
+                                        prefixPatches.Add(method);
                                     break;
                                 case HarmonyPatchType.Postfix:
-                                    if (permanentPatch is not null)
-                                        continue;
-                                    //todo care to make this faster
-                                    // _permanentHarmony.Patch(originalMethod, postfix: new HarmonyMethod(method));
-                                    else postfixPatches.Add(method);
+                                    if ((permanentPatch is not null || !patchPermanently) &&
+                                        (permanentPatch is null || patchPermanently))
+                                        postfixPatches.Add(method);
                                     break;
                             }
                         }

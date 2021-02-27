@@ -4,9 +4,12 @@ namespace PolusApi.Net {
     public interface IObjectManager {
         public static IObjectManager Instance;
 
-        public void Spawn(PolusNetObject netObjParent, int ownerId = -2, SpawnFlags flags = SpawnFlags.None);
-        public void Despawn(PolusNetObject objToDespawn);
-        public void WriteSpawnMessage(PolusNetObject netObjParent, int ownerId, SpawnFlags flags, MessageWriter msg);
+        public void Register(int index, PolusNetObject netObject);
+        public void HandleRpcInner(InnerNetObject netObject, byte call, MessageReader reader);
+        public void HandleSpawn(int cnt, uint netId, MessageReader reader);
         public void RemoveNetObject(PolusNetObject obj);
+        public bool HasObject(uint netId, out PolusNetObject obj);
+        public bool IsDestroyed(uint netId);
+        public T FindObjectByNetId<T>(uint netId) where T : PolusNetObject;
     }
 }

@@ -6,18 +6,24 @@ using PolusGGMod.Framework.Common.Utilities;
 
 namespace PolusGGMod {
     public class PggMod {
-        private Harmony _harmony;
-        private List<PatchDetails> ToggledPatches = new();
-        public static bool IsPatched;
+        protected Harmony _harmony;
+        protected List<PatchDetails> ToggledPatches = new();
+        public bool IsPatched;
 
-        public virtual void LoadPatches(Assembly assembly) {
+        public void LoadPatches(Assembly assembly) {
             System.Type[] types = AccessTools.GetTypesFromAssembly(assembly);
-            Harmony harmony = new Harmony($"gg.polus.temporary.{assembly.GetName()}");
+            _harmony = new Harmony($"gg.polus.temporary.{assembly.FullName}");
+            LoadPatches(null, types);
+        }
+
+        public virtual void LoadPatches(string harmonyName, System.Type[] types) {
+            if (_harmony == null) _harmony = new Harmony($"gg.polus.temporary.{harmonyName}");
             foreach (var type in types)
             {
-                ToggledPatches.AddRange(PatchManagerUtils.ResolvePatchDetails(type));
+                ToggledPatches.AddRange(PatchManagerUtils.ResolvePatchDetails(type, false));
             }
         }
+        
         public void Patch()
         {
             foreach (PatchDetails patchDetail in ToggledPatches)
