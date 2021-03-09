@@ -5,6 +5,7 @@ using Object = UnityEngine.Object;
 
 namespace PolusApi.Net {
     public abstract class PolusNetObject : MonoBehaviour, IComparable<InnerNetObject>, IComparable<PolusNetObject> {
+	    public PolusNetObject(IntPtr ptr) : base(ptr) {}
 		public bool AmOwner
 		{
 			get
@@ -13,8 +14,7 @@ namespace PolusApi.Net {
 			}
 		}
 
-		public void Despawn()
-		{
+		public void Despawn() {
 			Destroy(gameObject);
 		}
 

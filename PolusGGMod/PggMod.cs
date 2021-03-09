@@ -3,6 +3,7 @@ using System.Reflection;
 using HarmonyLib;
 using PolusGGMod.Framework;
 using PolusGGMod.Framework.Common.Utilities;
+using PolusGGMod.Patching;
 
 namespace PolusGGMod {
     public class PggMod {

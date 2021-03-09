@@ -9,7 +9,10 @@ using BepInEx;
 using BepInEx.IL2CPP;
 using BepInEx.Logging;
 using HarmonyLib;
+using Hazel;
 using PolusApi;
+using PolusApi.Net;
+using PolusApi.Resources;
 using UnityEngine;
 
 namespace PolusGGMod {
@@ -22,8 +25,9 @@ namespace PolusGGMod {
         public static PggMod PermanentMod = new PermanentPggMod();
         public static (PggMod, Mod)[] TemporaryMods;
         // public static AssemblyLoadContext LoadContext = 
-        public static AppDomain publicDomain;
+        public static System.AppDomain publicDomain;
         public static bool AllPatched;
+        public static PggCache Cache = new();
         
         //todo stop using appdomain
 
@@ -31,14 +35,20 @@ namespace PolusGGMod {
             try {
                 Logger = Log;
                 Logger.LogInfo("reuben scoobenson");
+                var join = Path.Join(PggConstants.DownloadFolder, "cache.dat");
+                if (File.Exists(join)) {
+                    var reader = new MessageReader();
+                    reader.Buffer = File.ReadAllBytes(join);
+                    reader.Length = reader.Buffer.Length;
+                    reader.Position = 0;
+                    Cache.Deserialize(reader);
+                }
                 PermanentMod.LoadPatches("gg.polus.permanent",
                     Assembly.GetExecutingAssembly().GetTypes()
                         .Where(x => x.GetCustomAttribute(typeof(HarmonyPatch)) != null).ToArray());
                 PermanentMod.Patch();
                 LoadMods();
                 PatchMods();
-                // domain.Load();
-                //todo download mod from website
             }
             catch (Exception e) {
                 Log.LogFatal($"Failed to load!");
@@ -48,44 +58,44 @@ namespace PolusGGMod {
         }
 
         public static void LoadMods() {
-            HttpClient http = new HttpClient();
+            HttpClient http = new();
 
             HttpResponseMessage dl = http.GetAsync(PggConstants.DownloadServer + PggConstants.ModListing).Result;
-            string[] modList = dl.Content.ReadAsStringAsync().Result.Split("\n");
-            List<Task<HttpResponseMessage>> tasks = new();
-            foreach (string mod in modList) {
-                tasks.Add(http.GetAsync(PggConstants.DownloadServer + mod));
-            }
-
-            Task.WhenAll(tasks).Wait();
-
-            byte[][] assemblies = tasks.Select(x => x.Result.Content.ReadAsByteArrayAsync().Result).ToArray();
-
-            //todo loading cached dlls from download folder 
+            string modListContent = dl.Content.ReadAsStringAsync().Result;
+            System.Console.WriteLine(modListContent);
+            (string, uint, byte[])[] modList = modListContent.Split("\n").Where(str => str != String.Empty).Select(x => {
+                var strings = x.Split(";");
+                Logger.LogInfo($"{strings[0]} {strings[1]} {strings[2]}");
+                return (strings[0], uint.Parse(strings[1]), Enumerable.Range(0, strings[2].Length)
+                    .Where(z => z % 2 == 0)
+                    .Select(y => Convert.ToByte(strings[2].Substring(y, 2), 16))
+                    .ToArray());
+            }).ToArray();
+            Logger.LogInfo($"found {modList.Length}");
+            
             if (Directory.Exists(PggConstants.DownloadFolder)) {
                 Directory.Delete(PggConstants.DownloadFolder, true);
             }
             Directory.CreateDirectory(PggConstants.DownloadFolder);
-            int i = 0;
-            string path;
-            foreach (byte[] assembly in assemblies) {
-                path = Path.Join(PggConstants.DownloadFolder, modList[i++]);
-                if (!Directory.Exists(Path.GetDirectoryName(path))) {
-                    Directory.CreateDirectory(Path.GetDirectoryName(path));
-                }
-
-                File.WriteAllBytes(path, assembly);
+            List<Task<CacheFile>> tasks = new();
+            foreach ((string mod, uint id, byte[] hash) in modList) {
+                Logger.LogInfo($"{mod} {id} {hash}");
+                tasks.Add(Cache.AddToCache(id, mod, hash, ResourceType.Assembly));
             }
+
+            Task.WhenAll(tasks).Wait();
+
+            CacheFile[] assemblies = tasks.Select(x => x.Result).ToArray();
 
             // publicDomain = AppDomain.CreateDomain("PggDomain");
             // publicDomain.Load(typeof(ModLoader).Assembly.Location);
             // publicDomain. = PggConstants.DownloadFolder;
 
             List<(PggMod, Mod)> mods = new();
-            foreach (byte[] assemblyData in assemblies) {
+            foreach (CacheFile assemblyData in assemblies) {
                 try {
                     Mod mod2;
-                    Assembly assembly = AppDomain.CurrentDomain.Load(assemblyData);
+                    Assembly assembly = AppDomain.CurrentDomain.Load(assemblyData.Data);
                     Type modType = assembly.GetTypes().First(x => x.IsSubclassOf(typeof(Mod)));
                     mod2 = (Mod) Activator.CreateInstance(modType);
                     PggMod mod = new();
@@ -101,10 +111,11 @@ namespace PolusGGMod {
         }
 
         public static void PatchMods() {
+            IObjectManager.Instance = new PggObjectManager();
+            Logger.LogInfo(TemporaryMods.Length);
             foreach ((PggMod pggMod, Mod mod) in TemporaryMods) {
-                ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource(mod.Name);
-                logger.LogInfo("sex");
-                mod.Load(logger);
+                Logger.LogInfo("sex");
+                mod.Load(Logger, IObjectManager.Instance);
                 pggMod.Patch();
             }
 
@@ -116,6 +127,8 @@ namespace PolusGGMod {
                 pggMod.Unpatch();
                 mod.Unload();
             }
+
+            ((PggObjectManager) IObjectManager.Instance).UnregisterAll();
 
             AllPatched = false;
 

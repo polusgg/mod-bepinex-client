@@ -1,16 +1,24 @@
-﻿using PolusApi.Net;
+﻿using System;
+using HarmonyLib;
+using PolusApi.Net;
+using PowerTools;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace TestMod {
 	public class RegisterPnos {
 		public static PolusNetObject CreateDeadBodyPrefab() {
-			GameObject prefab = new GameObject();
+			PlayerControl pc = (PlayerControl) AmongUsClient.Instance.SpawnableObjects[4];
+			DeadBody prefab = Object.Instantiate(pc.KillAnimations[0].bodyPrefab);
 			prefab.hideFlags = HideFlags.HideInHierarchy;
-			prefab.active = false;
+			prefab.gameObject.active = false;
 
-			Pno.DeadBody deadBody = prefab.AddComponent<Pno.DeadBody>();
+			Pno.PolusDeadBody polusDeadBody = prefab.gameObject.AddComponent<Pno.PolusDeadBody>();
+			polusDeadBody.anim = prefab.GetComponent<SpriteAnim>();
+			polusDeadBody.deadBody = prefab;
+
 			//todo recreate dead body hierarchy here
-			return deadBody;
+			return polusDeadBody;
 		}
 	}
 }

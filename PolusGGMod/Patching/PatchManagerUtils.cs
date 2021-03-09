@@ -1,4 +1,5 @@
 ﻿using PolusGGMod.Patches;
+using PolusGGMod.Patching;
 using UnityEngine;
 
 namespace PolusGGMod.Framework {
@@ -10,7 +11,7 @@ namespace PolusGGMod.Framework {
 
     namespace Common.Utilities {
         public static class PatchManagerUtils {
-            private static List<System.Type> _harmonyBulkPatchTypes = new() {
+            private static List<Type> _harmonyBulkPatchTypes = new() {
                 typeof(HarmonyTargetMethod),
                 typeof(HarmonyTargetMethods),
             };

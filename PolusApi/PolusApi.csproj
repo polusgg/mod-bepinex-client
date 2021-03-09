@@ -2,7 +2,6 @@
 
     <PropertyGroup>
         <TargetFramework>netstandard2.1</TargetFramework>
-        <RootNamespace>TestMod</RootNamespace>
         <LangVersion>9</LangVersion>
     </PropertyGroup>
 

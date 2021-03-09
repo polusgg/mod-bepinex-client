@@ -15,15 +15,32 @@ namespace PolusGGMod {
 		private HashSet<uint> _destroyedObjects = new();
 		private Dictionary<int, PolusNetObject> _spawnObjects = new();
 		private uint _netIdCnt = 0x80000000;
+		private readonly object _objectLock = new Object();
+
+		private event EventHandler<RpcEventArgs> RpcReceived;
 
 		// [DllImport("user32.dll")]
 		// private static extern void MessageBox(IntPtr hwnd, string text, string caption, uint type = 4);
 
 		public void Register(int index, PolusNetObject netObject) {
+		} 
+
+		public event EventHandler<RpcEventArgs> InnerRpcReceived {
+			add {
+				lock (_objectLock) {
+					RpcReceived += value;
+				}
+			}
+			remove {
+				lock (_objectLock) {
+					RpcReceived -= value;
+				}
+			}
 		}
 
-		public void HandleRpcInner(InnerNetObject netObject, byte call, MessageReader reader) {
-			throw new System.NotImplementedException();
+		public void HandleInnerRpc(InnerNetObject netObject, RpcEventArgs args) {
+			System.Console.WriteLine("bingus");
+			RpcReceived?.Invoke(netObject, args);
 		}
 
 		public void HandleSpawn(int cnt, uint netId, MessageReader reader) {
@@ -33,7 +50,7 @@ namespace PolusGGMod {
 			}
 
 			int num4 = reader.ReadPackedInt32();
-			ClientData clientData = PolusNetClient.InnerNetClientHandleGameDataInnerPatch.FindClientById(num4);
+			ClientData clientData = PolusNetClient.FindClientById(num4);
 			if (num4 > 0 && clientData == null) {
 				AmongUsClient.Instance.DeferMessage(cnt, reader, "Delay spawn for unowned " + netId);
 				return;
@@ -42,20 +59,9 @@ namespace PolusGGMod {
 			PolusNetObject polusNetObject =
 				Object.Instantiate(_spawnObjects[(int) netId]);
 			polusNetObject.SpawnFlags = (SpawnFlags) reader.ReadByte();
-			if ((polusNetObject.SpawnFlags & SpawnFlags.IsClientCharacter) != SpawnFlags.None) {
-				// MessageBox(IntPtr.Zero, "rooooooose COMe oNNN", "i even pinged you and said to not use spawn flags");
+			if (polusNetObject.SpawnFlags != SpawnFlags.None) {
 				AmongUsClient.Instance.HandleDisconnect(DisconnectReasons.Custom,
-					"Rose come on, I told you not to use nonzero spawn flags");
-				// if (!clientData.Character) {
-				// 	clientData.InScene = true;
-				// 	clientData.Character = (polusNetObject as PlayerControl);
-				// }
-				// else if (polusNetObject) {
-				// 	Debug.LogWarning(
-				// 		$"Double spawn character: {clientData.Id} already has {clientData.Character.NetId}");
-				// 	Object.Destroy(polusNetObject.gameObject);
-				// 	return false;
-				// }
+					"Spawn flags are unused pepega lmao cringe sad pepelaugh\n\nlmao\nbad");
 			}
 
 			int num5 = reader.ReadPackedInt32();
@@ -123,6 +129,18 @@ namespace PolusGGMod {
 			}
 
 			return default;
+		}
+
+		public void DestroyAll() {
+			_allObjects.ForEach(x => Object.DestroyImmediate(x.gameObject));
+			_allObjects = new();
+			_allObjectsFast = new();
+			_destroyedObjects = new();
+			_netIdCnt = new();
+		}
+
+		public void UnregisterAll() {
+			_spawnObjects = new Dictionary<int, PolusNetObject>();
 		}
 	}
 }
