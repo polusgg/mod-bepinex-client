@@ -4,5 +4,7 @@
 		public byte[] Hash;
 		public string Location;
 		public byte[] Data;
+		public string LocalLocation;
+		public object ExtraData;
 	}
 }

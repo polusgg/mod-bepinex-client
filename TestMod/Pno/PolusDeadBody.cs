@@ -2,22 +2,31 @@
 using Hazel;
 using PolusApi.Net;
 using PowerTools;
+using UnhollowerRuntimeLib;
 using UnityEngine;
 
 namespace TestMod.Pno {
 	public class PolusDeadBody : PolusNetObject {
-		//todo recreate dead body lmao
-		//todo patch murder player to not show dead body lmao
-		//todo patch reporting to correctly allow reporting custom dead bodies
+		// todo recreate dead body lmao
+		// todo patch murder player to not show dead body lmao
+		// todo patch reporting to correctly allow reporting custom dead bodies
+
+		public PolusDeadBody(IntPtr ptr) : base(ptr) { }
+
+		static PolusDeadBody() {
+			ClassInjector.RegisterTypeInIl2Cpp<PolusDeadBody>();
+		}
+
 		public override void HandleRpc(byte callId, MessageReader reader) {
 			
 		}
 
 		private void Start() {
-			GetComponent<SpriteRenderer>();
+			rend = GetComponent<SpriteRenderer>();
 		}
 
 		public override bool Serialize(MessageWriter writer, bool initialState) {
+			//fuck this
 			throw new NotImplementedException();
 		}
 
@@ -28,8 +37,6 @@ namespace TestMod.Pno {
 			rend.material.SetColor(BackColor, new Color32(reader.ReadByte(),reader.ReadByte(),reader.ReadByte(),reader.ReadByte()));
 			rend.material.SetColor(BodyColor, new Color32(reader.ReadByte(),reader.ReadByte(),reader.ReadByte(),reader.ReadByte()));
 		}
-
-		public PolusDeadBody(IntPtr ptr) : base(ptr) { }
 
 		public SpriteAnim anim;
 		public DeadBody deadBody;

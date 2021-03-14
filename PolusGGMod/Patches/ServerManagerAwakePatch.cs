@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using HarmonyLib;
 using Hazel;
@@ -14,6 +15,9 @@ namespace PolusGGMod.Patches {
         public static bool Awake(ServerManager __instance) {
             if (_hasStarted) return false;
             _hasStarted = true;
+            
+            PogusPlugin.ModManager.StartMods();
+            
             ServerManager.DefaultRegions = ServerManager.DefaultRegions.Append(PggConstants.Region).ToArray();
             __instance.CurrentRegion = PggConstants.Region;
             if (__instance.AvailableServers.All(s => s.Players == 0)) {

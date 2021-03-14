@@ -3,52 +3,67 @@ using BepInEx.Logging;
 using Hazel;
 using PolusApi;
 using PolusApi.Net;
+using PolusApi.Resources;
+using UnhollowerRuntimeLib;
 
 namespace TestMod {
     [Mod(Id, "1.0.0", "Sanae6")]
     public class TestPggMod : Mod {
         public const string Id = "TestMod Lmoa";
-        private static ManualLogSource Logger;
-        public override void Load(ManualLogSource logger, IObjectManager objectManager) {
-            Logger = logger;
-            System.Console.WriteLine($"PogU {logger == null}");
-            Logger.LogInfo($"Yo mama from {Id} {objectManager == null}");
-            // IObjectManager.Instance = objectManager;
+        public bool loaded;
+        public override void Load() {
+            if (!loaded) {
+                loaded = true;
+            }
+            Logger.LogInfo("Loaded " + Id);
+        }
+
+        public override void Start(IObjectManager objectManager, ICache cache) {
             objectManager.InnerRpcReceived += OnInnerRpcReceived;
+            objectManager.Register(0x81, RegisterPnos.CreateDeadBodyPrefab());
         }
 
         public override void Unload() {
-            Logger.LogInfo($"Your mother from {Id}");
         }
 
         private void OnInnerRpcReceived(object sender, RpcEventArgs e) {
             InnerNetObject netObject = (InnerNetObject) sender;
             
-            Logger.LogInfo($"Handle custom rpc from {e.callId}");
-
-            if (netObject is LobbyBehaviour && e.callId == 0x8b) {
-                GameStartManager.Instance.GameRoomName.Text = e.reader.ReadString();
-                return;
-            }
-
-            if (netObject is PlayerControl) {
-                switch (e.callId) {
-                    case 0x8c:
-                        
-                        break;
-                }
+            switch (e.callId) {
+                case 0x8B:
+                    GameStartManager.Instance.GameRoomName.Text = e.reader.ReadString();
+                    break;
+                case 0x8D:
+                    var lol = e.reader.ReadByte();
+                    Logger.LogInfo($"Got it lmoao {lol}");
+                    HudManager.Instance.Chat.SetVisible(lol > 0);
+                    break;
+                case 0x89:
+                    if (Minigame.Instance != null) Minigame.Instance.Close(true);
+                    if (CustomPlayerMenu.Instance != null) CustomPlayerMenu.Instance.Close(true);
+                    break;
             }
         }
 
         public override void HandleRoot(MessageReader reader) {
             switch (reader.Tag) {
                 case 0x80:
+                    uint resource = reader.ReadPackedUInt32();
+                    string location = reader.ReadString();
+                    byte[] hash = reader.ReadBytes(16);
                     
+                    break;
                 case 0x81:
                     break;
             }
         }
 
         public override string Name => "TestMod";
+        public ManualLogSource _loggee;
+
+        public override ManualLogSource Logger {
+            get => _loggee;
+            set => _loggee = value;
+        }
     }
 }

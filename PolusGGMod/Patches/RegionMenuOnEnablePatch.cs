@@ -12,14 +12,15 @@ namespace PolusGGMod.Patches {
                 ChatLanguageButton button = regionButton.Cast<ChatLanguageButton>();
                 button.SetSelected(DestroyableSingleton<ServerManager>.Instance.CurrentRegion.Name == button.Text.Text);
                 button.Button.OnClick.AddListener((Action) (() => {
-                    bool original = PogusPlugin.AllPatched;
+                    bool original = PogusPlugin.ModManager.AllPatched;
                     if (button.Text.Text == PggConstants.Region.Name) {
-                        if (!PogusPlugin.AllPatched)PogusPlugin.PatchMods();//todo implement temporary patches
-                    } else PogusPlugin.UnpatchMods();
+                        if (!PogusPlugin.ModManager.AllPatched)PogusPlugin.ModManager.PatchMods();//todo implement temporary patches
+                    } else PogusPlugin.ModManager.UnpatchMods();
 
-                    PogusPlugin.Logger.LogInfo($"IsPatched = {PogusPlugin.AllPatched}, original = {original}");
+                    PogusPlugin.Logger.LogInfo($"IsPatched = {PogusPlugin.ModManager.AllPatched}, original = {original}");
 
-                    if (original != PogusPlugin.AllPatched) {
+                    if (original != PogusPlugin.ModManager.AllPatched) {
+                        //todo might need an update when ported to latest with addressables
                         int sceneId = UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex;
                         UnityEngine.SceneManagement.SceneManager.LoadScene(sceneId);
                     }

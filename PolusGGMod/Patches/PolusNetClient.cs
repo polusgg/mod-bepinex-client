@@ -35,7 +35,7 @@ namespace PolusGGMod.Patches.Net {
             public static bool HandleMessage([HarmonyArgument(0)] MessageReader reader,
                 [HarmonyArgument(1)] SendOption yoMama) {
                 if (reader.Tag > 0x80) {
-                    foreach (var (_, mod) in PogusPlugin.TemporaryMods) {
+                    foreach (var (_, mod) in PogusPlugin.ModManager.TemporaryMods) {
                         mod.HandleRoot(reader);
                     }
 
@@ -86,7 +86,6 @@ namespace PolusGGMod.Patches.Net {
                     case 2: {
                         uint netId = reader.ReadPackedUInt32();
                         //todo transfer all object management code to iobjectmanager
-                        PogusPlugin.Logger.LogInfo($"WOO RPC FOR {netId} {netId >> 31}");
                         if (netId >> 31 > 0) {
                             if (IObjectManager.Instance.HasObject(netId, out var polusNetObject)) {
                                 polusNetObject.HandleRpc(reader.ReadByte(), reader);
@@ -101,6 +100,7 @@ namespace PolusGGMod.Patches.Net {
 
                         if ((netObject = instance.allObjectsFast[netId]) != null) {
                             byte call = reader.ReadByte();
+                            // PogusPlugin.Logger.LogInfo($"WOO RPC FOR {call}");
                             if (call > 0x80)
                                 IObjectManager.Instance.HandleInnerRpc(netObject, new RpcEventArgs(call, reader));
                             else netObject.HandleRpc(call, reader);

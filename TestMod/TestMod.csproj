@@ -1,12 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netstandard2.1</TargetFramework>
-        <RootNamespace>PolusGGMod</RootNamespace>
+        <RootNamespace>TestMod</RootNamespace>
         <LangVersion>9</LangVersion>
-    </PropertyGroup>
-
-    <PropertyGroup>
         <TargetFramework>netstandard2.1</TargetFramework>
         <Version>1.0.0</Version>
         <GameVersion>2020.12.9s</GameVersion>
@@ -14,7 +10,7 @@
 
         <Description>test mod lmoa</Description>
         <Authors>Sanae6</Authors>
-        <ModListing>E:\among us\mod-listing\</ModListing>
+        <ModListing>E:\among us\mod-listing\mods</ModListing>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
@@ -27,4 +23,8 @@
             <ExcludeAssets>runtime</ExcludeAssets>
         </ProjectReference>
     </ItemGroup>
+
+    <Target Name="Copy" AfterTargets="Reobfuscate">
+        <Copy SourceFiles="$(OutputPath)reobfuscated/$(AssemblyName)-$(GameVersion).dll" DestinationFolder="$(ModListing)/" Condition="'$(Configuration)' == 'Debug'" />
+    </Target>
 </Project>

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using Hazel;
 using InnerNet;
 using PolusApi.Net;
@@ -15,32 +14,17 @@ namespace PolusGGMod {
 		private HashSet<uint> _destroyedObjects = new();
 		private Dictionary<int, PolusNetObject> _spawnObjects = new();
 		private uint _netIdCnt = 0x80000000;
-		private readonly object _objectLock = new Object();
-
-		private event EventHandler<RpcEventArgs> RpcReceived;
 
 		// [DllImport("user32.dll")]
 		// private static extern void MessageBox(IntPtr hwnd, string text, string caption, uint type = 4);
 
 		public void Register(int index, PolusNetObject netObject) {
-		} 
-
-		public event EventHandler<RpcEventArgs> InnerRpcReceived {
-			add {
-				lock (_objectLock) {
-					RpcReceived += value;
-				}
-			}
-			remove {
-				lock (_objectLock) {
-					RpcReceived -= value;
-				}
-			}
 		}
 
+		public event EventHandler<RpcEventArgs> InnerRpcReceived;
+
 		public void HandleInnerRpc(InnerNetObject netObject, RpcEventArgs args) {
-			System.Console.WriteLine("bingus");
-			RpcReceived?.Invoke(netObject, args);
+			InnerRpcReceived.Invoke(netObject, args);
 		}
 
 		public void HandleSpawn(int cnt, uint netId, MessageReader reader) {
@@ -49,17 +33,17 @@ namespace PolusGGMod {
 				return;
 			}
 
-			int num4 = reader.ReadPackedInt32();
-			ClientData clientData = PolusNetClient.FindClientById(num4);
-			if (num4 > 0 && clientData == null) {
-				AmongUsClient.Instance.DeferMessage(cnt, reader, "Delay spawn for unowned " + netId);
-				return;
-			}
+			/*int num4 = */reader.ReadPackedInt32();
+			// ClientData clientData = PolusNetClient.FindClientById(num4);
+			// if (num4 > 0 && clientData == null) {
+			// 	AmongUsClient.Instance.DeferMessage(cnt, reader, "Delay spawn for unowned " + netId);
+			// 	return;
+			// }
 
 			PolusNetObject polusNetObject =
 				Object.Instantiate(_spawnObjects[(int) netId]);
-			polusNetObject.SpawnFlags = (SpawnFlags) reader.ReadByte();
-			if (polusNetObject.SpawnFlags != SpawnFlags.None) {
+			byte spawnFlags = reader.ReadByte();
+			if (spawnFlags > 0) {
 				AmongUsClient.Instance.HandleDisconnect(DisconnectReasons.Custom,
 					"Spawn flags are unused pepega lmao cringe sad pepelaugh\n\nlmao\nbad");
 			}
@@ -76,7 +60,7 @@ namespace PolusGGMod {
 			for (int i = 0; i < num5; i++) {
 				PolusNetObject polusNetObject4 = componentsInChildren[i];
 				polusNetObject4.NetId = reader.ReadPackedUInt32();
-				polusNetObject4.OwnerId = num4;
+				// polusNetObject4.OwnerId = num4;
 				if (_destroyedObjects.Contains(polusNetObject4.NetId)) {
 					polusNetObject.NetId = uint.MaxValue;
 					Object.Destroy(polusNetObject.gameObject);

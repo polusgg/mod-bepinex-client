@@ -5,7 +5,7 @@ namespace PolusGGMod.Patches {
     public class StereotypicalClientModderVersionShowerPatch {
         [HarmonyPostfix]
         public static void Start(VersionShower __instance) {
-            __instance.text.Text += "\n\n  [A80100FF]Sus mod v3[] ([0007AAFF]by Impsustor32[])";
+            __instance.text.Text += "\n\n  [A80100FF]Sus mod v2[] ([0007AAFF]by Impsustor32[])";
         }
     }
 }
