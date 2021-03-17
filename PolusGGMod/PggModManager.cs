@@ -18,16 +18,15 @@ namespace PolusGGMod {
         public (PggMod, Mod)[] TemporaryMods;
         public bool AllPatched;
         public ManualLogSource Logger;
-        private WeakReference _alcReference;
-        private ModLoadContext _alc;
+        private AppDomain _domain;
         public bool PostLoad;
-        // public 
 
         public PggModManager(ManualLogSource logger) {
             Logger = logger;
         }
 
         public void LoadMods() {
+            if (PostLoad) return;
             HttpClient http = new();
 
             HttpResponseMessage dl = http.GetAsync(PggConstants.DownloadServer + PggConstants.ModListing).Result;
@@ -50,7 +49,7 @@ namespace PolusGGMod {
             List<Task<CacheFile>> tasks = new();
             foreach ((string mod, uint id, byte[] hash) in modList) {
                 Logger.LogInfo($"{mod} {id} {hash}");
-                tasks.Add(PogusPlugin.Cache.AddToCache(id, mod, hash, ResourceType.Assembly));
+                tasks.Add(PogusPlugin.Cache.AddToCache(id, PggConstants.ModListingFolder + mod, hash, ResourceType.Assembly));
             }
 
             Task.WhenAll(tasks).Wait();
@@ -59,14 +58,14 @@ namespace PolusGGMod {
 
             //appdomains are bad post-framework
             // i also hate this code
-            // publicDomain = AppDomain.CreateDomain("PggDomain");
+            // _domain = AppDomain.CreateDomain("PggDomain");
             // Type type = typeof(Proxy);
             // var value = (Proxy)publicDomain.(
             //     type.Assembly.FullName,
             //     type.FullName);
-            // publicDomain.AssemblyResolve += MyResolver;
-            // publicDomain.Load(typeof(ModLoader).Assembly.Location);
-            // publicDomain. = PggConstants.DownloadFolder;
+            // _domain.AssemblyResolve += MyResolver;
+            // _domain.Load(typeof(ModLoader).Assembly.Location);
+            // _domain. = PggConstants.DownloadFolder;
             
             // Execute(out _alcReference, out _alc);
 
@@ -77,6 +76,7 @@ namespace PolusGGMod {
                     Mod mod2;
                     // Assembly assembly = _alc.LoadFromAssemblyName(new AssemblyName((assemblyData.ExtraData as string) ?? string.Empty));
                     Assembly assembly = Assembly.Load(assemblyData.GetData());
+                    // Assembly assembly = _domain.Load(assemblyData.GetData());
                     Type modType = assembly.GetTypes().First(x => x.IsSubclassOf(typeof(Mod)));
                     mod2 = (Mod) Activator.CreateInstance(modType);
                     PggMod mod = new();
@@ -93,7 +93,9 @@ namespace PolusGGMod {
 
         public void ReloadMods() {
             UnpatchMods();
-            
+            UnloadMods();
+            LoadMods();
+            PatchMods();
         }
 
         public void PatchMods() {
@@ -110,7 +112,7 @@ namespace PolusGGMod {
         }
 
         public void StartMods() {
-            foreach ((PggMod pggMod, Mod mod) in TemporaryMods) {
+            foreach ((_, Mod mod) in TemporaryMods) {
                 if (PostLoad) mod.Start(IObjectManager.Instance, PogusPlugin.Cache);
             }
         }
@@ -130,50 +132,57 @@ namespace PolusGGMod {
             AllPatched = false;
         }
         
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public void Execute(out WeakReference testAlcWeakRef, out ModLoadContext alc)
-        {
-            alc = new ModLoadContext();
-            testAlcWeakRef = new WeakReference(alc);
-            alc.Resolving += (alc2, assemblyName) =>
-            {
-                var dllName = assemblyName.Name.Split(',').First();
-                return LoadFromStreamAlc(alc2, dllName);
-            };
-            // probably code for running a specific plugin's code
-            // Assembly a = alc.LoadFromAssemblyName();
-            // var args = new object[] { 3, 2 };
-            //
-            // var methodInfo = a.GetExportedTypes()[0].GetMethods().Where(m => m.Name == "MethodName").ToList()[0];
-            // var result = methodInfo.Invoke(Activator.CreateInstance(a.GetExportedTypes()[0]), args);
+        public void UnloadMods() {
+            TemporaryMods = new (PggMod, Mod)[0];
+            AppDomain.Unload(_domain);
+            _domain = null;
+            PostLoad = false;
         }
         
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private void Unload(WeakReference testAlcWeakRef, ref ModLoadContext alc)
-        {
-            // alc.Unload(); 
-            alc = null;
-
-            for (int i = 0; testAlcWeakRef.IsAlive && (i < 10); i++)
-            {
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-            }
-
-            Logger.LogInfo($"is alive: {testAlcWeakRef.IsAlive}");
-        }
-
-        private Assembly LoadFromStreamAlc(AssemblyLoadContext context, string name) {
-            return context.LoadFromStream(PogusPlugin.Cache.CachedFiles
-                .Where(x => x.Value.Type == ResourceType.Assembly)
-                .First(x => (x.Value.ExtraData as string) == name).Value.GetDataStream());
-        }
-    }
-    
-    public class ModLoadContext : AssemblyLoadContext
-    {
-        protected override Assembly Load(AssemblyName assemblyName) {
-            return null;
-        }
+        // [MethodImpl(MethodImplOptions.NoInlining)]
+        // public void Execute(out WeakReference testAlcWeakRef, out ModLoadContext alc)
+        // {
+        //     alc = new ModLoadContext();
+        //     testAlcWeakRef = new WeakReference(alc);
+        //     alc.Resolving += (alc2, assemblyName) =>
+        //     {
+        //         var dllName = assemblyName.Name.Split(',').First();
+        //         return LoadFromStreamAlc(alc2, dllName);
+        //     };
+        //     // probably code for running a specific plugin's code
+        //     // Assembly a = alc.LoadFromAssemblyName();
+        //     // var args = new object[] { 3, 2 };
+        //     //
+        //     // var methodInfo = a.GetExportedTypes()[0].GetMethods().Where(m => m.Name == "MethodName").ToList()[0];
+        //     // var result = methodInfo.Invoke(Activator.CreateInstance(a.GetExportedTypes()[0]), args);
+        // }
+        //
+        // [MethodImpl(MethodImplOptions.NoInlining)]
+        // private void Unload(WeakReference testAlcWeakRef, ref ModLoadContext alc)
+        // {
+        //     // alc.Unload(); 
+        //     alc = null;
+        //
+        //     for (int i = 0; testAlcWeakRef.IsAlive && (i < 10); i++)
+        //     {
+        //         GC.Collect();
+        //         GC.WaitForPendingFinalizers();
+        //     }
+        //
+        //     Logger.LogInfo($"is alive: {testAlcWeakRef.IsAlive}");
+        // }
+        //
+        // private Assembly LoadFromStreamAlc(AssemblyLoadContext context, string name) {
+        //     return context.LoadFromStream(PogusPlugin.Cache.CachedFiles
+        //         .Where(x => x.Value.Type == ResourceType.Assembly)
+        //         .First(x => (x.Value.ExtraData as string) == name).Value.GetDataStream());
+        // }
+    // }
+    //
+    // public class ModLoadContext : AssemblyLoadContext
+    // {
+    //     protected override Assembly Load(AssemblyName assemblyName) {
+    //         return null;
+    //     }
     }
 }

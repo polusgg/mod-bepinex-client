@@ -5,7 +5,7 @@ using PolusApi.Net;
 using PolusApi.Resources;
 
 namespace PolusApi {
-    public abstract class Mod /*: MarshalByRefObject*/ {
+    public abstract class Mod : MarshalByRefObject {
         /// <summary>
         /// Mid-BepInEx 
         /// </summary>

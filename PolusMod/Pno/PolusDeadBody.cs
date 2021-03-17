@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Collections;
 using Hazel;
 using PolusApi.Net;
 using PowerTools;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 
-namespace TestMod.Pno {
+namespace PolusMod.Pno {
 	public class PolusDeadBody : PolusNetObject {
 		// todo recreate dead body lmao
 		// todo patch murder player to not show dead body lmao
@@ -17,6 +18,9 @@ namespace TestMod.Pno {
 			ClassInjector.RegisterTypeInIl2Cpp<PolusDeadBody>();
 		}
 
+		public uint SpawnId { get; }
+		public uint NetId { get; }
+
 		public override void HandleRpc(byte callId, MessageReader reader) {
 			
 		}
@@ -25,12 +29,12 @@ namespace TestMod.Pno {
 			rend = GetComponent<SpriteRenderer>();
 		}
 
-		public override bool Serialize(MessageWriter writer, bool initialState) {
-			//fuck this
-			throw new NotImplementedException();
+		public IEnumerator Lmao() {
+			yield break;
 		}
 
 		public override void Deserialize(MessageReader reader, bool initialState) {
+			reader.Position.Log(5, "LmaoOOOoAo");
 			anim.SetTime(reader.ReadBoolean() ? 0 : anim.m_currAnim.length);
 			rend.flipX = reader.ReadBoolean();
 			// transform.localScale = new Vector3(reader.ReadBoolean() ? -0.7f : 0.7f, 0.7f, 0.7f);
@@ -41,6 +45,7 @@ namespace TestMod.Pno {
 		public SpriteAnim anim;
 		public DeadBody deadBody;
 		public SpriteRenderer rend;
+		public PolusNetworkTransform netTransform;
 		private static readonly int BodyColor = Shader.PropertyToID("_BodyColor");
 		private static readonly int BackColor = Shader.PropertyToID("_BackColor");
 	}

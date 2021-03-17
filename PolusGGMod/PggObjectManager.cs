@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Hazel;
-using InnerNet;
 using PolusApi.Net;
-using PolusGGMod.Patches.Net;
+using UnhollowerRuntimeLib;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -12,13 +12,15 @@ namespace PolusGGMod {
 		private Dictionary<uint, PolusNetObject> _allObjectsFast = new();
 		private List<PolusNetObject> _allObjects = new();
 		private HashSet<uint> _destroyedObjects = new();
-		private Dictionary<int, PolusNetObject> _spawnObjects = new();
+		private Dictionary<uint, PolusNetObject> _spawnObjects = new();
 		private uint _netIdCnt = 0x80000000;
 
 		// [DllImport("user32.dll")]
 		// private static extern void MessageBox(IntPtr hwnd, string text, string caption, uint type = 4);
 
-		public void Register(int index, PolusNetObject netObject) {
+		public void Register(uint index, PolusNetObject netObject) {
+			PogusPlugin.Logger.LogInfo($"Registered {netObject.name} at index {index}");
+			_spawnObjects[index] = netObject;
 		}
 
 		public event EventHandler<RpcEventArgs> InnerRpcReceived;
@@ -27,9 +29,9 @@ namespace PolusGGMod {
 			InnerRpcReceived.Invoke(netObject, args);
 		}
 
-		public void HandleSpawn(int cnt, uint netId, MessageReader reader) {
-			if (netId >= (ulong) _spawnObjects.Count) {
-				Debug.LogError("Couldn't find spawnable prefab: " + netId);
+		public void HandleSpawn(int cnt, uint spawnType, MessageReader reader) {
+			if (!_spawnObjects.ContainsKey(spawnType)) {
+				Debug.LogError("Couldn't find polus spawnable prefab: " + spawnType);
 				return;
 			}
 
@@ -41,33 +43,28 @@ namespace PolusGGMod {
 			// }
 
 			PolusNetObject polusNetObject =
-				Object.Instantiate(_spawnObjects[(int) netId]);
-			byte spawnFlags = reader.ReadByte();
-			if (spawnFlags > 0) {
-				AmongUsClient.Instance.HandleDisconnect(DisconnectReasons.Custom,
-					"Spawn flags are unused pepega lmao cringe sad pepelaugh\n\nlmao\nbad");
-			}
-
+				Object.Instantiate(_spawnObjects[spawnType]);
+			reader.ReadByte();
 			int num5 = reader.ReadPackedInt32();
 			PolusNetObject[] componentsInChildren =
 				polusNetObject.GetComponentsInChildren<PolusNetObject>();
 			if (num5 != componentsInChildren.Length) {
-				Debug.LogError("Children didn't match for spawnable " + num5);
+				Debug.LogError("Children didn't match for polus spawnable " + num5);
 				Object.Destroy(polusNetObject.gameObject);
 				return;
 			}
 
 			for (int i = 0; i < num5; i++) {
-				PolusNetObject polusNetObject4 = componentsInChildren[i];
-				polusNetObject4.NetId = reader.ReadPackedUInt32();
+				PolusNetObject childNetObject = componentsInChildren[i];
+				childNetObject.NetId = reader.ReadPackedUInt32();
 				// polusNetObject4.OwnerId = num4;
-				if (_destroyedObjects.Contains(polusNetObject4.NetId)) {
+				if (_destroyedObjects.Contains(childNetObject.NetId)) {
 					polusNetObject.NetId = uint.MaxValue;
 					Object.Destroy(polusNetObject.gameObject);
 					return;
 				}
 
-				if (!this.AddNetObject(polusNetObject4)) {
+				if (!AddNetObject(childNetObject)) {
 					polusNetObject.NetId = uint.MaxValue;
 					Object.Destroy(polusNetObject.gameObject);
 					return;
@@ -75,9 +72,13 @@ namespace PolusGGMod {
 
 				MessageReader messageReader = reader.ReadMessage();
 				if (messageReader.Length > 0) {
-					polusNetObject4.Deserialize(messageReader, true);
+					childNetObject.GetType().FullName.Log(2);
+					childNetObject.Deserialize(messageReader, true);
+					"did it really".Log();
 				}
 			}
+
+			polusNetObject.gameObject.active = true;
 		}
 
 		private bool AddNetObject(PolusNetObject polusNetObject) {
@@ -96,6 +97,7 @@ namespace PolusGGMod {
 		}
 
 		public void RemoveNetObject(PolusNetObject obj) {
+			obj.Despawn();
 		}
 
 		public bool HasObject(uint netId, out PolusNetObject obj) {
@@ -124,7 +126,7 @@ namespace PolusGGMod {
 		}
 
 		public void UnregisterAll() {
-			_spawnObjects = new Dictionary<int, PolusNetObject>();
+			_spawnObjects = new Dictionary<uint, PolusNetObject>();
 		}
 	}
 }

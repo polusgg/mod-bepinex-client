@@ -14,6 +14,7 @@ using Hazel;
 using PolusApi;
 using PolusApi.Net;
 using PolusApi.Resources;
+using PolusGGMod.Patches;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 
@@ -59,6 +60,11 @@ namespace PolusGGMod {
             }
 
             ModManager.PostLoad = true;
+        }
+
+        public override bool Unload() {
+            File.WriteAllText("lol.txt", "Lol");
+            return base.Unload();
         }
     }
 }

@@ -14,10 +14,17 @@ namespace PolusGGMod.Patches {
                 button.Button.OnClick.AddListener((Action) (() => {
                     bool original = PogusPlugin.ModManager.AllPatched;
                     if (button.Text.Text == PggConstants.Region.Name) {
-                        if (!PogusPlugin.ModManager.AllPatched)PogusPlugin.ModManager.PatchMods();//todo implement temporary patches
-                    } else PogusPlugin.ModManager.UnpatchMods();
+                        if (!PogusPlugin.ModManager.AllPatched) {
+                            // PogusPlugin.ModManager.LoadMods();
+                            PogusPlugin.ModManager.PatchMods(); //todo implement temporary patches
+                        }
+                    } else {
+                        PogusPlugin.ModManager.UnpatchMods();
+                        // PogusPlugin.ModManager.UnloadMods();
+                    }
 
-                    PogusPlugin.Logger.LogInfo($"IsPatched = {PogusPlugin.ModManager.AllPatched}, original = {original}");
+                    PogusPlugin.Logger.LogInfo(
+                        $"IsPatched = {PogusPlugin.ModManager.AllPatched}, original = {original}");
 
                     if (original != PogusPlugin.ModManager.AllPatched) {
                         //todo might need an update when ported to latest with addressables

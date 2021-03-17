@@ -10,10 +10,10 @@ namespace PolusApi.Net {
         /// </summary>
         /// <param name="index">The index/spawn type of the object.</param>
         /// <param name="netObject"></param>
-        public void Register(int index, PolusNetObject netObject);
+        public void Register(uint index, PolusNetObject netObject);
         public event EventHandler<RpcEventArgs> InnerRpcReceived;
         public void HandleInnerRpc(InnerNetObject netObject, RpcEventArgs args);
-        public void HandleSpawn(int cnt, uint netId, MessageReader reader);
+        public void HandleSpawn(int cnt, uint spawnType, MessageReader reader);
         public void RemoveNetObject(PolusNetObject obj);
         public bool HasObject(uint netId, out PolusNetObject obj);
         public bool IsDestroyed(uint netId);

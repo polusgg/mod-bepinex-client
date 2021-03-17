@@ -4,7 +4,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PolusGGMod", "PolusGGMod\Po
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PolusApi", "PolusApi\PolusApi.csproj", "{A25B6581-7AF3-4D7A-94FE-4D1EC96BDC84}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestMod", "TestMod\TestMod.csproj", "{64EB8FE5-5BB7-4827-8537-A0F519C38158}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PolusMod", "PolusMod\PolusMod.csproj", "{64EB8FE5-5BB7-4827-8537-A0F519C38158}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

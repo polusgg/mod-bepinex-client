@@ -10,6 +10,7 @@ namespace PolusGGMod {
         protected Harmony _harmony;
         protected List<PatchDetails> ToggledPatches = new();
         public bool IsPatched;
+        public Harmony Harmony => _harmony;
 
         public void LoadPatches(Assembly assembly) {
             System.Type[] types = AccessTools.GetTypesFromAssembly(assembly);

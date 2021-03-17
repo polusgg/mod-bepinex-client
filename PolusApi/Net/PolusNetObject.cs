@@ -18,12 +18,7 @@ namespace PolusApi.Net {
 			
 		}
 
-		public virtual bool Serialize(MessageWriter writer, bool initialState) {
-			return false;
-		}
-
 		public virtual void Deserialize(MessageReader reader, bool initialState) {
-			
 		}
     }
 }

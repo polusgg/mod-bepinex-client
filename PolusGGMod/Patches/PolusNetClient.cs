@@ -34,7 +34,8 @@ namespace PolusGGMod.Patches.Net {
             [HarmonyPrefix]
             public static bool HandleMessage([HarmonyArgument(0)] MessageReader reader,
                 [HarmonyArgument(1)] SendOption yoMama) {
-                if (reader.Tag > 0x80) {
+                // PogusPlugin.Logger.LogInfo($"Root packet {reader.Tag:X2}");
+                if (reader.Tag >= 0x80) {
                     foreach (var (_, mod) in PogusPlugin.ModManager.TemporaryMods) {
                         mod.HandleRoot(reader);
                     }
@@ -54,60 +55,43 @@ namespace PolusGGMod.Patches.Net {
                 [HarmonyArgument(1)] int cnt) {
                 InnerNetClient instance = __instance;
                 InnerNetObject netObject;
+                int pos = reader.Position;
 
                 switch (reader.Tag) {
                     case 1: {
                         uint netId = reader.ReadPackedUInt32();
                         //todo transfer all object management code to iobjectmanager
-                        if (netId >> 31 > 0) {
-                            if (IObjectManager.Instance.HasObject(netId, out var polusNetObject)) {
-                                polusNetObject.Deserialize(reader, false);
-                                return false;
-                            }
-
-                            if (!IObjectManager.Instance.IsDestroyed(netId)) {
-                                instance.DeferMessage(cnt, reader, "Stored data for " + netId);
-                                return false;
-                            }
-                        }
-
-                        if ((netObject = instance.allObjectsFast[netId]) != null) {
-                            netObject.Deserialize(reader, false);
+                        if (IObjectManager.Instance.HasObject(netId, out var polusNetObject)) {
+                            polusNetObject.Deserialize(reader, false);
                             return false;
                         }
 
-                        if (!instance.DestroyedObjects.Contains(netId)) {
+                        if (!instance.DestroyedObjects.Contains(netId) && !IObjectManager.Instance.IsDestroyed(netId)) {
                             instance.DeferMessage(cnt, reader, "Stored data for " + netId);
                             return false;
                         }
-
-                        return false;
+                        
+                        reader.Position = pos;
+                        return true;
                     }
                     case 2: {
                         uint netId = reader.ReadPackedUInt32();
                         //todo transfer all object management code to iobjectmanager
-                        if (netId >> 31 > 0) {
-                            if (IObjectManager.Instance.HasObject(netId, out var polusNetObject)) {
-                                polusNetObject.HandleRpc(reader.ReadByte(), reader);
-                                return false;
-                            }
-
-                            if (netId != 4294967295U && !IObjectManager.Instance.IsDestroyed(netId)) {
-                                instance.DeferMessage(cnt, reader, "Stored Polus RPC for " + netId);
-                                return false;
-                            }
-                        }
-
-                        if ((netObject = instance.allObjectsFast[netId]) != null) {
-                            byte call = reader.ReadByte();
-                            // PogusPlugin.Logger.LogInfo($"WOO RPC FOR {call}");
-                            if (call > 0x80)
-                                IObjectManager.Instance.HandleInnerRpc(netObject, new RpcEventArgs(call, reader));
-                            else netObject.HandleRpc(call, reader);
+                        if (IObjectManager.Instance.HasObject(netId, out var polusNetObject)) {
+                            polusNetObject.HandleRpc(reader.ReadByte(), reader);
                             return false;
                         }
 
-                        if (netId != 4294967295U && !instance.DestroyedObjects.Contains(netId)) {
+                        if (instance.allObjectsFast.ContainsKey(netId)) {
+                            byte call = reader.ReadByte();
+                            // PogusPlugin.Logger.LogInfo($"WOO RPC FOR {call}");
+                            if (call >= 0x80)
+                                IObjectManager.Instance.HandleInnerRpc(instance.allObjectsFast[netId], new RpcEventArgs(call, reader));
+                            else instance.allObjectsFast[netId].HandleRpc(call, reader);
+                            return false;
+                        }
+
+                        if (netId != 4294967295U && !instance.DestroyedObjects.Contains(netId) && !IObjectManager.Instance.IsDestroyed(netId)) {
                             instance.DeferMessage(cnt, reader, "Stored RPC for " + netId);
                             return false;
                         }
@@ -115,14 +99,13 @@ namespace PolusGGMod.Patches.Net {
                         return false;
                     }
                     case 4: {
-                        int pos = reader.Position;
                         uint num3 = reader.ReadPackedUInt32();
 
-                        if (num3 > 0x80) {
+                        if (num3 >= 0x80) {
                             IObjectManager.Instance.HandleSpawn(cnt, num3, reader);
                             return false;
                         }
-
+                        
                         reader.Position = pos;
                         return true;
 
@@ -189,12 +172,11 @@ namespace PolusGGMod.Patches.Net {
                     case 5: {
                         uint num6 = reader.ReadPackedUInt32();
                         instance.DestroyedObjects.Add(num6);
-                        if (num6 >> 31 > 0) {
-                            PolusNetObject polusNetObject =
-                                IObjectManager.Instance.FindObjectByNetId<PolusNetObject>(num6); //todo pno despawns
-                            if (polusNetObject) {
-                                IObjectManager.Instance.RemoveNetObject(polusNetObject);
-                            }
+                        PolusNetObject polusNetObject =
+                            IObjectManager.Instance.FindObjectByNetId<PolusNetObject>(num6); //todo pno despawns
+                        if (polusNetObject != null) {
+                            IObjectManager.Instance.RemoveNetObject(polusNetObject);
+                            return false;
                         }
 
                         netObject = instance.FindObjectByNetId<InnerNetObject>(num6);
