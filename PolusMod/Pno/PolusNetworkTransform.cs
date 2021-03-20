@@ -6,7 +6,7 @@ using UnhollowerRuntimeLib;
 using UnityEngine;
 
 namespace PolusMod.Pno {
-    public class PolusNetworkTransform : PolusNetObject {
+    public class PolusNetworkTransform : PnoBehaviour {
         private float _interpolateMovement = 1f;
         private Vector2 _targetSyncPosition;
         private Vector2 _targetSyncVelocity;
@@ -14,8 +14,8 @@ namespace PolusMod.Pno {
         private float _sendInterval = 0.1f;
         private float snapThreshold = 5f;
         private ushort _lastSequenceId;
-        private readonly FloatRange _xRange = new(-40f, 40f);
-        private readonly FloatRange _yRange = new(-40f, 40f);
+        private static readonly FloatRange _xRange = new(-40f, 40f);
+        private static readonly FloatRange _yRange = new(-40f, 40f);
 
         public PolusNetworkTransform(IntPtr ptr) : base(ptr) { }
 
@@ -24,13 +24,13 @@ namespace PolusMod.Pno {
         }
 
         private void Start() {
+            pno = IObjectManager.Instance.LocateNetObject(this);
+            pno.OnRpc = HandleRpc;
+            pno.OnData = reader => Deserialize(reader, false);
             _rigidbody2D = GetComponent<Rigidbody2D>();
         }
 
-        public uint SpawnId { get; }
-        public uint NetId { get; }
-
-        public void HandleRpc(byte callId, MessageReader reader) {
+        public void HandleRpc(MessageReader reader, byte callId) {
             if (callId == (int) RpcCalls.SnapTo) {
                 Vector2 position = ReadVector2(reader);
                 ushort minSid = reader.ReadUInt16();
@@ -50,7 +50,8 @@ namespace PolusMod.Pno {
             _targetSyncVelocity = _rigidbody2D.velocity = Vector2.zero;
         }
 
-        private void FixedUpdate() {
+        public void FixedUpdate() {
+            if (pno.HasSpawnData()) Deserialize(pno.GetSpawnData(), true);
             if (_interpolateMovement != 0f) {
                 Vector2 vector = _targetSyncPosition - _rigidbody2D.position;
                 if (vector.sqrMagnitude >= 0.0001f) {
@@ -69,8 +70,9 @@ namespace PolusMod.Pno {
 
         public void Deserialize(MessageReader reader, bool initialState) {
             if (initialState) {
+                "Spawn time for cnt~".Log();
                 _lastSequenceId = reader.ReadUInt16();
-                _targetSyncPosition = (transform.position = ReadVector2(reader));
+                _targetSyncPosition = transform.position = ReadVector2(reader);
                 _targetSyncVelocity = ReadVector2(reader);
                 return;
             }
@@ -101,7 +103,7 @@ namespace PolusMod.Pno {
             }
         }
 
-        private Vector2 ReadVector2(MessageReader reader) {
+        public static Vector2 ReadVector2(MessageReader reader) {
             float v = reader.ReadUInt16() / 65535f;
             float v2 = reader.ReadUInt16() / 65535f;
             return new Vector2(_xRange.Lerp(v), _yRange.Lerp(v2));

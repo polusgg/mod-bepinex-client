@@ -11,6 +11,7 @@ using BepInEx.IL2CPP;
 using BepInEx.Logging;
 using HarmonyLib;
 using Hazel;
+using Mono.Cecil;
 using PolusApi;
 using PolusApi.Net;
 using PolusApi.Resources;
@@ -43,7 +44,7 @@ namespace PolusGGMod {
                 }
 
                 Logger.LogInfo("reuben scoobenson");
-                ClassInjector.RegisterTypeInIl2Cpp<PolusNetObject>();
+                // ClassInjector.RegisterTypeInIl2Cpp<PolusNetObject>();
                 PermanentMod.LoadPatches("gg.polus.permanent",
                     Assembly.GetExecutingAssembly().GetTypes()
                         .Where(x => x.GetCustomAttribute(typeof(HarmonyPatch)) != null).ToArray());

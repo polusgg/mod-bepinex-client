@@ -1,24 +1,38 @@
 ﻿using System;
+using System.IO;
 using Hazel;
-using UnityEngine;
-using Object = UnityEngine.Object;
+using PolusGGMod;
 
 namespace PolusApi.Net {
-    public class PolusNetObject : MonoBehaviour {
-	    public uint SpawnId;
-	    public uint NetId;
+    public class PolusNetObject {
+        public uint NetId;
+        public PnoBehaviour PnoBehaviour;
+        public OnDataDel OnData;
+        public OnRpcDel OnRpc;
+        private byte[] data;
+        private bool hasSpawn = false;
+        public delegate void OnDataDel(MessageReader reader);
+        public delegate void OnRpcDel(MessageReader reader, byte callId);
 
-	    public PolusNetObject(IntPtr ptr) : base(ptr) {}
+        public MessageReader GetSpawnData() {
+            MessageReader reader = MessageReader.GetSized(data.Length);
+            reader.Buffer = data;
+            hasSpawn = false;
+            return reader;
+        }
+        public void HandleRpc(MessageReader reader, byte callId) {
+            OnRpc?.Invoke(reader, callId);
+        }
 
-		public virtual void Despawn() {
-			Destroy(gameObject);
-		}
+        public void Spawn(MessageReader reader) {
+            reader.Position.Log(3, "3 times i will cry in real life");
+            hasSpawn = true;
+            data = reader.ReadBytes(reader.BytesRemaining);
+        }
+        public void Data(MessageReader reader) {
+            OnData?.Invoke(reader);
+        }
 
-		public virtual void HandleRpc(byte callId, MessageReader reader) {
-			
-		}
-
-		public virtual void Deserialize(MessageReader reader, bool initialState) {
-		}
+        public bool HasSpawnData() => hasSpawn;
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using BepInEx.IL2CPP;
 using Hazel;
 using PolusApi.Net;
 using PowerTools;
@@ -7,7 +8,14 @@ using UnhollowerRuntimeLib;
 using UnityEngine;
 
 namespace PolusMod.Pno {
-	public class PolusDeadBody : PolusNetObject {
+	public class PolusDeadBody : PnoBehaviour {
+		public SpriteAnim anim;
+		public DeadBody deadBody;
+		public SpriteRenderer rend;
+		public PolusNetworkTransform netTransform;
+		private static readonly int BodyColor = Shader.PropertyToID("_BodyColor");
+		private static readonly int BackColor = Shader.PropertyToID("_BackColor");
+
 		// todo recreate dead body lmao
 		// todo patch murder player to not show dead body lmao
 		// todo patch reporting to correctly allow reporting custom dead bodies
@@ -18,35 +26,24 @@ namespace PolusMod.Pno {
 			ClassInjector.RegisterTypeInIl2Cpp<PolusDeadBody>();
 		}
 
-		public uint SpawnId { get; }
-		public uint NetId { get; }
-
-		public override void HandleRpc(byte callId, MessageReader reader) {
-			
-		}
-
 		private void Start() {
+			pno = IObjectManager.Instance.LocateNetObject(this);
+			pno.OnData = Deserialize;
 			rend = GetComponent<SpriteRenderer>();
 		}
 
-		public IEnumerator Lmao() {
-			yield break;
+		private void FixedUpdate() {
+			if (pno.HasSpawnData()) Deserialize(pno.GetSpawnData());
 		}
 
-		public override void Deserialize(MessageReader reader, bool initialState) {
-			reader.Position.Log(5, "LmaoOOOoAo");
-			anim.SetTime(reader.ReadBoolean() ? 0 : anim.m_currAnim.length);
+		public void Deserialize(MessageReader reader) {
+			reader.Position.Log(10, "920489124i19");
+			// anim.SetNormalizedTime(reader.ReadBoolean() ? 1 : 0);
+			reader.ReadBoolean();
 			rend.flipX = reader.ReadBoolean();
 			// transform.localScale = new Vector3(reader.ReadBoolean() ? -0.7f : 0.7f, 0.7f, 0.7f);
 			rend.material.SetColor(BackColor, new Color32(reader.ReadByte(),reader.ReadByte(),reader.ReadByte(),reader.ReadByte()));
 			rend.material.SetColor(BodyColor, new Color32(reader.ReadByte(),reader.ReadByte(),reader.ReadByte(),reader.ReadByte()));
 		}
-
-		public SpriteAnim anim;
-		public DeadBody deadBody;
-		public SpriteRenderer rend;
-		public PolusNetworkTransform netTransform;
-		private static readonly int BodyColor = Shader.PropertyToID("_BodyColor");
-		private static readonly int BackColor = Shader.PropertyToID("_BackColor");
 	}
 }

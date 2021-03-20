@@ -28,6 +28,18 @@ namespace PolusGGMod.Patches.Net {
             return null;
         }
 
+        [HarmonyPatch(typeof(AmongUsClient), nameof(AmongUsClient.OnDisconnect))]
+        public class InnerNetClientLolDestroyAllPatch {
+            [PermanentPatch]
+            [HarmonyPrefix]
+            public static bool OnDisconnect() {
+                // if (PogusPlugin.ModManager.AllPatched) {
+                    IObjectManager.Instance.EndedGame();
+                // }
+                return true;
+            }
+        }
+
         [HarmonyPatch(typeof(InnerNetClient), nameof(InnerNetClient.HandleMessage))]
         public class InnerNetClientHandleMessagePatch {
             [PermanentPatch]
@@ -62,7 +74,8 @@ namespace PolusGGMod.Patches.Net {
                         uint netId = reader.ReadPackedUInt32();
                         //todo transfer all object management code to iobjectmanager
                         if (IObjectManager.Instance.HasObject(netId, out var polusNetObject)) {
-                            polusNetObject.Deserialize(reader, false);
+                            polusNetObject.NetId.Log(1, "for dataPOg");
+                            polusNetObject.Data(reader);
                             return false;
                         }
 
@@ -71,14 +84,14 @@ namespace PolusGGMod.Patches.Net {
                             return false;
                         }
                         
-                        reader.Position = pos;
+                        reader.Position = pos.Log(1, "lol send it baby");
                         return true;
                     }
                     case 2: {
                         uint netId = reader.ReadPackedUInt32();
                         //todo transfer all object management code to iobjectmanager
                         if (IObjectManager.Instance.HasObject(netId, out var polusNetObject)) {
-                            polusNetObject.HandleRpc(reader.ReadByte(), reader);
+                            polusNetObject.HandleRpc(reader, reader.ReadByte());
                             return false;
                         }
 

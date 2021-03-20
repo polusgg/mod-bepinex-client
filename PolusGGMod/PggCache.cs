@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -8,8 +9,12 @@ using System.Net.Http;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using HarmonyLib;
 using Hazel;
+using PolusApi;
 using PolusApi.Resources;
+using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace PolusGGMod {
     public class PggCache : ICache {
@@ -17,22 +22,27 @@ namespace PolusGGMod {
         private HttpClient _client = new();
 
         public Dictionary<uint, CacheFile> CachedFiles => _cacheFiles;
+        private uint tempId;
 
-        public async Task<CacheFile> AddToCache(uint id, string location, byte[] hash, ResourceType type) {
+        public async Task<CacheFile> AddToCache(uint id, string location, byte[] hash, ResourceType type, uint parentId = uint.MaxValue) {
             string path = Path.Join(PggConstants.DownloadFolder, $"{id}");
 
             if (!IsCachedAndValid(id, hash)) {
-                var responseMessage =
+                HttpResponseMessage responseMessage =
+                    null;
+                if (type == ResourceType.Asset) goto AssetOnly;
+
+                responseMessage =
                     await _client.GetAsync(PggConstants.DownloadServer + location,
                         HttpCompletionOption.ResponseHeadersRead);
-                
                 if (!responseMessage.IsSuccessStatusCode) {
                     //todo log and report failure on startup or during server requested download
                     PogusPlugin.Logger.LogFatal($"Failed with: {responseMessage.StatusCode}");
                     throw new CacheRequestException($"Unsuccessful attempt at getting {location}", responseMessage.StatusCode);
                 }
 
-                var cacheFile = new CacheFile {
+                AssetOnly:
+                CacheFile cacheFile = new() {
                     Hash = hash,
                     Location = location,
                     LocalLocation = path,
@@ -51,6 +61,16 @@ namespace PolusGGMod {
                         Stream stream = responseMessage.Content.ReadAsStreamAsync().Result;
                         FileStream fileStream = File.Create(path);
                         await stream.CopyToAsync(fileStream);
+                        AssetBundle bundle = AssetBundle.LoadFromFile(path);
+                        Bundle bundone = JsonUtility.FromJson<Bundle>(bundle.LoadAsset<TextAsset>("Assets/Cringomatedcarriesthegame.json").text);
+
+                        uint assetId = bundone.BaseId;
+                        foreach (string bundoneAsset in bundone.Assets)
+                            await AddToCache(++assetId, bundoneAsset, hash, ResourceType.Asset, parentId);
+                        cacheFile.ExtraData = bundone.Assets;
+                        break;
+                    case ResourceType.Asset:
+                        cacheFile.ExtraData = parentId;
                         break;
                 }
 
@@ -72,7 +92,7 @@ namespace PolusGGMod {
 
         public void Serialize(BinaryWriter writer) {
             writer.Write(_cacheFiles.Count);
-            foreach (var (x, y) in _cacheFiles) {
+            foreach ((uint x, CacheFile y) in _cacheFiles) {
                 writer.Write(x);
                 writer.Write((byte) y.Type);
                 writer.Write(y.Hash);
@@ -83,6 +103,14 @@ namespace PolusGGMod {
                         writer.Write(y.ExtraData as string ?? string.Empty);
                         break;
                     case ResourceType.AssetBundle:
+                        var extra = (string[]) y.ExtraData;
+                        writer.Write(extra.Length);
+                        foreach (string s in extra) {
+                            writer.Write(s);
+                        }
+                        break;
+                    case ResourceType.Asset:
+                        writer.Write((uint) y.ExtraData);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -107,18 +135,17 @@ namespace PolusGGMod {
             };
             file.ExtraData = file.Type switch {
                 ResourceType.Assembly => reader.ReadString(),
+                // ResourceType.AssetBundle => ,
+                ResourceType.Asset => reader.ReadUInt32(),
                 _ => null
             };
-        }
-    }
-
-    public static class CacheFileExtensions {
-        public static Stream GetDataStream(this CacheFile cacheFile) {
-            return File.OpenRead(cacheFile.LocalLocation);
-        }
-
-        public static byte[] GetData(this CacheFile cacheFile) {
-            return cacheFile.Data ?? (cacheFile.Data = File.ReadAllBytes(cacheFile.LocalLocation));
+            if (file.Type == ResourceType.AssetBundle) {
+                int leng = reader.ReadInt32().Log(1, "asset bundle len unread");
+                List<string> ab = new List<string>();
+                for (int i = 0; i < leng; i++) {
+                    ab.Add(reader.ReadString());
+                }
+            }
         }
     }
 }
