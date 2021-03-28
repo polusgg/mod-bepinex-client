@@ -7,9 +7,9 @@ namespace PolusGGMod {
         public static readonly string ModListing = "modlist";
         public static readonly string ModListingFolder = "mods/";
         public static readonly string DownloadFolder = "Polus.gg Mods";
-        public static readonly string CacheLocation = Path.Join(PggConstants.DownloadFolder, "cache.dat");
+        public static readonly string CacheLocation = Path.Join(DownloadFolder, "cache.dat");
 
         public static readonly ServerInfo Server = new("Pogger-Lmoa-Master-1", "127.0.0.1", 22023);
-        public static readonly RegionInfo Region = new("Polus.gg Server", Server.Ip, new ServerInfo[] {Server});
+        public static readonly StaticRegionInfo Region = new("Polus.gg Server", StringNames.NoTranslation, Server.Ip, new[] { Server });
     }
 }

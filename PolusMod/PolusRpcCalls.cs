@@ -2,7 +2,7 @@
     public enum PolusRpcCalls : byte {
         // 
         SnapTo = RpcCalls.SnapTo,
-        
+        ReportDeadBody = RpcCalls.ReportDeadBody,
         Revive = 0x84,
         PlaySound = 0x85,
         CloseHud = 0x83,

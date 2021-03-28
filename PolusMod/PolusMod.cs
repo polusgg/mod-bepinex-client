@@ -1,19 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Threading.Tasks;
 using BepInEx.Logging;
-using HarmonyLib;
 using Hazel;
+using InnerNet;
 using PolusApi;
 using PolusApi.Net;
 using PolusApi.Resources;
 using PolusMod.Pno;
-using UnhollowerBaseLib;
-using UnhollowerRuntimeLib;
 using UnityEngine;
-using Delegate = Il2CppSystem.Delegate;
 
 namespace PolusMod {
     [Mod(Id, "1.0.0", "Sanae6")]
@@ -21,27 +16,31 @@ namespace PolusMod {
         public const string Id = "PolusMod Lmoa";
         public bool loaded;
         public ICache Cache;
+        public static RoleData RoleData = new RoleData();
+        public static bool IsHatEditor = false;
 
         public override void Load() {
             if (!loaded) {
                 loaded = true;
             }
-
+            
             Logger.LogInfo("Loaded " + Id);
         }
 
         public override void Start(IObjectManager objectManager, ICache cache) {
             objectManager.InnerRpcReceived += OnInnerRpcReceived;
             objectManager.Register(0x83, RegisterPnos.CreateDeadBodyPrefab());
-            objectManager.Register(0x80, RegisterPnos.CreateImage());
-            ResolutionManager.ResolutionChanged.delegates = ResolutionManager.ResolutionChanged.delegates.AddItem(DelegateSupport.ConvertDelegate<Delegate>(new Action<float>((aspect) => {
-                MessageWriter writer = MessageWriter.Get(SendOption.Reliable);
-                writer.StartMessage((byte) PolusRootPackets.Resize);
-                writer.Write((float) Screen.width);
-                writer.Write((float) Screen.height);
-                writer.EndMessage();
-                AmongUsClient.Instance.SendOrDisconnect(writer);
-            }))).ToArray();
+            objectManager.Register(0x81, RegisterPnos.CreateButton());
+
+            //todo fix resolution issues changed lol when (maybe make a monobehaviour for receiving that)
+            // ResolutionManager.ResolutionChanged.delegates = ResolutionManager.ResolutionChanged.delegates.AddItem(DelegateSupport.ConvertDelegate<Delegate>(new Action<float>((aspect) => {
+            //     MessageWriter writer = MessageWriter.Get(SendOption.Reliable);
+            //     writer.StartMessage((byte) PolusRootPackets.Resize);
+            //     writer.Write((float) Screen.width);
+            //     writer.Write((float) Screen.height);
+            //     writer.EndMessage();
+            //     AmongUsClient.Instance.SendOrDisconnect(writer);
+            // }))).ToArray();
             Cache = cache;
         }
 
@@ -70,23 +69,27 @@ namespace PolusMod {
                     bool loop = e.reader.ReadBoolean();
                     byte volume = e.reader.ReadByte();
                     Vector2 vec2 = PolusNetworkTransform.ReadVector2(e.reader);
-                    
+
                     SoundManager.Instance.PlayDynamicSound(ac.name, ac, loop, new Action<AudioSource, float>(
                         (source, _) => {
-                            source.volume = (volume - Vector2.Distance(PlayerControl.LocalPlayer.GetTruePosition(), vec2) -
-                                             (
-                                                 PhysicsHelpers.AnythingBetween(
-                                                     vec2,
-                                                     PlayerControl.LocalPlayer.GetTruePosition(),
-                                                     LayerMask.NameToLayer("Ship") | LayerMask.NameToLayer("Players"),
-                                                     false
-                                                     ) ? 15f : 0f)) / 100f;
+                            source.volume =
+                                (volume - Vector2.Distance(PlayerControl.LocalPlayer.GetTruePosition(), vec2) -
+                                 (
+                                     PhysicsHelpers.AnythingBetween(
+                                         vec2,
+                                         PlayerControl.LocalPlayer.GetTruePosition(),
+                                         LayerMask.NameToLayer("Ship") | LayerMask.NameToLayer("Players"),
+                                         false
+                                     )
+                                         ? 15f
+                                         : 0f)) / 100f;
                         }), sfx);
                     break;
             }
         }
 
         public override void HandleRoot(MessageReader reader) {
+            Logger.LogInfo($"LOL {reader.Tag}");
             switch ((PolusRootPackets) reader.Tag) {
                 case PolusRootPackets.FetchResource:
                     uint resource = reader.ReadPackedUInt32();
@@ -95,41 +98,52 @@ namespace PolusMod {
                     uint resourceType = reader.ReadByte();
                     MessageWriter writer;
                     if (Cache.IsCachedAndValid(resource, hash)) {
+                        Logger.LogInfo($"{resource} is already cached");
                         writer = StartSendResourceResponse(resource, ResponseType.DownloadEnded);
                         writer.Write(1);
                         EndSendResourceResponse(writer);
                         return;
                     }
 
-                    Task<CacheFile> resourceTask = Cache.AddToCache(resource, location, hash,
-                        (ResourceType) resourceType);
-                    resourceTask.Wait();
-                    if (resourceTask.IsFaulted) {
+                    try {
+                        Logger.LogInfo($"Trying to download and cache {resource}");
+                        Cache.AddToCache(resource, location, hash,
+                            (ResourceType) resourceType);
+                        writer = StartSendResourceResponse(resource, ResponseType.DownloadEnded);
+                        writer.Write(0);
+                        EndSendResourceResponse(writer);
+                        Logger.LogInfo($"Cached {resource}!");
+                    } catch (Exception e) {
+                        Logger.LogInfo($"Failed to cache {resource}");
                         writer = StartSendResourceResponse(resource, ResponseType.DownloadFailed);
-                        if (resourceTask.Exception?.InnerException is CacheRequestException exception) {
+                        if (e is CacheRequestException exception) {
                             writer.WritePacked((uint) exception.Code);
                         } else {
                             writer.WritePacked(0x69420);
                         }
 
                         EndSendResourceResponse(writer);
-                    } else {
-                        writer = StartSendResourceResponse(resource, ResponseType.DownloadEnded);
-                        writer.Write((byte) 0);
-                        EndSendResourceResponse(writer);
                     }
 
                     break;
                 case PolusRootPackets.Intro:
-                    
+                    RoleData.IntroName = reader.ReadString();
+                    RoleData.IntroDesc = reader.ReadString();
+                    RoleData.IntroColor = new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
+                    RoleData.IntroPlayers = Enumerable.Repeat(15, reader.Length - reader.Position).Select(_ => reader.ReadByte()).ToList();
+                    //todo finish this and outro
                     break;
                 case PolusRootPackets.EndGame:
                     
+                    break;
+                default:
+                    Logger.LogError($"Invalid packet with id {reader.Tag}");
                     break;
             }
         }
 
         private MessageWriter StartSendResourceResponse(uint resource, ResponseType type) {
+            Logger.LogInfo($"Starting response with type {type}");
             MessageWriter writer = MessageWriter.Get(SendOption.Reliable);
             writer.StartMessage((byte) PolusRootPackets.FetchResource);
             writer.WritePacked(resource);
@@ -156,6 +170,20 @@ namespace PolusMod {
                 corpse.SetThickAssAndBigDumpy(true, true);
             }
         }
+    }
+
+    public class RoleData {
+        public bool IsImpostor = false;
+        public string IntroName = "Poobscoob";
+        public string IntroDesc = "you failed to set this on time";
+        public Color IntroColor = Color.magenta;
+        public List<byte> IntroPlayers = new();
+        public string OutroName;
+        public string OutroDesc;
+        public Color OutroColor;
+        public byte[] OutroPlayers;
+        public bool ShowPlayAgain;
+        public bool ShowQuit;
     }
 
     public static class Lol {

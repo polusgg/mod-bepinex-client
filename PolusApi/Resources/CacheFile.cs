@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using UnityEngine;
 using Object = UnityEngine.Object;
 
 namespace PolusApi.Resources {
@@ -28,7 +29,7 @@ namespace PolusApi.Resources {
 
 		public static T Get<T>(this CacheFile cacheFile) where T : Object {
 			if (cacheFile.Type != ResourceType.Asset) throw new Exception("Invalid Get call to non-asset");
-			return ICache.Instance.CachedFiles[(uint) cacheFile.ExtraData].LoadAssetBundle().LoadAsset<T>(cacheFile.Location);
+			return ICache.Instance.CachedFiles[(uint) cacheFile.ExtraData].LoadAssetBundle().LoadAsset(cacheFile.Location).Cast<T>();
 		}
 	}
 }

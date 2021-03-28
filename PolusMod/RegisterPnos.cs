@@ -12,25 +12,29 @@ namespace PolusMod {
 			var gameObject = prefab.gameObject;
 			gameObject.active = false;
 			Object.DontDestroyOnLoad(gameObject);
-			gameObject.AddComponent<Rigidbody2D>();
 
-			PolusDeadBody polusDeadBody = prefab.gameObject.AddComponent<PolusDeadBody>();
-			polusDeadBody.netTransform = prefab.gameObject.AddComponent<PolusNetworkTransform>();
+			PolusDeadBody polusDeadBody = gameObject.AddComponent<PolusDeadBody>();
+			polusDeadBody.netTransform = gameObject.AddComponent<PolusNetworkTransform>();
+			AspectPosition position = gameObject.AddComponent<AspectPosition>();
+			position.enabled = false;
 
 			return polusDeadBody;
 		}
-		public static PnoBehaviour CreateImage() {
-			GameObject imageObject = new("ImagePrefab") {active = false};
+		public static PnoBehaviour CreateButton() {
+			GameObject imageObject = new("UnityExplorerAndies") {active = false};
 			Object.DontDestroyOnLoad(imageObject);
+			GameObject timerObject = new("SussyCooldown");
 
-			PolusClickBehaviour cbp = imageObject.AddComponent<PolusClickBehaviour>();
+			PolusButton button = imageObject.AddComponent<PolusButton>();
 			imageObject.AddComponent<PolusGraphic>();
 			imageObject.AddComponent<PolusNetworkTransform>();
 			imageObject.AddComponent<SpriteRenderer>();
 			imageObject.AddComponent<BoxCollider2D>();
 			imageObject.AddComponent<PassiveButton>();
 
-			return cbp;
+			timerObject.AddComponent<TextRenderer>();
+
+			return button;
 		}
 	}
 }

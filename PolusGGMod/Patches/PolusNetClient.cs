@@ -3,6 +3,7 @@ using Hazel;
 using Il2CppSystem;
 using Il2CppSystem.Collections.Generic;
 using InnerNet;
+using PolusApi;
 using PolusApi.Net;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -28,11 +29,12 @@ namespace PolusGGMod.Patches.Net {
             return null;
         }
 
-        [HarmonyPatch(typeof(AmongUsClient), nameof(AmongUsClient.OnDisconnect))]
+        [HarmonyPatch(typeof(EndGameManager), nameof(EndGameManager.Start))]
         public class InnerNetClientLolDestroyAllPatch {
             [PermanentPatch]
             [HarmonyPrefix]
-            public static bool OnDisconnect() {
+            public static bool SetEverythingUp() {
+                "holy fuck just work oh my fucking god".Log(3); 
                 // if (PogusPlugin.ModManager.AllPatched) {
                     IObjectManager.Instance.EndedGame();
                 // }
@@ -46,9 +48,11 @@ namespace PolusGGMod.Patches.Net {
             [HarmonyPrefix]
             public static bool HandleMessage([HarmonyArgument(0)] MessageReader reader,
                 [HarmonyArgument(1)] SendOption yoMama) {
-                // PogusPlugin.Logger.LogInfo($"Root packet {reader.Tag:X2}");
+                PogusPlugin.Logger.LogInfo($"Root packet {reader.Tag:X2}");
                 if (reader.Tag >= 0x80) {
-                    foreach (var (_, mod) in PogusPlugin.ModManager.TemporaryMods) {
+                    PogusPlugin.Logger.LogInfo($"Polus packet {reader.Tag:X2}");
+                    foreach ((_, Mod mod) in PogusPlugin.ModManager.TemporaryMods) {
+                        PogusPlugin.Logger.LogInfo($"Handling packet {reader.Tag:X2} for {mod.Name}");
                         mod.HandleRoot(reader);
                     }
 
@@ -59,7 +63,7 @@ namespace PolusGGMod.Patches.Net {
             }
         }
 
-        [HarmonyPatch(typeof(InnerNetClient), nameof(InnerNetClient.Method_16))]
+        // [HarmonyPatch(typeof(InnerNetClient), nameof(InnerNetClient.HandleGameDataInner))]
         public class InnerNetClientHandleGameDataInnerPatch {
             [PermanentPatch]
             [HarmonyPrefix]
@@ -79,12 +83,12 @@ namespace PolusGGMod.Patches.Net {
                             return false;
                         }
 
-                        if (!instance.DestroyedObjects.Contains(netId) && !IObjectManager.Instance.IsDestroyed(netId)) {
-                            instance.DeferMessage(cnt, reader, "Stored data for " + netId);
+                        if (!instance.allObjectsFast.ContainsKey(netId) && !instance.DestroyedObjects.Contains(netId) && !IObjectManager.Instance.IsDestroyed(netId)) {
+                            // instance.DeferMessage(cnt, reader, "Stored data for " + netId);
                             return false;
                         }
-                        
-                        reader.Position = pos.Log(1, "lol send it baby");
+
+                        reader.Position = pos;
                         return true;
                     }
                     case 2: {
@@ -105,7 +109,7 @@ namespace PolusGGMod.Patches.Net {
                         }
 
                         if (netId != 4294967295U && !instance.DestroyedObjects.Contains(netId) && !IObjectManager.Instance.IsDestroyed(netId)) {
-                            instance.DeferMessage(cnt, reader, "Stored RPC for " + netId);
+                            // instance.DeferMessage(cnt, reader, "Stored RPC for " + netId);
                             return false;
                         }
 
@@ -121,66 +125,6 @@ namespace PolusGGMod.Patches.Net {
                         
                         reader.Position = pos;
                         return true;
-
-                        // if (num3 >= (ulong) instance.SpawnableObjects.Length) {
-                        //     Debug.LogError($"Couldn't find spawnable prefab: {num3}");
-                        //     return false;
-                        // }
-                        //
-                        // int num4 = reader.ReadPackedInt32();
-                        // ClientData clientData = FindClientById(num4);
-                        // if (num4 > 0 && clientData == null) {
-                        //     instance.DeferMessage(cnt, reader, "Delay spawn for unowned " + num3);
-                        //     return false;
-                        // }
-                        //
-                        // netObject = Object.Instantiate<InnerNetObject>(instance.SpawnableObjects[(int) num3]);
-                        // PogusPlugin.Logger.LogInfo($"Spawned lomoa {netObject.NetId} {netObject.name}");
-                        // netObject.SpawnFlags = (SpawnFlags) reader.ReadByte();
-                        // if ((netObject.SpawnFlags & SpawnFlags.IsClientCharacter) != SpawnFlags.None) {
-                        //     if (!clientData.Character) {
-                        //         clientData.InScene = true;
-                        //         clientData.Character = (netObject as PlayerControl);
-                        //     }
-                        //     else if (netObject) {
-                        //         Debug.LogWarning(string.Format("Double spawn character: {0} already has {1}",
-                        //             clientData.Id, clientData.Character.NetId));
-                        //         Object.Destroy(netObject.gameObject);
-                        //         return false;
-                        //     }
-                        // }
-                        //
-                        // int num5 = reader.ReadPackedInt32();
-                        // InnerNetObject[] componentsInChildren = netObject.GetComponentsInChildren<InnerNetObject>();
-                        // if (num5 != componentsInChildren.Length) {
-                        //     Debug.LogError("Children didn't match for spawnable " + num3);
-                        //     Object.Destroy(netObject.gameObject);
-                        //     return false;
-                        // }
-                        //
-                        // for (int i = 0; i < num5; i++) {
-                        //     InnerNetObject innerNetObject4 = componentsInChildren[i];
-                        //     innerNetObject4.NetId = reader.ReadPackedUInt32();
-                        //     innerNetObject4.OwnerId = num4;
-                        //     if (instance.DestroyedObjects.Contains(innerNetObject4.NetId)) {
-                        //         netObject.NetId = uint.MaxValue;
-                        //         Object.Destroy(netObject.gameObject);
-                        //         return false;
-                        //     }
-                        //
-                        //     if (!instance.AddNetObject(innerNetObject4)) {
-                        //         netObject.NetId = uint.MaxValue;
-                        //         Object.Destroy(netObject.gameObject);
-                        //         return false;
-                        //     }
-                        //
-                        //     MessageReader messageReader = reader.ReadMessage();
-                        //     if (messageReader.Length > 0) {
-                        //         innerNetObject4.Deserialize(messageReader, true);
-                        //     }
-                        // }
-                        //
-                        // return false;
                     }
                     case 5: {
                         uint num6 = reader.ReadPackedUInt32();
@@ -192,41 +136,13 @@ namespace PolusGGMod.Patches.Net {
                             return false;
                         }
 
-                        netObject = instance.FindObjectByNetId<InnerNetObject>(num6);
-                        if (netObject && !netObject.AmOwner) {
-                            instance.RemoveNetObject(netObject);
-                            Object.Destroy(netObject.gameObject);
-                            return false;
-                        }
-
-                        return false;
+                        reader.Position = pos;
+                        return true;
                     }
+                    case 7:
                     case 6: {
-                        int num7 = reader.ReadPackedInt32();
-
-                        ClientData client = FindClientById(num7);
-                        string targetScene = reader.ReadString();
-                        if (client != null && !string.IsNullOrWhiteSpace(targetScene)) {
-                            List<Action> dispatcher = instance.Dispatcher;
-                            lock (dispatcher) {
-                                instance.Dispatcher.Add((new System.Action(delegate {
-                                    instance.OnPlayerChangedScene(client, targetScene);
-                                })));
-                                return false;
-                            }
-                        }
-
-                        Debug.Log($"Couldn't find client {num7} to change scene to {targetScene}");
-                        return false;
-                    }
-                    case 7: {
-                        ClientData clientData2 = FindClientById(reader.ReadPackedInt32());
-                        if (clientData2 != null) {
-                            clientData2.IsReady = true;
-                            return false;
-                        }
-
-                        return false;
+                        reader.Position = pos;
+                        return true;
                     }
                 }
 

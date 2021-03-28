@@ -46,15 +46,18 @@ namespace PolusGGMod {
                 Directory.CreateDirectory(PggConstants.DownloadFolder);
                 // Directory.Delete(PggConstants.DownloadFolder, true);
             }
-            List<Task<CacheFile>> tasks = new();
+            List<CacheFile> assemblies = new();
             foreach ((string mod, uint id, byte[] hash) in modList) {
                 Logger.LogInfo($"{mod} {id} {hash}");
-                tasks.Add(PogusPlugin.Cache.AddToCache(id, PggConstants.ModListingFolder + mod, hash, ResourceType.Assembly));
+                try {
+                    assemblies.Add(PogusPlugin.Cache.AddToCache(id, PggConstants.ModListingFolder + mod, hash,
+                        ResourceType.Assembly));
+                } catch (Exception e) {
+                    Logger.LogError($"Failed to download {mod}");
+                    Logger.LogError(e);
+                }
             }
-
-            Task.WhenAll(tasks).Wait();
-
-            CacheFile[] assemblies = tasks.Where(x => !x.IsFaulted).Select(x => x.Result).ToArray();
+            // CacheFile[] assemblies = tasks.Where(x => !x.IsFaulted).Select(x => x.Result).ToArray();
 
             //appdomains are bad post-framework
             // i also hate this code

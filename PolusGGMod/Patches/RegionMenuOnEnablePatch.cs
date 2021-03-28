@@ -13,7 +13,8 @@ namespace PolusGGMod.Patches {
                 button.SetSelected(DestroyableSingleton<ServerManager>.Instance.CurrentRegion.Name == button.Text.Text);
                 button.Button.OnClick.AddListener((Action) (() => {
                     bool original = PogusPlugin.ModManager.AllPatched;
-                    if (button.Text.Text == PggConstants.Region.Name) {
+                    if (button.Text.Text == PggConstants.Server.Name) {
+                        
                         if (!PogusPlugin.ModManager.AllPatched) {
                             // PogusPlugin.ModManager.LoadMods();
                             PogusPlugin.ModManager.PatchMods(); //todo implement temporary patches

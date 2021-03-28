@@ -1,20 +1,12 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using HarmonyLib;
-using Hazel;
 using PolusApi;
 using PolusApi.Resources;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace PolusGGMod {
     public class PggCache : ICache {
@@ -24,17 +16,19 @@ namespace PolusGGMod {
         public Dictionary<uint, CacheFile> CachedFiles => _cacheFiles;
         private uint tempId;
 
-        public async Task<CacheFile> AddToCache(uint id, string location, byte[] hash, ResourceType type, uint parentId = uint.MaxValue) {
+        public CacheFile AddToCache(uint id, string location, byte[] hash, ResourceType type, uint parentId = uint.MaxValue) {
             string path = Path.Join(PggConstants.DownloadFolder, $"{id}");
 
             if (!IsCachedAndValid(id, hash)) {
                 HttpResponseMessage responseMessage =
                     null;
-                if (type == ResourceType.Asset) goto AssetOnly;
+                if (type == ResourceType.Asset) {
+                    goto AssetOnly;
+                }
 
                 responseMessage =
-                    await _client.GetAsync(PggConstants.DownloadServer + location,
-                        HttpCompletionOption.ResponseHeadersRead);
+                    _client.GetAsync(PggConstants.DownloadServer + location,
+                        HttpCompletionOption.ResponseHeadersRead).Result;
                 if (!responseMessage.IsSuccessStatusCode) {
                     //todo log and report failure on startup or during server requested download
                     PogusPlugin.Logger.LogFatal($"Failed with: {responseMessage.StatusCode}");
@@ -54,19 +48,22 @@ namespace PolusGGMod {
                 switch (type) {
                     case ResourceType.Assembly:
                         byte[] data = responseMessage.Content.ReadAsByteArrayAsync().Result;
-                        await File.WriteAllBytesAsync(path, data);
+                        File.WriteAllBytes(path, data);
                         cacheFile.ExtraData = Assembly.ReflectionOnlyLoad(data).GetName().Name;
                         break;
                     case ResourceType.AssetBundle:
                         Stream stream = responseMessage.Content.ReadAsStreamAsync().Result;
                         FileStream fileStream = File.Create(path);
-                        await stream.CopyToAsync(fileStream);
+                        stream.CopyTo(fileStream);
+                        stream.Close();
                         AssetBundle bundle = AssetBundle.LoadFromFile(path);
-                        Bundle bundone = JsonUtility.FromJson<Bundle>(bundle.LoadAsset<TextAsset>("Assets/Cringomatedcarriesthegame.json").text);
+                        "Woozy".Log(2, "asset bundle");
+                        Bundle bundone = JsonUtility.FromJson<Bundle>(bundle.LoadAsset("Assets/AssetList.json".Log(2)).Cast<TextAsset>().Log(2).text.Log(2));
+                        "Loggers".Log(2, "asset bundle");
 
                         uint assetId = bundone.BaseId;
                         foreach (string bundoneAsset in bundone.Assets)
-                            await AddToCache(++assetId, bundoneAsset, hash, ResourceType.Asset, parentId);
+                            AddToCache(++assetId, bundoneAsset, hash, ResourceType.Asset, parentId);
                         cacheFile.ExtraData = bundone.Assets;
                         break;
                     case ResourceType.Asset:
@@ -83,7 +80,7 @@ namespace PolusGGMod {
             }
 
             CacheFile cached = _cacheFiles[id];
-            PogusPlugin.Logger.LogMessage($"Using cached file {cached.LocalLocation} ({cached.Location})");
+            PogusPlugin.Logger.LogInfo($"Using cached file {cached.LocalLocation} ({cached.Location})");
             return cached;
         }
 

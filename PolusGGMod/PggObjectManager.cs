@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
+using System.Runtime.InteropServices;
 using Hazel;
+using InnerNet;
 using PolusApi.Net;
-using UnhollowerRuntimeLib;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -16,13 +15,14 @@ namespace PolusGGMod {
 		private Dictionary<uint, PnoBehaviour> _spawnObjects = new();
 		private uint _netIdCnt = 0x80000000;
 
-		// [DllImport("user32.dll")]
-		// private static extern void MessageBox(IntPtr hwnd, string text, string caption, uint type = 4);
+		[DllImport("user32.dll")]
+		private static extern void MessageBox(IntPtr hwnd, string text, string caption, uint type = 4);
+		//yeah ????? lol it's so fucking easy
 
 		public void Register(uint index, PnoBehaviour netObject) {
 			PogusPlugin.Logger.LogInfo($"Registered {netObject.GetType().Name} at index {index}");
 			_spawnObjects[index] = netObject;
-		}
+		}// you're laughin at me shut the fuck up
 
 		public PolusNetObject LocateNetObject(PnoBehaviour netBehaviour) {
 			return _allObjects.Find(x => x.PnoBehaviour.Pointer == netBehaviour.Pointer);
@@ -31,8 +31,6 @@ namespace PolusGGMod {
 		public PolusNetObject FindNetObject(uint netId) {
 			return _allObjectsFast[netId];
 		}
-
-		public PolusNetObject CurrentPnoSetup { get; private set; }
 
 		public event EventHandler<RpcEventArgs> InnerRpcReceived;
 
@@ -46,12 +44,12 @@ namespace PolusGGMod {
 				return;
 			}
 
-			/*int num4 = */reader.ReadPackedInt32();
+			/*int num4 = */reader.ReadPackedInt32();// todo is that readpackedint32 the owner id and does it matter at all
 			// ClientData clientData = PolusNetClient.FindClientById(num4);
 			// if (num4 > 0 && clientData == null) {
 			// 	AmongUsClient.Instance.DeferMessage(cnt, reader, "Delay spawn for unowned " + netId);
 			// 	return;
-			// }
+			
 
 			PnoBehaviour pnoBehaviour =
 				Object.Instantiate(_spawnObjects[spawnType]);
@@ -139,7 +137,6 @@ namespace PolusGGMod {
 
 		public void EndedGame() {
 			PogusPlugin.Logger.LogInfo("Lmao");
-			_allObjects.ForEach(x => Object.DestroyImmediate(x.PnoBehaviour));
 			_allObjects = new();
 			_allObjectsFast = new();
 			_destroyedObjects = new();

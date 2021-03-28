@@ -44,7 +44,6 @@ namespace PolusGGMod {
                 }
 
                 Logger.LogInfo("reuben scoobenson");
-                // ClassInjector.RegisterTypeInIl2Cpp<PolusNetObject>();
                 PermanentMod.LoadPatches("gg.polus.permanent",
                     Assembly.GetExecutingAssembly().GetTypes()
                         .Where(x => x.GetCustomAttribute(typeof(HarmonyPatch)) != null).ToArray());

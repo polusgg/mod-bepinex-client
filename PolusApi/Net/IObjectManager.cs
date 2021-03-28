@@ -1,5 +1,6 @@
 ﻿using System;
 using Hazel;
+using InnerNet;
 
 namespace PolusApi.Net {
     public interface IObjectManager {
