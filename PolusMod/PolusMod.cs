@@ -9,6 +9,7 @@ using PolusApi.Net;
 using PolusApi.Resources;
 using PolusMod.Pno;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace PolusMod {
     [Mod(Id, "1.0.0", "Sanae6")]
@@ -16,8 +17,7 @@ namespace PolusMod {
         public const string Id = "PolusMod Lmoa";
         public bool loaded;
         public ICache Cache;
-        public static RoleData RoleData = new RoleData();
-        public static bool IsHatEditor = false;
+        public static RoleData RoleData = new();
 
         public override void Load() {
             if (!loaded) {
@@ -134,7 +134,14 @@ namespace PolusMod {
                     //todo finish this and outro
                     break;
                 case PolusRootPackets.EndGame:
+                    RoleData.OutroName = reader.ReadString();
+                    RoleData.OutroDesc = reader.ReadString();
+                    RoleData.OutroColor = new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
+                    RoleData.OutroPlayers = Enumerable.Repeat(15, reader.Length - reader.Position - 2).Select(_ => new WinningPlayerData(GameData.Instance.GetPlayerById(reader.ReadByte()))).ToList();
+                    RoleData.ShowQuit = reader.ReadBoolean();
+                    RoleData.ShowPlayAgain = reader.ReadBoolean();
                     
+                    SceneManager.LoadScene("EndGame");
                     break;
                 default:
                     Logger.LogError($"Invalid packet with id {reader.Tag}");
@@ -181,7 +188,7 @@ namespace PolusMod {
         public string OutroName;
         public string OutroDesc;
         public Color OutroColor;
-        public byte[] OutroPlayers;
+        public List<WinningPlayerData> OutroPlayers;
         public bool ShowPlayAgain;
         public bool ShowQuit;
     }

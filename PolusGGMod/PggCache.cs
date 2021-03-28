@@ -58,7 +58,7 @@ namespace PolusGGMod {
                         stream.Close();
                         AssetBundle bundle = AssetBundle.LoadFromFile(path);
                         "Woozy".Log(2, "asset bundle");
-                        Bundle bundone = JsonUtility.FromJson<Bundle>(bundle.LoadAsset("Assets/AssetList.json".Log(2)).Cast<TextAsset>().Log(2).text.Log(2));
+                        Bundle bundone = JsonUtility.FromJson<Bundle>(bundle.LoadAsset<TextAsset>("Assets/AssetList.json".Log(2)).Cast<TextAsset>().Log(2).text.Log(2));
                         "Loggers".Log(2, "asset bundle");
 
                         uint assetId = bundone.BaseId;

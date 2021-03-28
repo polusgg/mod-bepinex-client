@@ -10,6 +10,7 @@ namespace PolusGGMod {
         public static readonly string CacheLocation = Path.Join(DownloadFolder, "cache.dat");
 
         public static readonly ServerInfo Server = new("Pogger-Lmoa-Master-1", "127.0.0.1", 22023);
-        public static readonly StaticRegionInfo Region = new("Polus.gg Server", StringNames.NoTranslation, Server.Ip, new[] { Server });
+        public static readonly RegionInfo Region = new("Polus.gg Server", Server.Ip, new[] { Server });
+        // public static readonly StaticRegionInfo Region = new("Polus.gg Server", StringNames.NoTranslation, Server.Ip, new[] { Server });
     }
 }
