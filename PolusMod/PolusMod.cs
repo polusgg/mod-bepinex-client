@@ -141,7 +141,8 @@ namespace PolusMod {
                     RoleData.ShowQuit = reader.ReadBoolean();
                     RoleData.ShowPlayAgain = reader.ReadBoolean();
                     
-                    SceneManager.LoadScene("EndGame");
+                    // test go directly to endgame
+                    // SceneManager.LoadScene("EndGame");
                     break;
                 default:
                     Logger.LogError($"Invalid packet with id {reader.Tag}");
