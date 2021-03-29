@@ -59,12 +59,31 @@ namespace PolusGGMod.Patches.Net {
                     return false;
                 }
 
+                // if (reader.Tag == 5 || reader.Tag == 6) {
+                //     
+                //     
+                // }
+
                 return true;
             }
         }
 
-        // [HarmonyPatch(typeof(InnerNetClient), nameof(InnerNetClient.HandleGameDataInner))]
-        public class InnerNetClientHandleGameDataInnerPatch {
+        public static void DeferMessage(int cnt, MessageReader reader, string msg) {
+            
+        }
+
+        public static bool HandleGameData(MessageReader reader, int cnt) {
+            try {
+                MessageReader mr = reader.ReadMessage();
+            } catch {
+                Debug.LogError("Failed to read game data! Deferring to nonpolus HandleMessage");
+            }
+
+            return false;
+        }
+
+        [HarmonyPatch(typeof(InnerNetClient), nameof(InnerNetClient.Method_16))]
+        public class GameDataTempClass {
             [PermanentPatch]
             [HarmonyPrefix]
             public static bool HandleGameDataInner(InnerNetClient __instance, [HarmonyArgument(0)] MessageReader reader,
@@ -83,8 +102,9 @@ namespace PolusGGMod.Patches.Net {
                             return false;
                         }
 
-                        if (!instance.allObjectsFast.ContainsKey(netId) && !instance.DestroyedObjects.Contains(netId) && !IObjectManager.Instance.IsDestroyed(netId)) {
-                            // instance.DeferMessage(cnt, reader, "Stored data for " + netId);
+                        if (!instance.allObjectsFast.ContainsKey(netId) && !instance.DestroyedObjects.Contains(netId) &&
+                            !IObjectManager.Instance.IsDestroyed(netId)) {
+                            instance.DeferMessage(cnt, reader, "Stored data for " + netId);
                             return false;
                         }
 
@@ -101,15 +121,17 @@ namespace PolusGGMod.Patches.Net {
 
                         if (instance.allObjectsFast.ContainsKey(netId)) {
                             byte call = reader.ReadByte();
-                            // PogusPlugin.Logger.LogInfo($"WOO RPC FOR {call}");
+                            PogusPlugin.Logger.LogInfo($"WOO RPC FOR {call}");
                             if (call >= 0x80)
-                                IObjectManager.Instance.HandleInnerRpc(instance.allObjectsFast[netId], new RpcEventArgs(call, reader));
+                                IObjectManager.Instance.HandleInnerRpc(instance.allObjectsFast[netId],
+                                    new RpcEventArgs(call, reader));
                             else instance.allObjectsFast[netId].HandleRpc(call, reader);
                             return false;
                         }
 
-                        if (netId != 4294967295U && !instance.DestroyedObjects.Contains(netId) && !IObjectManager.Instance.IsDestroyed(netId)) {
-                            // instance.DeferMessage(cnt, reader, "Stored RPC for " + netId);
+                        if (netId != 4294967295U && !instance.DestroyedObjects.Contains(netId) &&
+                            !IObjectManager.Instance.IsDestroyed(netId)) {
+                            instance.DeferMessage(cnt, reader, "Stored RPC for " + netId);
                             return false;
                         }
 
@@ -122,7 +144,7 @@ namespace PolusGGMod.Patches.Net {
                             IObjectManager.Instance.HandleSpawn(cnt, num3, reader);
                             return false;
                         }
-                        
+
                         reader.Position = pos;
                         return true;
                     }

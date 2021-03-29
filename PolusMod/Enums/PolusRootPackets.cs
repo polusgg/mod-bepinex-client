@@ -1,4 +1,4 @@
-﻿namespace PolusMod {
+﻿namespace PolusMod.Enums {
     public enum PolusRootPackets : byte {
         FetchResource = 0x80,
         Resize = 0x81,

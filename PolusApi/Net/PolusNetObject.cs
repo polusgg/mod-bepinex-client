@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using Hazel;
-using PolusGGMod;
 
 namespace PolusApi.Net {
     public class PolusNetObject {

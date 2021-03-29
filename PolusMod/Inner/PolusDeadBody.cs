@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Collections;
-using BepInEx.IL2CPP;
 using Hazel;
 using PolusApi.Net;
 using PowerTools;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 
-namespace PolusMod.Pno {
+namespace PolusMod.Inner {
 	public class PolusDeadBody : PnoBehaviour {
 		public SpriteAnim anim;
 		public DeadBody deadBody;
@@ -30,6 +28,7 @@ namespace PolusMod.Pno {
 			pno = IObjectManager.Instance.LocateNetObject(this);
 			pno.OnData = Deserialize;
 			rend = GetComponent<SpriteRenderer>();
+			
 		}
 
 		private void FixedUpdate() {
@@ -37,7 +36,6 @@ namespace PolusMod.Pno {
 		}
 
 		public void Deserialize(MessageReader reader) {
-			reader.Position.Log(10, "920489124i19");
 			// anim.SetNormalizedTime(reader.ReadBoolean() ? 1 : 0);
 			reader.ReadBoolean();
 			rend.flipX = reader.ReadBoolean();

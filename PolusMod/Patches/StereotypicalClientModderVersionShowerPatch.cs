@@ -1,6 +1,6 @@
 ﻿using HarmonyLib;
 
-namespace PolusGGMod.Patches {
+namespace PolusMod.Patches {
     [HarmonyPatch(typeof(VersionShower), nameof(VersionShower.Start))]
     public class StereotypicalClientModderVersionShowerPatch {
         [HarmonyPostfix]

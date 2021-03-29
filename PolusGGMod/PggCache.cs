@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
+using System.Threading;
+using Newtonsoft.Json;
 using PolusApi;
 using PolusApi.Resources;
 using UnityEngine;
@@ -13,8 +15,7 @@ namespace PolusGGMod {
         private Dictionary<uint, CacheFile> _cacheFiles = new();
         private HttpClient _client = new();
 
-        public Dictionary<uint, CacheFile> CachedFiles => _cacheFiles;
-        private uint tempId;
+        public Dictionary<uint, CacheFile> CachedFiles { get; }
 
         public CacheFile AddToCache(uint id, string location, byte[] hash, ResourceType type, uint parentId = uint.MaxValue) {
             string path = Path.Join(PggConstants.DownloadFolder, $"{id}");
@@ -45,20 +46,21 @@ namespace PolusGGMod {
                     ExtraData = null
                 };
 
+                byte[] data;
                 switch (type) {
                     case ResourceType.Assembly:
-                        byte[] data = responseMessage.Content.ReadAsByteArrayAsync().Result;
+                        data = responseMessage.Content.ReadAsByteArrayAsync().Result;
                         File.WriteAllBytes(path, data);
                         cacheFile.ExtraData = Assembly.ReflectionOnlyLoad(data).GetName().Name;
                         break;
                     case ResourceType.AssetBundle:
-                        Stream stream = responseMessage.Content.ReadAsStreamAsync().Result;
-                        FileStream fileStream = File.Create(path);
-                        stream.CopyTo(fileStream);
-                        stream.Close();
-                        AssetBundle bundle = AssetBundle.LoadFromFile(path);
+                        data = responseMessage.Content.ReadAsByteArrayAsync().Result;
+                        File.WriteAllBytes(path, data);
                         "Woozy".Log(2, "asset bundle");
-                        Bundle bundone = JsonUtility.FromJson<Bundle>(bundle.LoadAsset<TextAsset>("Assets/AssetList.json".Log(2)).Cast<TextAsset>().Log(2).text.Log(2));
+                        AssetBundle bundle = AssetBundle.LoadFromMemory(data);
+
+                        Thread.CurrentThread.ManagedThreadId.Log(16, "CURRENT THREAD AT Load");
+                        Bundle bundone = JsonConvert.DeserializeObject<Bundle>(bundle.LoadAsset<TextAsset>("Assets/AssetListing.json".Log(2)).Log(2).Log(2).text.Log(2));
                         "Loggers".Log(2, "asset bundle");
 
                         uint assetId = bundone.BaseId;
@@ -107,6 +109,7 @@ namespace PolusGGMod {
                         }
                         break;
                     case ResourceType.Asset:
+                        (y.ExtraData == null).Log();
                         writer.Write((uint) y.ExtraData);
                         break;
                     default:
@@ -132,17 +135,14 @@ namespace PolusGGMod {
             };
             file.ExtraData = file.Type switch {
                 ResourceType.Assembly => reader.ReadString(),
-                // ResourceType.AssetBundle => ,
+                ResourceType.AssetBundle => Enumerable.Range(0, reader.ReadInt32()).Select(x => reader.ReadString()).ToArray(),
                 ResourceType.Asset => reader.ReadUInt32(),
                 _ => null
             };
-            if (file.Type == ResourceType.AssetBundle) {
-                int leng = reader.ReadInt32().Log(1, "asset bundle len unread");
-                List<string> ab = new List<string>();
-                for (int i = 0; i < leng; i++) {
-                    ab.Add(reader.ReadString());
-                }
-            }
+        }
+
+        public void Invalidate() {
+            _cacheFiles = new Dictionary<uint, CacheFile>();
         }
     }
 }

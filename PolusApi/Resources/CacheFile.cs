@@ -24,13 +24,19 @@ namespace PolusApi.Resources {
 		}
 
 		private static AssetBundle LoadAssetBundle(this CacheFile cacheFile) {
-			return (AssetBundle) (cacheFile.InternalData ?? (cacheFile.InternalData = AssetBundle.LoadFromFile(cacheFile.LocalLocation)));
+			return (AssetBundle) (cacheFile.InternalData ?? (cacheFile.InternalData = AssetBundle.LoadFromFile(cacheFile.Location)));
 		}
 
 		public static T Get<T>(this CacheFile cacheFile) where T : Object {
 			if (cacheFile.Type != ResourceType.Asset) throw new Exception("Invalid Get call to non-asset");
 			// return ICache.Instance.CachedFiles[(uint) cacheFile.ExtraData].LoadAssetBundle().LoadAsset(cacheFile.Location).Cast<T>();
-			return ICache.Instance.CachedFiles[(uint) cacheFile.ExtraData].LoadAssetBundle().LoadAsset<T>(cacheFile.Location).Cast<T>();
+			if (cacheFile.InternalData == null) {
+				T dontDestroy = ICache.Instance.CachedFiles[(uint) cacheFile.ExtraData].LoadAssetBundle().LoadAsset<T>(cacheFile.Location).DontDestroy();
+				cacheFile.InternalData = dontDestroy;
+				return dontDestroy;
+			}
+
+			return (T) cacheFile.InternalData;
 		}
 	}
 }

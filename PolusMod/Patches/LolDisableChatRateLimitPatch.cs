@@ -1,7 +1,6 @@
 ﻿using HarmonyLib;
-using UnityEngine;
 
-namespace PolusMod {
+namespace PolusMod.Patches {
     [HarmonyPatch(typeof(ChatController), nameof(ChatController.SendChat))]
     public class LolDisableChatRateLimitPatch {
         [HarmonyPrefix]

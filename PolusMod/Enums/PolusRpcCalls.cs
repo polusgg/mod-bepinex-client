@@ -1,8 +1,9 @@
-﻿namespace PolusMod {
+﻿namespace PolusMod.Enums {
     public enum PolusRpcCalls : byte {
         // 
         SnapTo = RpcCalls.SnapTo,
         ReportDeadBody = RpcCalls.ReportDeadBody,
+        SetRole = 0x82,
         Revive = 0x84,
         PlaySound = 0x85,
         CloseHud = 0x83,

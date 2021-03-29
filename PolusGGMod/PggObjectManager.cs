@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Hazel;
 using InnerNet;
+using PolusApi;
 using PolusApi.Net;
 using UnityEngine;
 using Object = UnityEngine.Object;

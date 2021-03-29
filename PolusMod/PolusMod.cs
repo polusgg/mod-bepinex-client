@@ -1,19 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using BepInEx.Logging;
 using Hazel;
-using InnerNet;
+using Il2CppSystem;
 using PolusApi;
 using PolusApi.Net;
 using PolusApi.Resources;
-using PolusMod.Pno;
+using PolusMod.Enums;
+using PolusMod.Inner;
+using PolusMod.Patches;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Array = System.Array;
+using Exception = System.Exception;
+using Object = Il2CppSystem.Object;
+using StringComparison = System.StringComparison;
 
 namespace PolusMod {
     [Mod(Id, "1.0.0", "Sanae6")]
-    public class TestPggMod : Mod {
+    public class PolusMod : Mod {
         public const string Id = "PolusMod Lmoa";
         public bool loaded;
         public ICache Cache;
@@ -23,7 +29,7 @@ namespace PolusMod {
             if (!loaded) {
                 loaded = true;
             }
-            
+
             Logger.LogInfo("Loaded " + Id);
         }
 
@@ -32,15 +38,9 @@ namespace PolusMod {
             objectManager.Register(0x83, RegisterPnos.CreateDeadBodyPrefab());
             objectManager.Register(0x81, RegisterPnos.CreateButton());
 
-            //todo fix resolution issues changed lol when (maybe make a monobehaviour for receiving that)
-            // ResolutionManager.ResolutionChanged.delegates = ResolutionManager.ResolutionChanged.delegates.AddItem(DelegateSupport.ConvertDelegate<Delegate>(new Action<float>((aspect) => {
-            //     MessageWriter writer = MessageWriter.Get(SendOption.Reliable);
-            //     writer.StartMessage((byte) PolusRootPackets.Resize);
-            //     writer.Write((float) Screen.width);
-            //     writer.Write((float) Screen.height);
-            //     writer.EndMessage();
-            //     AmongUsClient.Instance.SendOrDisconnect(writer);
-            // }))).ToArray();
+            Thread.CurrentThread.ManagedThreadId.Log(16, "CURRENT THREAD AT STARTUP");
+            
+            ResolutionManagerPlus.Resolution();
             Cache = cache;
         }
 
@@ -48,14 +48,20 @@ namespace PolusMod {
 
         private void OnInnerRpcReceived(object sender, RpcEventArgs e) {
             InnerNetObject netObject = (InnerNetObject) sender;
-
+            PlayerControl playerControl;
             switch ((PolusRpcCalls) e.callId) {
                 case PolusRpcCalls.SetString:
-                    GameStartManager.Instance.GameRoomName.Text = e.reader.ReadString();
+                    switch ((StringLocations) e.reader.ReadByte()) {
+                        case StringLocations.GameCode:
+                            GameStartManager.Instance.GameRoomName.Text = e.reader.ReadString();
+                            break;
+                        case StringLocations.GamePlayerCount:
+                            GameStartManager.Instance.PlayerCounter.Text = e.reader.ReadString();
+                            break;
+                    }
                     break;
                 case PolusRpcCalls.ChatVisibility:
                     var lol = e.reader.ReadByte() > 0;
-                    // Logger.LogInfo($"Got it lmoao {HudManager.Instance.Chat.gameObject.active} {lol}");
                     if (HudManager.Instance.Chat.gameObject.active != lol)
                         HudManager.Instance.Chat.SetVisible(lol);
                     break;
@@ -63,15 +69,52 @@ namespace PolusMod {
                     if (Minigame.Instance != null) Minigame.Instance.Close(true);
                     if (CustomPlayerMenu.Instance != null) CustomPlayerMenu.Instance.Close(true);
                     break;
+                case PolusRpcCalls.SetRole:
+                    playerControl = netObject.Cast<PlayerControl>();
+                    if (e.reader.ReadBoolean()) {
+                        ImportantTextTask important = null;
+                        try {
+                            important = playerControl.myTasks[0].Cast<ImportantTextTask>();
+                        } catch { }
+
+                        if (!important || !important.Text.Contains(
+                            TranslationController.Instance.GetString(StringNames.ImpostorTask, Array.Empty<Object>()))
+                        ) {
+                            ImportantTextTask importantTextTask =
+                                new GameObject("_Player").AddComponent<ImportantTextTask>();
+                            importantTextTask.transform.SetParent(PlayerControl.LocalPlayer.transform, false);
+                            importantTextTask.Text =
+                                TranslationController.Instance.GetString(StringNames.ImpostorTask,
+                                    Array.Empty<Object>()) + "\r\n[FFFFFFFF]" +
+                                TranslationController.Instance.GetString(StringNames.FakeTasks,
+                                    Array.Empty<Object>());
+                            playerControl.myTasks.Insert(0, importantTextTask);
+                        }
+
+                        DestroyableSingleton<HudManager>.Instance.KillButton.gameObject.SetActive(true);
+                        playerControl.SetKillTimer(PlayerControl.GameOptions.KillCooldown);
+                        playerControl.Data.Object.nameText.Color = Palette.ImpostorRed;
+                    } else {
+                        playerControl.SetKillTimer(21f);
+                        HudManager.Instance.KillButton.gameObject.SetActive(false);
+                        if (playerControl.myTasks[0] is ImportantTextTask) {
+                            playerControl.myTasks.Remove(playerControl.myTasks[0]);
+                        }
+                        playerControl.Data.Object.nameText.Color = Palette.White;
+                    }
+
+                    break;
                 case PolusRpcCalls.PlaySound:
                     AudioClip ac = Cache.CachedFiles[e.reader.ReadPackedUInt32()].Get<AudioClip>();
                     bool sfx = e.reader.ReadBoolean();
                     bool loop = e.reader.ReadBoolean();
+                    float pitch = e.reader.ReadSingle();
                     byte volume = e.reader.ReadByte();
                     Vector2 vec2 = PolusNetworkTransform.ReadVector2(e.reader);
 
-                    SoundManager.Instance.PlayDynamicSound(ac.name, ac, loop, new Action<AudioSource, float>(
+                    SoundManager.Instance.PlayDynamicSound(ac.name, ac, loop, new System.Action<AudioSource, float>(
                         (source, _) => {
+                            source.pitch = pitch;
                             source.volume =
                                 (volume - Vector2.Distance(PlayerControl.LocalPlayer.GetTruePosition(), vec2) -
                                  (
@@ -84,6 +127,9 @@ namespace PolusMod {
                                          ? 15f
                                          : 0f)) / 100f;
                         }), sfx);
+                    break;
+                case PolusRpcCalls.Revive:
+                    netObject.Cast<PlayerControl>().Revive();
                     break;
             }
         }
@@ -114,7 +160,8 @@ namespace PolusMod {
                         EndSendResourceResponse(writer);
                         Logger.LogInfo($"Cached {resource}!");
                     } catch (Exception e) {
-                        Logger.LogInfo($"Failed to cache {resource}");
+                        Logger.LogError($"Failed to cache {resource}");
+                        Logger.LogError(e);
                         writer = StartSendResourceResponse(resource, ResponseType.DownloadFailed);
                         if (e is CacheRequestException exception) {
                             writer.WritePacked((uint) exception.Code);
@@ -129,18 +176,23 @@ namespace PolusMod {
                 case PolusRootPackets.Intro:
                     RoleData.IntroName = reader.ReadString();
                     RoleData.IntroDesc = reader.ReadString();
-                    RoleData.IntroColor = new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
-                    RoleData.IntroPlayers = Enumerable.Repeat(15, reader.Length - reader.Position).Select(_ => reader.ReadByte()).ToList();
+                    RoleData.IntroColor = new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(),
+                        reader.ReadByte());
+                    RoleData.IntroPlayers = Enumerable.Repeat(15, reader.Length - reader.Position)
+                        .Select(_ => reader.ReadByte()).ToList();
                     //todo finish this and outro
                     break;
                 case PolusRootPackets.EndGame:
                     RoleData.OutroName = reader.ReadString();
                     RoleData.OutroDesc = reader.ReadString();
-                    RoleData.OutroColor = new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
-                    RoleData.OutroPlayers = Enumerable.Repeat(15, reader.Length - reader.Position - 2).Select(_ => new WinningPlayerData(GameData.Instance.GetPlayerById(reader.ReadByte()))).ToList();
+                    RoleData.OutroColor = new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(),
+                        reader.ReadByte());
+                    RoleData.OutroPlayers = Enumerable.Repeat(15, reader.Length - reader.Position - 2)
+                        .Select(_ => new WinningPlayerData(GameData.Instance.GetPlayerById(reader.ReadByte())))
+                        .ToList();
                     RoleData.ShowQuit = reader.ReadBoolean();
                     RoleData.ShowPlayAgain = reader.ReadBoolean();
-                    
+
                     // test go directly to endgame
                     // SceneManager.LoadScene("EndGame");
                     break;

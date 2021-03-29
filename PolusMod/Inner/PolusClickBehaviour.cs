@@ -1,14 +1,14 @@
 ﻿using System;
-using System.Buffers.Binary;
 using System.Linq;
 using HarmonyLib;
 using Hazel;
 using PolusApi.Net;
+using PolusMod.Enums;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace PolusMod.Pno {
+namespace PolusMod.Inner {
     public class PolusClickBehaviour : PnoBehaviour {
         public PolusClickBehaviour(IntPtr ptr) : base(ptr) { }
 
@@ -35,6 +35,10 @@ namespace PolusMod.Pno {
 
         private void FixedUpdate() {
             if (pno.HasSpawnData()) Deserialize(pno.GetSpawnData());
+            if (counting) {
+                currentTimer -= Time.deltaTime;
+                if (currentTimer < 0) currentTimer = 0;
+            }
         }
 
         private void Deserialize(MessageReader reader) {

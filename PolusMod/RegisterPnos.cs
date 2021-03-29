@@ -1,5 +1,5 @@
 ﻿using PolusApi.Net;
-using PolusMod.Pno;
+using PolusMod.Inner;
 using PowerTools;
 using UnityEngine;
 
@@ -14,7 +14,8 @@ namespace PolusMod {
 			Object.DontDestroyOnLoad(gameObject);
 
 			PolusDeadBody polusDeadBody = gameObject.AddComponent<PolusDeadBody>();
-			polusDeadBody.netTransform = gameObject.AddComponent<PolusNetworkTransform>();
+			gameObject.AddComponent<PolusNetworkTransform>();
+			gameObject.AddComponent<PolusClickBehaviour>();
 			AspectPosition position = gameObject.AddComponent<AspectPosition>();
 			position.enabled = false;
 
@@ -25,9 +26,9 @@ namespace PolusMod {
 			Object.DontDestroyOnLoad(imageObject);
 			GameObject timerObject = new("SussyCooldown");
 
-			PolusButton button = imageObject.AddComponent<PolusButton>();
-			imageObject.AddComponent<PolusGraphic>();
 			imageObject.AddComponent<PolusNetworkTransform>();
+			imageObject.AddComponent<PolusGraphic>();
+			PolusClickBehaviour button = imageObject.AddComponent<PolusClickBehaviour>();
 			imageObject.AddComponent<SpriteRenderer>();
 			imageObject.AddComponent<BoxCollider2D>();
 			imageObject.AddComponent<PassiveButton>();

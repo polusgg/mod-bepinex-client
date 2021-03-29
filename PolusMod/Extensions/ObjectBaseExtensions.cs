@@ -1,8 +1,4 @@
-﻿using System;
-using UnhollowerBaseLib;
-using UnhollowerBaseLib.Runtime;
-
-namespace PolusMod {
+﻿namespace PolusMod.Extensions {
     public static class ObjectBaseExtensions {
         // public static Il2CppObjectBase TryTypedCast(this Il2CppObjectBase obj, Type typed)
         // {

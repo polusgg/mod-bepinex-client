@@ -5,7 +5,7 @@ using PolusApi.Resources;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 
-namespace PolusMod.Pno {
+namespace PolusMod.Inner {
     public class PolusGraphic : PnoBehaviour {
         public SpriteRenderer Renderer;
         public PolusGraphic(IntPtr ptr) : base(ptr) { }
@@ -25,7 +25,9 @@ namespace PolusMod.Pno {
         }
 
         private void Deserialize(MessageReader reader) {
-            Sprite sprite = ICache.Instance.CachedFiles[reader.ReadUInt32()].Get<Sprite>();
+            uint id = reader.ReadPackedUInt32();
+            // if (!ICache.Instance.IsCachedAndValid(id, )) return;
+            Sprite sprite = ICache.Instance.CachedFiles[id].Get<Sprite>();
             Renderer.sprite = sprite;
         }
     }
