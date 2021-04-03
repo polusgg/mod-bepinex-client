@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace PolusMod.Inner {
     public class PolusGraphic : PnoBehaviour {
-        public SpriteRenderer Renderer;
+        public SpriteRenderer renderer;
         public PolusGraphic(IntPtr ptr) : base(ptr) { }
 
         static PolusGraphic() {
@@ -17,7 +17,7 @@ namespace PolusMod.Inner {
         private void Start() {
             pno = IObjectManager.Instance.LocateNetObject(this);
             pno.OnData = Deserialize;
-            Renderer = GetComponent<SpriteRenderer>();
+            renderer = GetComponent<SpriteRenderer>();
         }
 
         private void FixedUpdate() {
@@ -28,7 +28,7 @@ namespace PolusMod.Inner {
             uint id = reader.ReadPackedUInt32();
             // if (!ICache.Instance.IsCachedAndValid(id, )) return;
             Sprite sprite = ICache.Instance.CachedFiles[id].Get<Sprite>();
-            Renderer.sprite = sprite;
+            renderer.sprite = sprite;
         }
     }
 }

@@ -41,10 +41,12 @@ namespace PolusMod.Inner {
             _aspectPosition.Alignment = (AspectPosition.EdgeAlignments) reader.ReadByte();
             
             if (_aspectPosition.Alignment != 0) {
+                transform.parent = HudManager.Instance.gameObject.transform;
                 _aspectPosition.enabled = true;
                 _aspectPosition.DistanceFromEdge = ReadVector2(reader).Log(4, "distance from edge");
                 _aspectPosition.AdjustPosition();
             } else {
+                transform.parent = null;
                 _aspectPosition.enabled = false;
                 transform.position = ReadVector2(reader).Log(4, "position");
             }

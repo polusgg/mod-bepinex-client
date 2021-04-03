@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using HarmonyLib;
 using Il2CppSystem.Collections.Generic;
+using PolusApi;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 using IntPtr = System.IntPtr;
@@ -51,7 +52,7 @@ namespace PolusMod.Patches {
         public class SetYoMamaUp {
             [HarmonyPrefix]
             public static void Prefix() {
-                TempData.winners = new List<WinningPlayerData>();
+                TempData.winners.Clear();
                 foreach (WinningPlayerData winningPlayerData in PolusMod.RoleData.OutroPlayers) {
                     TempData.winners.Add(winningPlayerData);
                 }

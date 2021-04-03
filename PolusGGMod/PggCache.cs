@@ -110,7 +110,7 @@ namespace PolusGGMod {
                         break;
                     case ResourceType.Asset:
                         (y.ExtraData == null).Log();
-                        writer.Write((uint) y.ExtraData);
+                        writer?.Write((uint) y.ExtraData);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();

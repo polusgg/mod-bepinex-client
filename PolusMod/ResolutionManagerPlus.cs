@@ -5,9 +5,9 @@ using PolusMod.Enums;
 using UnityEngine;
 
 namespace PolusMod.Patches {
-    public class ResolutionManagerPlus {
+    public static class ResolutionManagerPlus {
         public static void Resolution() {
-            Action<float> resolutionChanged = f => global::ResolutionManager.ResolutionChanged.Invoke(f);
+            Action<float> resolutionChanged = f => ResolutionManager.ResolutionChanged.Invoke(f);
             Action<float> action2;
             Action<float> value = f => {
                 MessageWriter writer = MessageWriter.Get(SendOption.Reliable);

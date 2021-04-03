@@ -12,31 +12,31 @@ namespace PolusApi.Resources {
 		public string LocalLocation;
 		public object ExtraData;
 		public object InternalData;
-	}
-
-	public static class CacheFileExtensions {
-		public static Stream GetDataStream(this CacheFile cacheFile) {
-			return File.OpenRead(cacheFile.LocalLocation);
+		public Stream GetDataStream() {
+			return File.OpenRead(LocalLocation);
 		}
 
-		public static byte[] GetData(this CacheFile cacheFile) {
-			return cacheFile.Data ?? (cacheFile.Data = File.ReadAllBytes(cacheFile.LocalLocation));
+		public byte[] GetData() {
+			return Data ??= File.ReadAllBytes(LocalLocation);
 		}
 
-		private static AssetBundle LoadAssetBundle(this CacheFile cacheFile) {
-			return (AssetBundle) (cacheFile.InternalData ?? (cacheFile.InternalData = AssetBundle.LoadFromFile(cacheFile.Location)));
+		private AssetBundle LoadAssetBundle() {
+			return (AssetBundle) (InternalData ??= AssetBundle.LoadFromFile(Location));
 		}
 
-		public static T Get<T>(this CacheFile cacheFile) where T : Object {
-			if (cacheFile.Type != ResourceType.Asset) throw new Exception("Invalid Get call to non-asset");
+		public T Get<T>() where T : Object {
+			if (Type != ResourceType.Asset) throw new Exception("Invalid Get call to non-asset");
 			// return ICache.Instance.CachedFiles[(uint) cacheFile.ExtraData].LoadAssetBundle().LoadAsset(cacheFile.Location).Cast<T>();
-			if (cacheFile.InternalData == null) {
-				T dontDestroy = ICache.Instance.CachedFiles[(uint) cacheFile.ExtraData].LoadAssetBundle().LoadAsset<T>(cacheFile.Location).DontDestroy();
-				cacheFile.InternalData = dontDestroy;
+			if (InternalData == null) {
+				T dontDestroy = ICache.Instance.CachedFiles[(uint) ExtraData].LoadAssetBundle().LoadAsset<T>(Location).DontDestroy();
+				InternalData = dontDestroy;
 				return dontDestroy;
 			}
 
-			return (T) cacheFile.InternalData;
+			return (T) InternalData;
 		}
+	}
+
+	public static class CacheFileExtensions {
 	}
 }

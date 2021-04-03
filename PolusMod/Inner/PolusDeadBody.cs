@@ -11,6 +11,7 @@ namespace PolusMod.Inner {
 		public DeadBody deadBody;
 		public SpriteRenderer rend;
 		public PolusNetworkTransform netTransform;
+		public PolusClickBehaviour clickBehaviour;
 		private static readonly int BodyColor = Shader.PropertyToID("_BodyColor");
 		private static readonly int BackColor = Shader.PropertyToID("_BackColor");
 
@@ -28,7 +29,10 @@ namespace PolusMod.Inner {
 			pno = IObjectManager.Instance.LocateNetObject(this);
 			pno.OnData = Deserialize;
 			rend = GetComponent<SpriteRenderer>();
-			
+			anim = GetComponent<SpriteAnim>();
+			deadBody = GetComponent<DeadBody>();
+			netTransform = GetComponent<PolusNetworkTransform>();
+			clickBehaviour = GetComponent<PolusClickBehaviour>();
 		}
 
 		private void FixedUpdate() {
@@ -36,8 +40,8 @@ namespace PolusMod.Inner {
 		}
 
 		public void Deserialize(MessageReader reader) {
-			// anim.SetNormalizedTime(reader.ReadBoolean() ? 1 : 0);
-			reader.ReadBoolean();
+			anim.SetNormalizedTime(reader.ReadBoolean() ? 1 : 0);
+			// reader.ReadBoolean();
 			rend.flipX = reader.ReadBoolean();
 			// transform.localScale = new Vector3(reader.ReadBoolean() ? -0.7f : 0.7f, 0.7f, 0.7f);
 			rend.material.SetColor(BackColor, new Color32(reader.ReadByte(),reader.ReadByte(),reader.ReadByte(),reader.ReadByte()));

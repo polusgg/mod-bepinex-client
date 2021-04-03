@@ -38,8 +38,6 @@ namespace PolusMod {
             objectManager.Register(0x83, RegisterPnos.CreateDeadBodyPrefab());
             objectManager.Register(0x81, RegisterPnos.CreateButton());
 
-            Thread.CurrentThread.ManagedThreadId.Log(16, "CURRENT THREAD AT STARTUP");
-            
             ResolutionManagerPlus.Resolution();
             Cache = cache;
         }
@@ -72,34 +70,30 @@ namespace PolusMod {
                 case PolusRpcCalls.SetRole:
                     playerControl = netObject.Cast<PlayerControl>();
                     if (e.reader.ReadBoolean()) {
-                        ImportantTextTask important = null;
-                        try {
-                            important = playerControl.myTasks[0].Cast<ImportantTextTask>();
-                        } catch { }
-
-                        if (!important || !important.Text.Contains(
-                            TranslationController.Instance.GetString(StringNames.ImpostorTask, Array.Empty<Object>()))
-                        ) {
-                            ImportantTextTask importantTextTask =
-                                new GameObject("_Player").AddComponent<ImportantTextTask>();
-                            importantTextTask.transform.SetParent(PlayerControl.LocalPlayer.transform, false);
-                            importantTextTask.Text =
-                                TranslationController.Instance.GetString(StringNames.ImpostorTask,
-                                    Array.Empty<Object>()) + "\r\n[FFFFFFFF]" +
-                                TranslationController.Instance.GetString(StringNames.FakeTasks,
-                                    Array.Empty<Object>());
-                            playerControl.myTasks.Insert(0, importantTextTask);
+                        if (playerControl == PlayerControl.LocalPlayer) {
+                            "Impsotr set hud".Log();
+                            DestroyableSingleton<HudManager>.Instance.KillButton.gameObject.SetActive(true);
+                            playerControl.SetKillTimer(PlayerControl.GameOptions.KillCooldown);
                         }
 
-                        DestroyableSingleton<HudManager>.Instance.KillButton.gameObject.SetActive(true);
-                        playerControl.SetKillTimer(PlayerControl.GameOptions.KillCooldown);
-                        playerControl.Data.Object.nameText.Color = Palette.ImpostorRed;
+                        if (PlayerControl.LocalPlayer.Data.IsImpostor) {
+                            "Impsotr set text".Log();
+                            playerControl.Data.Object.nameText.Color = Palette.ImpostorRed;
+                            
+                            foreach (GameData.PlayerInfo player in GameData.Instance.AllPlayers) {
+                                player.Object.nameText.Color = player.IsImpostor ? Palette.ImpostorRed : Palette.White;
+                            }
+                        }
                     } else {
-                        playerControl.SetKillTimer(21f);
-                        HudManager.Instance.KillButton.gameObject.SetActive(false);
-                        if (playerControl.myTasks[0] is ImportantTextTask) {
-                            playerControl.myTasks.Remove(playerControl.myTasks[0]);
+                        if (playerControl == PlayerControl.LocalPlayer) {
+                            "cewmate hud".Log();
+                            playerControl.SetKillTimer(21f);
+                                HudManager.Instance.KillButton.gameObject.SetActive(false);
+                                foreach (GameData.PlayerInfo player in GameData.Instance.AllPlayers) {
+                                    player.Object.nameText.Color = Palette.White;
+                                }
                         }
+                        
                         playerControl.Data.Object.nameText.Color = Palette.White;
                     }
 
@@ -238,12 +232,12 @@ namespace PolusMod {
         public string IntroDesc = "you failed to set this on time";
         public Color IntroColor = Color.magenta;
         public List<byte> IntroPlayers = new();
-        public string OutroName;
-        public string OutroDesc;
-        public Color OutroColor;
-        public List<WinningPlayerData> OutroPlayers;
-        public bool ShowPlayAgain;
-        public bool ShowQuit;
+        public string OutroName = "Error!";
+        public string OutroDesc = "Failed to set ending correctly!";
+        public Color OutroColor = Color.green;
+        public List<WinningPlayerData> OutroPlayers = new();
+        public bool ShowPlayAgain = false;
+        public bool ShowQuit = true;
     }
 
     public static class Lol {

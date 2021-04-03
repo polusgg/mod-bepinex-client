@@ -1,4 +1,5 @@
-﻿using PolusApi.Net;
+﻿using PolusApi;
+using PolusApi.Net;
 using PolusMod.Inner;
 using PowerTools;
 using UnityEngine;
@@ -21,16 +22,24 @@ namespace PolusMod {
 
 			return polusDeadBody;
 		}
+
+		public static PnoBehaviour CreateImage() {
+			GameObject imageObject = new("Button") {active = false};
+			imageObject.AddComponent<PolusNetworkTransform>();
+			return imageObject.AddComponent<PolusGraphic>();
+		}
 		public static PnoBehaviour CreateButton() {
-			GameObject imageObject = new("UnityExplorerAndies") {active = false};
-			Object.DontDestroyOnLoad(imageObject);
-			GameObject timerObject = new("SussyCooldown");
+			GameObject imageObject = new("Button") {active = false};
+			imageObject.DontDestroy();
+			GameObject timerObject = new("Cooldown");
+			timerObject.transform.parent = imageObject.transform;
 
 			imageObject.AddComponent<PolusNetworkTransform>();
 			imageObject.AddComponent<PolusGraphic>();
 			PolusClickBehaviour button = imageObject.AddComponent<PolusClickBehaviour>();
 			imageObject.AddComponent<SpriteRenderer>();
-			imageObject.AddComponent<BoxCollider2D>();
+			BoxCollider2D collider = imageObject.AddComponent<BoxCollider2D>();
+			collider.size = new Vector2(1.15f, 1.15f);
 			imageObject.AddComponent<PassiveButton>();
 
 			timerObject.AddComponent<TextRenderer>();

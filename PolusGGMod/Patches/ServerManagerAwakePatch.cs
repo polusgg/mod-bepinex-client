@@ -17,6 +17,9 @@ namespace PolusGGMod.Patches {
             _hasStarted = true;
 
             PogusPlugin.ModManager.StartMods();
+            Il2CppStructArray<uint> stats = new(8);
+            Array.Copy(StatsManager.Instance.WinReasons, stats, 7);
+            StatsManager.Instance.WinReasons = stats;
             ServerManager.DefaultRegions = ServerManager.DefaultRegions.Append(PggConstants.Region).ToArray();
             __instance.CurrentRegion = PggConstants.Region;
             if (__instance.AvailableServers.All(s => s.Players == 0)) {
