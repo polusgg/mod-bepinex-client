@@ -2,13 +2,14 @@
 using System.Linq;
 using HarmonyLib;
 using Hazel;
-using PolusApi.Net;
-using PolusMod.Enums;
+using PolusGG.Enums;
+using PolusGG.Extensions;
+using PolusGG.Net;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace PolusMod.Inner {
+namespace PolusGG.Inner {
     public class PolusClickBehaviour : PnoBehaviour {
         public PolusClickBehaviour(IntPtr ptr) : base(ptr) { }
 

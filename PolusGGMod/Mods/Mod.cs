@@ -1,10 +1,10 @@
 ﻿using System;
 using BepInEx.Logging;
 using Hazel;
-using PolusApi.Net;
-using PolusApi.Resources;
+using PolusGG.Net;
+using PolusGG.Resources;
 
-namespace PolusApi {
+namespace PolusGG.Mods {
     public abstract class Mod : MarshalByRefObject {
         /// <summary>
         /// Mid-BepInEx 

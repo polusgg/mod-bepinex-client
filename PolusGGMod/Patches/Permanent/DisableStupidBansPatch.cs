@@ -1,8 +1,6 @@
-﻿using System;
-using System.Reflection;
-using HarmonyLib;
+﻿using HarmonyLib;
 
-namespace PolusGGMod.Patches {
+namespace PolusGG.Patches.Permanent {
     [HarmonyPatch(typeof(StatsManager), nameof(StatsManager.AmBanned), MethodType.Getter)]
     public class DisableStupidBansPatch {
         [PermanentPatch]

@@ -1,8 +1,8 @@
 ﻿using System;
 using HarmonyLib;
-using PolusGGMod.Framework.Common.Utilities;
+using PolusGG.Patching.Common.Utilities;
 
-namespace PolusGGMod {
+namespace PolusGG {
     public class PermanentPggMod : PggMod {
         public override void LoadPatches(string harmonyName, Type[] types) {
             PogusPlugin.Logger.LogInfo(types.Length);

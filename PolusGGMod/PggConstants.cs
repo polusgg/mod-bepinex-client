@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace PolusGGMod {
+namespace PolusGG {
     public static class PggConstants {
         public static readonly string DownloadServer = "http://localhost:6969/";
         //todo hate rose for not supporting more than one mod
@@ -11,7 +11,7 @@ namespace PolusGGMod {
 
         public static readonly ServerInfo Server = new("Pogger-Lmoa-Master-1", "127.0.0.1", 22023);
         // public static readonly ServerInfo Server = new("Pogger-Lmoa-Master-1", "72.69.195.100", 22023);
-        public static readonly RegionInfo Region = new("Polus.gg Server", Server.Ip, new[] { Server });
-        // public static readonly StaticRegionInfo Region = new("Polus.gg Server", StringNames.NoTranslation, Server.Ip, new[] { Server });
+        // public static readonly RegionInfo Region = new("Polus.gg Server", Server.Ip, new[] { Server });
+        public static readonly StaticRegionInfo Region = new("Polus.gg Server", StringNames.NoTranslation, Server.Ip, new[] { Server });
     }
 }

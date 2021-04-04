@@ -1,6 +1,6 @@
 ﻿using Hazel;
 
-namespace PolusMod.Extensions {
+namespace PolusGG.Extensions {
     public static class ClientExtensions {
         public static void SendRpcImmediately(this AmongUsClient client, uint netId, byte callId, SendOption option = SendOption.Reliable) {
             MessageWriter messageWriter = MessageWriter.Get(option);

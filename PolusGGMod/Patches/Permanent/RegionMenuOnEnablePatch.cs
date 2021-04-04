@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Linq;
 using HarmonyLib;
 
-namespace PolusGGMod.Patches {
+namespace PolusGG.Patches.Permanent {
     [HarmonyPatch(typeof(RegionMenu), nameof(RegionMenu.OnEnable))]
     public static class RegionMenuOnEnablePatch {
         [HarmonyPostfix]

@@ -1,16 +1,16 @@
-﻿using HarmonyLib;
+﻿using System;
+using HarmonyLib;
 using Hazel;
-using Il2CppSystem;
 using Il2CppSystem.Collections.Generic;
 using InnerNet;
-using PolusApi;
-using PolusApi.Net;
+using PolusGG.Extensions;
+using PolusGG.Mods;
+using PolusGG.Net;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
-namespace PolusGGMod.Patches.Net {
+namespace PolusGG.Patches.Permanent {
     public class PolusNetClient {
-        public static ClientData FindClientById(int id) {
+        public static ClientData? FindClientById(int id) {
             AmongUsClient instance = AmongUsClient.Instance;
             if (id < 0) {
                 return null;
@@ -19,7 +19,7 @@ namespace PolusGGMod.Patches.Net {
             List<ClientData> obj = instance.allClients;
             lock (obj) {
                 for (int i = 0; i < instance.allClients.Count; i++) {
-                    ClientData clientData = instance.allClients[i];
+                    ClientData clientData = instance.allClients[(Index) 0].Cast<ClientData>();
                     if (clientData.Id == id) {
                         return clientData;
                     }
@@ -82,7 +82,7 @@ namespace PolusGGMod.Patches.Net {
             return false;
         }
 
-        [HarmonyPatch(typeof(InnerNetClient), nameof(InnerNetClient.Method_16))]
+        [HarmonyPatch(typeof(InnerNetClient), nameof(InnerNetClient.HandleGameDataInner))]
         public class GameDataTempClass {
             [PermanentPatch]
             [HarmonyPrefix]
@@ -104,7 +104,7 @@ namespace PolusGGMod.Patches.Net {
 
                         if (!instance.allObjectsFast.ContainsKey(netId) && !instance.DestroyedObjects.Contains(netId) &&
                             !IObjectManager.Instance.IsDestroyed(netId)) {
-                            instance.DeferMessage(cnt, reader, "Stored data for " + netId);
+                            DeferMessage(cnt, reader, "Stored data for " + netId);
                             return false;
                         }
 
@@ -131,7 +131,7 @@ namespace PolusGGMod.Patches.Net {
 
                         if (netId != 4294967295U && !instance.DestroyedObjects.Contains(netId) &&
                             !IObjectManager.Instance.IsDestroyed(netId)) {
-                            instance.DeferMessage(cnt, reader, "Stored RPC for " + netId);
+                            DeferMessage(cnt, reader, "Stored RPC for " + netId);
                             return false;
                         }
 

@@ -2,7 +2,7 @@
 using HarmonyLib;
 using UnhollowerBaseLib;
 
-namespace PolusApi {
+namespace PolusGG.Extensions {
     public static class LogExtensions {
         public static T Log<T>(this T value, int times = 1, string comment = "") {
             #if DEBUG

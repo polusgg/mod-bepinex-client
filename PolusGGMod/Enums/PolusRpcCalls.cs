@@ -1,4 +1,4 @@
-﻿namespace PolusMod.Enums {
+﻿namespace PolusGG.Enums {
     public enum PolusRpcCalls : byte {
         // 
         SnapTo = RpcCalls.SnapTo,

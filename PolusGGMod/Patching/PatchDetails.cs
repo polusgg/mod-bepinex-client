@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace PolusGGMod.Patching {
+namespace PolusGG.Patching {
     public class PatchDetails
     {
         public MethodBase? OriginalMethodBase;

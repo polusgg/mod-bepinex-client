@@ -1,4 +1,4 @@
-﻿namespace PolusMod.Extensions {
+﻿namespace PolusGG.Extensions {
     public static class ObjectBaseExtensions {
         // public static Il2CppObjectBase TryTypedCast(this Il2CppObjectBase obj, Type typed)
         // {

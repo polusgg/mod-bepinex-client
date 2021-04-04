@@ -1,18 +1,17 @@
 ﻿using System.Linq;
 using HarmonyLib;
 using Il2CppSystem.Collections.Generic;
-using PolusApi;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 using IntPtr = System.IntPtr;
 using Object = UnityEngine.Object;
 
-namespace PolusMod.Patches {
+namespace PolusGG.Patches {
     // I really learned how to patch IEnumerators from town of us today
     // this is the saddest day of my life
     // can't wait til i need to use 
     
-    [HarmonyPatch(typeof(IntroCutscene), nameof(IntroCutscene.BeginCrewmate))]
+    [HarmonyPatch(typeof(IntroCutscene), nameof(IntroCutscene.DLGJDGFGAEA))]
     public class IntroCrewmatePatch {
         [HarmonyPrefix]
         public static void Prefix([HarmonyArgument(0)] ref List<PlayerControl> team) {
@@ -30,7 +29,7 @@ namespace PolusMod.Patches {
         }
     }
     
-    [HarmonyPatch(typeof(IntroCutscene), nameof(IntroCutscene.BeginImpostor))]
+    [HarmonyPatch(typeof(IntroCutscene), nameof(IntroCutscene.HMLCOCAJBGM))]
     public class IntroImpostorPatch {
         [HarmonyPrefix]
         public static void Prefix([HarmonyArgument(0)] ref List<PlayerControl> team) {
@@ -71,11 +70,11 @@ namespace PolusMod.Patches {
             }
         }
 
-        [HarmonyPatch(typeof(EndGameManager), nameof(EndGameManager.CoBegin__d.MoveNext))]
+        [HarmonyPatch(typeof(EndGameManager._CoBegin_d__18), nameof(EndGameManager._CoBegin_d__18.MoveNext))]
         public class SetYoMamaUpTheSequel {
             [HarmonyPrefix]
-            public static void YoMama(EndGameManager.CoBegin__d __instance) {
-                float num = Mathf.Min(1f, __instance.timer / 3f);
+            public static void YoMama(EndGameManager._CoBegin_d__18 __instance) {
+                float num = Mathf.Min(1f, __instance._timer_5__5 / 3f);
                 _descColor.a = Mathf.Lerp(0f, PolusMod.RoleData.OutroColor.a, (num - 0.3f) * 3f);
                 _winDescText.Color = _descColor;
             }

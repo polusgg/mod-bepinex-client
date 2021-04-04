@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Hazel;
 using InnerNet;
-using PolusApi;
-using PolusApi.Net;
+using PolusGG.Extensions;
+using PolusGG.Net;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace PolusGGMod {
+namespace PolusGG {
 	public class PggObjectManager : IObjectManager {
 		private Dictionary<uint, PolusNetObject> _allObjectsFast = new();
 		private List<PolusNetObject> _allObjects = new();

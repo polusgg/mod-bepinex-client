@@ -1,7 +1,7 @@
 ﻿using HarmonyLib;
-using PolusApi.Net;
+using PolusGG.Net;
 
-namespace PolusGGMod.Patches {
+namespace PolusGG.Patches.Permanent {
     [HarmonyPatch(typeof(VersionShower), nameof(VersionShower.Start))]
     public class VersionShowerPatch {
         [PermanentPatch]

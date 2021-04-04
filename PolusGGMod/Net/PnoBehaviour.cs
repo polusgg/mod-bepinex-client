@@ -2,7 +2,7 @@
 using UnhollowerRuntimeLib;
 using UnityEngine;
 
-namespace PolusApi.Net {
+namespace PolusGG.Net {
     public class PnoBehaviour : MonoBehaviour {
         public PolusNetObject pno;
         public PnoBehaviour(IntPtr ptr) : base(ptr) {}

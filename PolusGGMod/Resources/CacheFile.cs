@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO;
-using UnityEngine;
+using PolusGG.Extensions;
 using Object = UnityEngine.Object;
 
-namespace PolusApi.Resources {
+namespace PolusGG.Resources {
 	public struct CacheFile {
 		public ResourceType Type;
 		public byte[] Hash;

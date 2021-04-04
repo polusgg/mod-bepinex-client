@@ -1,11 +1,11 @@
 ﻿using System;
 using Hazel;
-using PolusApi.Net;
+using PolusGG.Net;
 using PowerTools;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 
-namespace PolusMod.Inner {
+namespace PolusGG.Inner {
 	public class PolusDeadBody : PnoBehaviour {
 		public SpriteAnim anim;
 		public DeadBody deadBody;

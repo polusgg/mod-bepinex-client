@@ -1,14 +1,11 @@
-﻿using PolusGGMod.Patches;
-using PolusGGMod.Patching;
-using UnityEngine;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using HarmonyLib;
+using PolusGG.Patches.Permanent;
 
-namespace PolusGGMod.Framework {
-    using System;
-    using System.Collections.Generic;
-    using HarmonyLib;
-    using System.Reflection;
-    using System.Linq;
-
+namespace PolusGG.Patching {
     namespace Common.Utilities {
         public static class PatchManagerUtils {
             private static List<Type> _harmonyBulkPatchTypes = new() {

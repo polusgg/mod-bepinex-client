@@ -6,10 +6,10 @@ using BepInEx;
 using BepInEx.IL2CPP;
 using BepInEx.Logging;
 using HarmonyLib;
-using PolusApi;
-using PolusApi.Net;
+using PolusGG.Extensions;
+using PolusGG.Net;
 
-namespace PolusGGMod {
+namespace PolusGG {
     [BepInPlugin(Id, "Polus.gg", "0.69")]
     public class PogusPlugin : BasePlugin {
         public const string Id = "gg.polus.bepismod";

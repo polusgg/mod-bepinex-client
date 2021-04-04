@@ -1,13 +1,12 @@
 ﻿using System;
 using Hazel;
-using PolusApi;
-using PolusApi.Net;
-using PolusMod.Enums;
-using PolusMod.Extensions;
+using PolusGG.Enums;
+using PolusGG.Extensions;
+using PolusGG.Net;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 
-namespace PolusMod.Inner {
+namespace PolusGG.Inner {
     public class PolusNetworkTransform : PnoBehaviour {
         private static readonly FloatRange _xRange = new(40f, -40f);
         private static readonly FloatRange _yRange = new(40f, -40f);
@@ -38,7 +37,7 @@ namespace PolusMod.Inner {
 
         public void Deserialize(MessageReader reader) {
             reader.Buffer.Log();
-            _aspectPosition.Alignment = (AspectPosition.Nested_0) reader.ReadByte();
+            _aspectPosition.Alignment = (AspectPosition.EdgeAlignments) reader.ReadByte();
             
             if (_aspectPosition.Alignment != 0) {
                 transform.parent = HudManager.Instance.gameObject.transform;

@@ -2,7 +2,7 @@
 using UnhollowerBaseLib;
 using UnityEngine;
 
-namespace PolusApi {
+namespace PolusGG.Extensions {
     public static class ImageExtension
     {
         private delegate bool d_LoadImage(IntPtr tex, IntPtr data, bool markNonReadable);

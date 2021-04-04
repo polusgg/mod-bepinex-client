@@ -1,7 +1,7 @@
 ﻿using HarmonyLib;
 using UnityEngine;
 
-namespace PolusMod.Patches {
+namespace PolusGG.Patches {
     [HarmonyPatch(typeof(ShadowCamera), nameof(ShadowCamera.OnEnable))]
     public static class ShadowCameraOnEnablePatch {
         [HarmonyPostfix]

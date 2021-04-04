@@ -1,10 +1,9 @@
-﻿using PolusApi;
-using PolusApi.Net;
-using PolusMod.Inner;
-using PowerTools;
+﻿using PolusGG.Extensions;
+using PolusGG.Inner;
+using PolusGG.Net;
 using UnityEngine;
 
-namespace PolusMod {
+namespace PolusGG {
 	public class RegisterPnos {
 		public static PnoBehaviour CreateDeadBodyPrefab() {
 			PlayerControl pc = AmongUsClient.Instance.PlayerPrefab;

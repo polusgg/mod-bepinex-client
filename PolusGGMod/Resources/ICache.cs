@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using PolusApi.Resources;
 
-namespace PolusApi.Resources {
+namespace PolusGG.Resources {
 	public interface ICache {
 		public static ICache Instance { get; }
 		public Dictionary<uint, CacheFile> CachedFiles { get; }

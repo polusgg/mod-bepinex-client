@@ -3,10 +3,11 @@
 
 using System;
 using System.Linq;
+using PolusGG.Extensions;
 using UnhollowerBaseLib;
 using UnhollowerRuntimeLib;
 
-namespace PolusApi {
+namespace PolusGG {
     public class AssetBundle : IDisposable {
         private delegate IntPtr d_LoadFromFile(IntPtr path, uint crc, ulong offset);
     

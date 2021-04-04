@@ -4,10 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using BepInEx.Logging;
-using PolusApi;
-using PolusApi.Net;
+using PolusGG.Mods;
+using PolusGG.Net;
 
-namespace PolusGGMod {
+namespace PolusGG {
     public class PggModManager {
         public (PggMod, Mod)[] TemporaryMods;
         public bool AllPatched;

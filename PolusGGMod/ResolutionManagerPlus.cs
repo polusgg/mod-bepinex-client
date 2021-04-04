@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Threading;
 using Hazel;
-using PolusMod.Enums;
+using PolusGG.Enums;
 using UnityEngine;
 
-namespace PolusMod.Patches {
+namespace PolusGG {
     public static class ResolutionManagerPlus {
         public static void Resolution() {
             Action<float> resolutionChanged = f => ResolutionManager.ResolutionChanged.Invoke(f);

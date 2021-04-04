@@ -1,4 +1,4 @@
-﻿namespace PolusMod.Enums {
+﻿namespace PolusGG.Enums {
     public enum ResponseType : byte {
         DownloadStarted = 0x00,
         DownloadEnded = 0x01,

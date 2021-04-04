@@ -1,23 +1,19 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using BepInEx.Logging;
 using Hazel;
-using Il2CppSystem;
-using PolusApi;
-using PolusApi.Net;
-using PolusApi.Resources;
-using PolusMod.Enums;
-using PolusMod.Inner;
-using PolusMod.Patches;
+using InnerNet;
+using PolusGG.Enums;
+using PolusGG.Extensions;
+using PolusGG.Inner;
+using PolusGG.Mods;
+using PolusGG.Net;
+using PolusGG.Resources;
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using Array = System.Array;
 using Exception = System.Exception;
-using Object = Il2CppSystem.Object;
 using StringComparison = System.StringComparison;
 
-namespace PolusMod {
+namespace PolusGG {
     [Mod(Id, "1.0.0", "Sanae6")]
     public class PolusMod : Mod {
         public const string Id = "PolusMod Lmoa";
@@ -80,8 +76,8 @@ namespace PolusMod {
                             "Impsotr set text".Log();
                             playerControl.Data.Object.nameText.Color = Palette.ImpostorRed;
                             
-                            foreach (GameData.Nested_1 player in GameData.Instance.AllPlayers) {
-                                player.LAOEJKHLKAI.nameText.Color = player.IsImpostor ? Palette.ImpostorRed : Palette.White;
+                            foreach (GameData.PlayerInfo player in GameData.Instance.AllPlayers) {
+                                player.Object.nameText.Color = player.IsImpostor ? Palette.ImpostorRed : Palette.White;
                             }
                         }
                     } else {

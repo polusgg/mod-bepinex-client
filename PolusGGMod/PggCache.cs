@@ -6,11 +6,11 @@ using System.Net.Http;
 using System.Reflection;
 using System.Threading;
 using Newtonsoft.Json;
-using PolusApi;
-using PolusApi.Resources;
+using PolusGG.Extensions;
+using PolusGG.Resources;
 using UnityEngine;
 
-namespace PolusGGMod {
+namespace PolusGG {
     public class PggCache : ICache {
         private Dictionary<uint, CacheFile> _cacheFiles = new();
         private HttpClient _client = new();
@@ -57,10 +57,10 @@ namespace PolusGGMod {
                         data = responseMessage.Content.ReadAsByteArrayAsync().Result;
                         File.WriteAllBytes(path, data);
                         "Woozy".Log(2, "asset bundle");
-                        AssetBundle bundle = AssetBundle.LoadFromMemory(data);
+                        UnityEngine.AssetBundle bundle = UnityEngine.AssetBundle.LoadFromMemory(data);
 
                         Thread.CurrentThread.ManagedThreadId.Log(16, "CURRENT THREAD AT Load");
-                        Bundle bundone = JsonConvert.DeserializeObject<Bundle>(bundle.LoadAsset<TextAsset>("Assets/AssetListing.json".Log(2)).Log(2).Log(2).text.Log(2));
+                        Bundle bundone = JsonConvert.DeserializeObject<Bundle>(bundle.LoadAsset("Assets/AssetListing.json".Log(2)).TryCast<TextAsset>().Log(2).Log(2).text.Log(2));
                         "Loggers".Log(2, "asset bundle");
 
                         uint assetId = bundone.BaseId;

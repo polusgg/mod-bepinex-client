@@ -1,8 +1,7 @@
-﻿using System;
-using System.IO;
-using Hazel;
+﻿using Hazel;
+using PolusGG.Extensions;
 
-namespace PolusApi.Net {
+namespace PolusGG.Net {
     public class PolusNetObject {
         public uint NetId;
         public PnoBehaviour PnoBehaviour;

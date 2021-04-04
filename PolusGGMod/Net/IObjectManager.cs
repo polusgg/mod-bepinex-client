@@ -2,7 +2,7 @@
 using Hazel;
 using InnerNet;
 
-namespace PolusApi.Net {
+namespace PolusGG.Net {
     public interface IObjectManager {
         public static IObjectManager Instance;
 

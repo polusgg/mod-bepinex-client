@@ -1,11 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
 using HarmonyLib;
-using PolusGGMod.Framework;
-using PolusGGMod.Framework.Common.Utilities;
-using PolusGGMod.Patching;
+using PolusGG.Patching;
+using PolusGG.Patching.Common.Utilities;
 
-namespace PolusGGMod {
+namespace PolusGG {
     public class PggMod {
         protected Harmony _harmony;
         protected List<PatchDetails> ToggledPatches = new();

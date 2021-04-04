@@ -1,4 +1,4 @@
-﻿namespace PolusMod.Inner {
+﻿namespace PolusGG.Inner {
     // public class PolusButton : PnoBehaviour {
     //     private TextRenderer textRenderer;
     //     private SpriteRenderer spriteRenderer;

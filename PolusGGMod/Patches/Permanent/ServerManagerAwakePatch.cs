@@ -1,12 +1,10 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
 using HarmonyLib;
-using Hazel;
 using UnhollowerBaseLib;
 using UnityEngine;
 
-namespace PolusGGMod.Patches {
+namespace PolusGG.Patches.Permanent {
     [HarmonyPatch(typeof(ServerManager), nameof(ServerManager.Awake))]
     public class ServerManagerAwakePatch {
         private static bool _hasStarted;
@@ -20,18 +18,13 @@ namespace PolusGGMod.Patches {
             Il2CppStructArray<uint> stats = new(8);
             Array.Copy(StatsManager.Instance.WinReasons, stats, 7);
             StatsManager.Instance.WinReasons = stats;
-            ServerManager.DefaultRegions = ServerManager.DefaultRegions.Append(PggConstants.Region).ToArray();
-            __instance.CurrentRegion = PggConstants.Region;
-            if (__instance.AvailableServers.All(s => s.Players == 0)) {
-                __instance.CurrentRegion.Servers =
-                    new Il2CppReferenceArray<ServerInfo>(__instance.AvailableServers.OrderBy(a => Guid.NewGuid())
-                        .ToArray());
-            }
+            ServerManager.DefaultRegions = ServerManager.DefaultRegions.Append(PggConstants.Region.Duplicate()).ToArray();
+            __instance.CurrentRegion = PggConstants.Region.Duplicate();
             __instance.CurrentServer = (from s in __instance.AvailableServers
                 orderby s.ConnectionFailures, s.Players
                 select s).First();
             Debug.Log(string.Format("Selected server: {0}", __instance.CurrentServer));
-            __instance.state = (ServerManager.Nested_0) 2;
+            __instance.state = (ServerManager.UpdateState) 2;
             __instance.SaveServers();
             // IRegionInfo currentRegion = PggConstants.Region.Duplicate();
             // ServerManager.DefaultRegions = ServerManager.DefaultRegions.Append(currentRegion).ToArray();

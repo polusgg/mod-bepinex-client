@@ -1,7 +1,7 @@
 ﻿using System;
 using Hazel;
 
-namespace PolusApi.Net {
+namespace PolusGG.Net {
 	public class RpcEventArgs : EventArgs{
 		// (InnerNetObject netObject, byte call, MessageReader reader)
 		public RpcEventArgs(byte callId, MessageReader reader) {

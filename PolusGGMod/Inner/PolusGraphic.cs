@@ -1,11 +1,11 @@
 ﻿using System;
 using Hazel;
-using PolusApi.Net;
-using PolusApi.Resources;
+using PolusGG.Net;
+using PolusGG.Resources;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 
-namespace PolusMod.Inner {
+namespace PolusGG.Inner {
     public class PolusGraphic : PnoBehaviour {
         public SpriteRenderer renderer;
         public PolusGraphic(IntPtr ptr) : base(ptr) { }
