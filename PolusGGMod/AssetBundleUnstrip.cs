@@ -7,7 +7,6 @@ using UnhollowerBaseLib;
 using UnhollowerRuntimeLib;
 
 namespace PolusApi {
-    // ASSET BUNDLES ARE UNSTRIPPED IN 3.5 FINALLY
     public class AssetBundle : IDisposable {
         private delegate IntPtr d_LoadFromFile(IntPtr path, uint crc, ulong offset);
     

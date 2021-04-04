@@ -80,8 +80,8 @@ namespace PolusMod {
                             "Impsotr set text".Log();
                             playerControl.Data.Object.nameText.Color = Palette.ImpostorRed;
                             
-                            foreach (GameData.PlayerInfo player in GameData.Instance.AllPlayers) {
-                                player.Object.nameText.Color = player.IsImpostor ? Palette.ImpostorRed : Palette.White;
+                            foreach (GameData.Nested_1 player in GameData.Instance.AllPlayers) {
+                                player.LAOEJKHLKAI.nameText.Color = player.IsImpostor ? Palette.ImpostorRed : Palette.White;
                             }
                         }
                     } else {

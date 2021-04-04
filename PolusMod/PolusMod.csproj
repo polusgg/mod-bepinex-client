@@ -26,6 +26,10 @@
         </ProjectReference>
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Patches" />
+    </ItemGroup>
+
     <Target Name="Copy" AfterTargets="Reobfuscate">
         <Copy SourceFiles="$(OutputPath)reobfuscated/$(AssemblyName)-$(GameVersion).dll" DestinationFolder="$(ModListing)/" Condition="'$(Configuration)' == 'Debug'" />
     </Target>

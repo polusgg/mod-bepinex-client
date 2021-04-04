@@ -3,7 +3,7 @@ using UnhollowerBaseLib;
 using UnityEngine;
 
 namespace PolusApi {
-    public static class ImageConversion
+    public static class ImageExtension
     {
         private delegate bool d_LoadImage(IntPtr tex, IntPtr data, bool markNonReadable);
 

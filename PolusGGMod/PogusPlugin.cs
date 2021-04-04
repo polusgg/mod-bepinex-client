@@ -1,26 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Reflection;
-using System.Runtime.Loader;
-using System.Threading.Tasks;
 using BepInEx;
 using BepInEx.IL2CPP;
 using BepInEx.Logging;
 using HarmonyLib;
-using Hazel;
-using Mono.Cecil;
 using PolusApi;
 using PolusApi.Net;
-using PolusApi.Resources;
-using PolusGGMod.Patches;
-using UnhollowerRuntimeLib;
-using UnityEngine;
 
 namespace PolusGGMod {
-    [BepInPlugin(Id)]
+    [BepInPlugin(Id, "Polus.gg", "0.69")]
     public class PogusPlugin : BasePlugin {
         public const string Id = "gg.polus.bepismod";
 

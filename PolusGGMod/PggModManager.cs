@@ -2,16 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Runtime.Loader;
-using System.Text;
-using System.Threading.Tasks;
 using BepInEx.Logging;
 using PolusApi;
 using PolusApi.Net;
-using PolusApi.Resources;
 
 namespace PolusGGMod {
     public class PggModManager {
@@ -27,63 +21,20 @@ namespace PolusGGMod {
 
         public void LoadMods() {
             if (PostLoad) return;
-            HttpClient http = new();
-
-            HttpResponseMessage dl = http.GetAsync(PggConstants.DownloadServer + PggConstants.ModListing).Result;
-            string modListContent = dl.Content.ReadAsStringAsync().Result;
-            // System.Console.WriteLine(modListContent);
-            (string, uint, byte[])[] modList = modListContent.Split("\n").Where(str => str != String.Empty).Select(x => {
-                var strings = x.Split(";");
-                Logger.LogInfo($"{strings[0]} {strings[1]} {strings[2]}");
-                return (strings[0], uint.Parse(strings[1]), Enumerable.Range(0, strings[2].Length)
-                    .Where(z => z % 2 == 0)
-                    .Select(y => Convert.ToByte(strings[2].Substring(y, 2), 16))
-                    .ToArray());
-            }).ToArray();
-            // Logger.LogInfo($"found {modList.Length}");
             
             if (!Directory.Exists(PggConstants.DownloadFolder)) {
                 Directory.CreateDirectory(PggConstants.DownloadFolder);
                 // Directory.Delete(PggConstants.DownloadFolder, true);
             }
-            List<CacheFile> assemblies = new();
-            foreach ((string mod, uint id, byte[] hash) in modList) {
-                Logger.LogInfo($"{mod} {id} {hash}");
-                try {
-                    assemblies.Add(PogusPlugin.Cache.AddToCache(id, PggConstants.ModListingFolder + mod, hash,
-                        ResourceType.Assembly));
-                } catch (Exception e) {
-                    Logger.LogError($"Failed to download {mod}");
-                    Logger.LogError(e);
-                }
-            }
-            // CacheFile[] assemblies = tasks.Where(x => !x.IsFaulted).Select(x => x.Result).ToArray();
 
-            //appdomains are bad post-framework
-            // i also hate this code
-            // _domain = AppDomain.CreateDomain("PggDomain");
-            // Type type = typeof(Proxy);
-            // var value = (Proxy)publicDomain.(
-            //     type.Assembly.FullName,
-            //     type.FullName);
-            // _domain.AssemblyResolve += MyResolver;
-            // _domain.Load(typeof(ModLoader).Assembly.Location);
-            // _domain. = PggConstants.DownloadFolder;
-            
-            // Execute(out _alcReference, out _alc);
-
+            IEnumerable<Type> enumerable = Assembly.GetExecutingAssembly().GetTypes().Where(x => x.IsSubclassOf(typeof(Mod)));
             List<(PggMod, Mod)> mods = new();
-            foreach (CacheFile assemblyData in assemblies) {
+            foreach (Type type in enumerable) {
                 try {
-                    Logger.LogWarning($"Attempting to load {assemblyData.Location}");
                     Mod mod2;
-                    // Assembly assembly = _alc.LoadFromAssemblyName(new AssemblyName((assemblyData.ExtraData as string) ?? string.Empty));
-                    Assembly assembly = Assembly.Load(assemblyData.GetData());
-                    // Assembly assembly = _domain.Load(assemblyData.GetData());
-                    Type modType = assembly.GetTypes().First(x => x.IsSubclassOf(typeof(Mod)));
-                    mod2 = (Mod) Activator.CreateInstance(modType);
+                    mod2 = (Mod) Activator.CreateInstance(type);
                     PggMod mod = new();
-                    mod.LoadPatches(assembly);
+                    mod.LoadPatches(Assembly.GetAssembly(type));
                     mods.Add((mod, mod2));
                 }
                 catch (Exception e) {
@@ -128,10 +79,6 @@ namespace PolusGGMod {
 
             ((PggObjectManager) IObjectManager.Instance).UnregisterAll();
 
-            // TemporaryMods = new (PggMod, Mod)[0];
-            // AppDomain.Unload(publicDomain);
-            //todo do assemblyloadcontext bullshit
-
             AllPatched = false;
         }
         
@@ -141,51 +88,5 @@ namespace PolusGGMod {
             _domain = null;
             PostLoad = false;
         }
-        
-        // [MethodImpl(MethodImplOptions.NoInlining)]
-        // public void Execute(out WeakReference testAlcWeakRef, out ModLoadContext alc)
-        // {
-        //     alc = new ModLoadContext();
-        //     testAlcWeakRef = new WeakReference(alc);
-        //     alc.Resolving += (alc2, assemblyName) =>
-        //     {
-        //         var dllName = assemblyName.Name.Split(',').First();
-        //         return LoadFromStreamAlc(alc2, dllName);
-        //     };
-        //     // probably code for running a specific plugin's code
-        //     // Assembly a = alc.LoadFromAssemblyName();
-        //     // var args = new object[] { 3, 2 };
-        //     //
-        //     // var methodInfo = a.GetExportedTypes()[0].GetMethods().Where(m => m.Name == "MethodName").ToList()[0];
-        //     // var result = methodInfo.Invoke(Activator.CreateInstance(a.GetExportedTypes()[0]), args);
-        // }
-        //
-        // [MethodImpl(MethodImplOptions.NoInlining)]
-        // private void Unload(WeakReference testAlcWeakRef, ref ModLoadContext alc)
-        // {
-        //     // alc.Unload(); 
-        //     alc = null;
-        //
-        //     for (int i = 0; testAlcWeakRef.IsAlive && (i < 10); i++)
-        //     {
-        //         GC.Collect();
-        //         GC.WaitForPendingFinalizers();
-        //     }
-        //
-        //     Logger.LogInfo($"is alive: {testAlcWeakRef.IsAlive}");
-        // }
-        //
-        // private Assembly LoadFromStreamAlc(AssemblyLoadContext context, string name) {
-        //     return context.LoadFromStream(PogusPlugin.Cache.CachedFiles
-        //         .Where(x => x.Value.Type == ResourceType.Assembly)
-        //         .First(x => (x.Value.ExtraData as string) == name).Value.GetDataStream());
-        // }
-    // }
-    //
-    // public class ModLoadContext : AssemblyLoadContext
-    // {
-    //     protected override Assembly Load(AssemblyName assemblyName) {
-    //         return null;
-    //     }
     }
 }

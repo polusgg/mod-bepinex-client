@@ -38,7 +38,7 @@ namespace PolusMod.Inner {
 
         public void Deserialize(MessageReader reader) {
             reader.Buffer.Log();
-            _aspectPosition.Alignment = (AspectPosition.EdgeAlignments) reader.ReadByte();
+            _aspectPosition.Alignment = (AspectPosition.Nested_0) reader.ReadByte();
             
             if (_aspectPosition.Alignment != 0) {
                 transform.parent = HudManager.Instance.gameObject.transform;
