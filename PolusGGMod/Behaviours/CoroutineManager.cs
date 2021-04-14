@@ -4,10 +4,14 @@ using System.Collections.Generic;
 using System.Linq;
 using UnhollowerBaseLib;
 using UnhollowerBaseLib.Attributes;
+using UnhollowerRuntimeLib;
 using UnityEngine;
 
 namespace PolusGG.Behaviours {
     public sealed class CoroutineManager : MonoBehaviour {
+        static CoroutineManager() {
+            ClassInjector.RegisterTypeInIl2Cpp<CoroutineManager>();
+        }
         public CoroutineManager(IntPtr intPtr) : base(intPtr) { }
 
         private struct CoroutineTuple {

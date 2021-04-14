@@ -6,6 +6,8 @@ using System.Reflection;
 using BepInEx.Logging;
 using PolusGG.Mods;
 using PolusGG.Net;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace PolusGG {
     public class PggModManager {
@@ -14,9 +16,31 @@ namespace PolusGG {
         public ManualLogSource Logger;
         private AppDomain _domain;
         public bool PostLoad;
+        private bool wasOnline;
+        private static readonly string[] OnlineScenes = { "EndGame", "OnlineGame" };
 
         public PggModManager(ManualLogSource logger) {
             Logger = logger;
+            
+            SceneManager.add_sceneLoaded(new Action<Scene, LoadSceneMode>((scene, mode) => {
+                // yeah i could be putting this shit in a better place but who cares
+    
+                if (!AllPatched) return;
+                if (OnlineScenes.Contains(scene.name) != wasOnline) {
+                    Logger.LogInfo(scene.name);
+                    wasOnline = OnlineScenes.Contains(scene.name);
+                    foreach ((_, Mod mod) in TemporaryMods)
+                        if (wasOnline) mod.LobbyJoined();
+                        else {
+                            mod.LobbyLeft();
+                            PogusPlugin.ObjectManager.EndedGame();
+                        }
+                }
+
+                if (scene.name == "MMOnline") {
+                    AccountMenu.InitializeAccountMenu(scene);
+                }
+            }));
         }
 
         public void LoadMods() {
@@ -58,16 +82,17 @@ namespace PolusGG {
                 Logger.LogInfo("sex");
                 mod.Logger = Logger;
                 mod.Load();
-                if (PostLoad) mod.Start(IObjectManager.Instance, PogusPlugin.Cache);
+                if (PostLoad) mod.Start(PogusPlugin.ObjectManager, PogusPlugin.Cache);
                 pggMod.Patch();
             }
 
+            
             AllPatched = true;
         }
 
         public void StartMods() {
             foreach ((_, Mod mod) in TemporaryMods) {
-                if (PostLoad) mod.Start(IObjectManager.Instance, PogusPlugin.Cache);
+                if (PostLoad) mod.Start(PogusPlugin.ObjectManager, PogusPlugin.Cache);
             }
         }
 
@@ -77,7 +102,7 @@ namespace PolusGG {
                 mod.Unload();
             }
 
-            ((PggObjectManager) IObjectManager.Instance).UnregisterAll();
+            ((PggObjectManager) PogusPlugin.ObjectManager).UnregisterAll();
 
             AllPatched = false;
         }

@@ -3,6 +3,8 @@
         FetchResource = 0x80,
         Resize = 0x81,
         Intro = 0x82,
-        EndGame = 0x83
+        EndGame = 0x83,
+        SetString = 0x84,
+        DeclareHat
     }
 }

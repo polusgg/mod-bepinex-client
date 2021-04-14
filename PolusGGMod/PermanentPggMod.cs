@@ -1,6 +1,6 @@
 ﻿using System;
 using HarmonyLib;
-using PolusGG.Patching.Common.Utilities;
+using PolusGG.Mods.Patching.Common.Utilities;
 
 namespace PolusGG {
     public class PermanentPggMod : PggMod {

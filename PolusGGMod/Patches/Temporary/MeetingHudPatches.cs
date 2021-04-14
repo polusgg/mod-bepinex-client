@@ -1,6 +1,6 @@
 ﻿using HarmonyLib;
 
-namespace PolusGG.Patches {
+namespace PolusGG.Patches.Temporary {
     public class MeetingHudPatches {
         [HarmonyPatch(typeof(ShipStatus), nameof(ShipStatus.IsGameOverDueToDeath))]
         public class EndHudPatch {

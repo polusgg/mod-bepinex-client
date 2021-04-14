@@ -8,21 +8,36 @@ using BepInEx.Logging;
 using HarmonyLib;
 using PolusGG.Extensions;
 using PolusGG.Net;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using Debug = System.Diagnostics.Debug;
 
 namespace PolusGG {
     [BepInPlugin(Id, "Polus.gg", "0.69")]
     public class PogusPlugin : BasePlugin {
         public const string Id = "gg.polus.bepismod";
-
         public static ManualLogSource Logger;
 
         public static PggMod PermanentMod = new PermanentPggMod();
         public static PggModManager ModManager;
         public static PggCache Cache = new();
+        
+        private static AssetBundle _bundle;
+        public static IObjectManager ObjectManager;
 
-        //todo stop using appdomain
-        //todo shut the fuck up i'm using assembly load context
-        //todo shut the fuck up oh my god stop trying to put hot-reloading 
+        public static AssetBundle Bundle {
+            get {
+                if (_bundle == null) {
+                    Stream strm = Assembly.GetExecutingAssembly().GetManifestResourceStream("PolusGG.bepinexresources");
+                    Debug.Assert(strm != null, nameof(strm) + " != null");
+                    byte[] ba = new byte[strm.Length];
+                    strm.Read(ba, 0, ba.Length);
+                    _bundle = AssetBundle.LoadFromMemory(ba);
+                }
+
+                return _bundle;
+            }
+        }
 
         public override void Load() {
             Logger = Log;
@@ -44,10 +59,9 @@ namespace PolusGG {
                     Assembly.GetExecutingAssembly().GetTypes()
                         .Where(x => x.GetCustomAttribute(typeof(HarmonyPatch)) != null).ToArray());
                 PermanentMod.Patch();
-                IObjectManager.Instance = new PggObjectManager();
+                ObjectManager = new PggObjectManager();
                 ModManager = new PggModManager(Log);
                 ModManager.LoadMods();
-                ModManager.PatchMods();
             }
             catch (Exception e) {
                 Log.LogFatal($"Failed to load!");
@@ -62,5 +76,9 @@ namespace PolusGG {
             "Unload is never used".Log();
             return base.Unload();
         }
+
+        // class LolPog : MonoBehaviour {
+        //     public LolPog(IntPtr ptr) : base(ptr) {}
+        // }
     }
 }

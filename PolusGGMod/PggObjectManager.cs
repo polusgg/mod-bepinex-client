@@ -14,7 +14,6 @@ namespace PolusGG {
 		private List<PolusNetObject> _allObjects = new();
 		private HashSet<uint> _destroyedObjects = new();
 		private Dictionary<uint, PnoBehaviour> _spawnObjects = new();
-		private uint _netIdCnt = 0x80000000;
 
 		[DllImport("user32.dll")]
 		private static extern void MessageBox(IntPtr hwnd, string text, string caption, uint type = 4);
@@ -39,13 +38,14 @@ namespace PolusGG {
 			InnerRpcReceived?.Invoke(netObject, args);
 		}
 
-		public void HandleSpawn(int cnt, uint spawnType, MessageReader reader) {
+		public void HandleSpawn(uint spawnType, MessageReader reader) {
 			if (!_spawnObjects.ContainsKey(spawnType)) {
 				Debug.LogError("Couldn't find polus spawnable prefab: " + spawnType);
 				return;
 			}
 
-			/*int num4 = */reader.ReadPackedInt32();// todo is that readpackedint32 the owner id and does it matter at all
+			/*int num4 = */reader.ReadPackedInt32();
+			// todo is that readpackedint32 the owner id and does it matter at all
 			// ClientData clientData = PolusNetClient.FindClientById(num4);
 			// if (num4 > 0 && clientData == null) {
 			// 	AmongUsClient.Instance.DeferMessage(cnt, reader, "Delay spawn for unowned " + netId);
@@ -89,6 +89,7 @@ namespace PolusGG {
 				MessageReader messageReader = reader.ReadMessage();
 				if (messageReader.Length > 0) {
 					// childNetObject.GetType().FullName.Log(2);
+					messageReader.Length.Log(6, "spawn length");
 					polusNetObject.Spawn(messageReader);
 					// "did it really".Log();
 				}
@@ -118,6 +119,7 @@ namespace PolusGG {
 
 		public void RemoveNetObject(PolusNetObject obj) {
 			Object.Destroy(obj.PnoBehaviour);
+			_destroyedObjects.Add(obj.NetId);
 		}
 
 		public bool HasObject(uint netId, out PolusNetObject obj) {
@@ -138,10 +140,21 @@ namespace PolusGG {
 
 		public void EndedGame() {
 			PogusPlugin.Logger.LogInfo("Lmao");
-			_allObjects = new();
-			_allObjectsFast = new();
-			_destroyedObjects = new();
-			_netIdCnt = new();
+			_allObjects = new List<PolusNetObject>();
+			_allObjectsFast = new Dictionary<uint, PolusNetObject>();
+			_destroyedObjects = new HashSet<uint>();
+		}
+
+		public Transform GetNetObject(uint netId) {
+			if (_allObjectsFast.TryGetValue(netId, out var polusNetObject)) {
+				return polusNetObject.PnoBehaviour.transform;
+			}
+
+			if (AmongUsClient.Instance.allObjectsFast.TryGetValue(netId, out var innerNetObject)) {
+				return innerNetObject.transform;
+			}
+
+			return null;
 		}
 
 		public void UnregisterAll() {

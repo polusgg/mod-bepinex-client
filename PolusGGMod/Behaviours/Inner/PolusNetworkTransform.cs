@@ -6,7 +6,7 @@ using PolusGG.Net;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 
-namespace PolusGG.Inner {
+namespace PolusGG.Behaviours.Inner {
     public class PolusNetworkTransform : PnoBehaviour {
         internal static readonly FloatRange _xRange = new(50f, -50f);
         internal static readonly FloatRange _yRange = new(50f, -50f);
@@ -21,7 +21,7 @@ namespace PolusGG.Inner {
         }
 
         public void Start() {
-            pno = IObjectManager.Instance.LocateNetObject(this);
+            pno = PogusPlugin.ObjectManager.LocateNetObject(this);
             pno.OnRpc = HandleRpc;
             pno.OnData = Deserialize;
             _aspectPosition = gameObject.AddComponent<AspectPosition>();
@@ -59,8 +59,8 @@ namespace PolusGG.Inner {
             } else {
                 _aspectPosition.enabled = false;
                 int parent = reader.ReadPackedInt32();
-                transform.parent = parent < 0 ? null : IObjectManager.Instance.GetNetObject((uint) parent);
-                transform.localPosition = pos;
+                transform.parent = parent < 0 ? null : PogusPlugin.ObjectManager.GetNetObject((uint) parent);
+                _target = pos;
             }
         }
     }

@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
 using HarmonyLib;
-using PolusGG.Patching;
-using PolusGG.Patching.Common.Utilities;
+using PolusGG.Mods.Patching;
+using PolusGG.Mods.Patching.Common.Utilities;
 
 namespace PolusGG {
     public class PggMod {

@@ -18,7 +18,9 @@ namespace PolusGG.Mods {
         /// </summary>
         public abstract void Start(IObjectManager objectManager, ICache cache);
         public abstract void Unload();
-        public abstract void HandleRoot(MessageReader reader);
+        public abstract void RootPacketReceived(MessageReader reader);
+        public abstract void LobbyJoined();
+        public abstract void LobbyLeft();
         public abstract string Name { get; }
         public abstract ManualLogSource Logger { get; set; }
     }

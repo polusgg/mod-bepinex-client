@@ -1,17 +1,15 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace PolusGG {
     public static class PggConstants {
-        public static readonly string DownloadServer = "http://localhost:6969/";
-        //todo hate rose for not supporting more than one mod
-        public static readonly string ModListing = "modlist";
-        public static readonly string ModListingFolder = "mods/";
-        public static readonly string DownloadFolder = "Polus.gg Mods";
+        public static readonly string AuthBaseUrl = "https://polus.gg/api or whatever/";
+        public static readonly string DownloadServer = "https://polusgg-assetbundles.nyc3.digitaloceanspaces.com/";
+        public static readonly string DownloadFolder = "PolusCache" + Guid.NewGuid();
         public static readonly string CacheLocation = Path.Join(DownloadFolder, "cache.dat");
 
-        public static readonly ServerInfo Server = new("Pogger-Lmoa-Master-1", "127.0.0.1", 22023);
-        // public static readonly ServerInfo Server = new("Pogger-Lmoa-Master-1", "72.69.195.100", 22023);
-        // public static readonly RegionInfo Region = new("Polus.gg Server", Server.Ip, new[] { Server });
-        public static readonly StaticRegionInfo Region = new("Polus.gg Server", StringNames.NoTranslation, Server.Ip, new[] { Server });
+        public static readonly DnsRegionInfo Region =
+            // new("", "Polus.gg Server", StringNames.NoTranslation, "127.0.0.1", 22023);
+            new("", "Polus.gg Server", StringNames.NoTranslation, "151.204.156.54", 22023);
     }
 }

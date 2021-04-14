@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Linq;
 using HarmonyLib;
+using PolusGG.Mods.Patching;
 using UnhollowerBaseLib;
-using UnityEngine;
 
 namespace PolusGG.Patches.Permanent {
     [HarmonyPatch(typeof(ServerManager), nameof(ServerManager.Awake))]
@@ -39,11 +39,14 @@ namespace PolusGG.Patches.Permanent {
             // __instance.Field_6 = ServerManager.UpdateState.Success;
             return true;
         }
+    }
 
+    [HarmonyPatch(typeof(AnnouncementPopUp._Init_d__12), nameof(AnnouncementPopUp._Init_d__12.MoveNext))]
+    public class AnnouncementInitPatch {
         [PermanentPatch]
         [HarmonyPrefix]
-        public static void Postfix(ServerManager __instance) {
-            if (__instance.OnlineNetAddress.Equals(PggConstants.Region.DefaultIp)) {
+        public static void Postfix(AnnouncementPopUp._Init_d__12 __instance) {
+            if (ServerManager.Instance.OnlineNetAddress.Equals(PggConstants.Region.DefaultIp)) {
                 PogusPlugin.ModManager.PatchMods();
                 PogusPlugin.ModManager.LoadMods();
             }

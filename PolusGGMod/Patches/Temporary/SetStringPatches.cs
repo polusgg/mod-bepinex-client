@@ -1,13 +1,13 @@
 ﻿using HarmonyLib;
 
-namespace PolusGG.Patches {
+namespace PolusGG.Patches.Temporary {
     [HarmonyPatch(typeof(PingTracker), nameof(PingTracker.Update))]
     public class PingTrackerTextPatch {
         public static string PingText = null;
         [HarmonyPostfix]
         public static void Update(PingTracker __instance) {
             if (PingText is not null) {
-                __instance.text.Text = PingText;
+                __instance.text.text = PingText;
             }
         }
     }
@@ -18,8 +18,10 @@ namespace PolusGG.Patches {
         [HarmonyPostfix]
         public static void Update(RoomTracker __instance) {
             if (RoomText is not null) {
-                __instance.text.Text = RoomText;
+                __instance.text.text = RoomText;
             }
         }
     }
+    
+    // public class 
 }

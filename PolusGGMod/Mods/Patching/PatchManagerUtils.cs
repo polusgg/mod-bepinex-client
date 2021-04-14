@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 using HarmonyLib;
 
-namespace PolusGG.Patching {
+namespace PolusGG.Mods.Patching {
     namespace Common.Utilities {
         public static class PatchManagerUtils {
             private static List<Type> _harmonyBulkPatchTypes = new() {

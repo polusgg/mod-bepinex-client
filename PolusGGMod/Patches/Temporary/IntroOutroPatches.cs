@@ -6,12 +6,12 @@ using UnityEngine;
 using IntPtr = System.IntPtr;
 using Object = UnityEngine.Object;
 
-namespace PolusGG.Patches {
+namespace PolusGG.Patches.Temporary {
     // I really learned how to patch IEnumerators from town of us today
     // this is the saddest day of my life
     // can't wait til i need to use 
     
-    [HarmonyPatch(typeof(IntroCutscene), nameof(IntroCutscene.DLGJDGFGAEA))]
+    [HarmonyPatch(typeof(IntroCutscene), nameof(IntroCutscene.BeginCrewmate))]
     public class IntroCrewmatePatch {
         [HarmonyPrefix]
         public static void Prefix([HarmonyArgument(0)] ref List<PlayerControl> team) {
@@ -24,7 +24,7 @@ namespace PolusGG.Patches {
         }
     }
     
-    [HarmonyPatch(typeof(IntroCutscene), nameof(IntroCutscene.HMLCOCAJBGM))]
+    [HarmonyPatch(typeof(IntroCutscene), nameof(IntroCutscene.BeginImpostor))]
     public class IntroImpostorPatch {
         [HarmonyPrefix]
         public static void Prefix([HarmonyArgument(0)] ref List<PlayerControl> team) {
@@ -36,9 +36,9 @@ namespace PolusGG.Patches {
 
         [HarmonyPostfix]
         public static void Postfix(IntroCutscene __instance) {
-            __instance.Title.Text = PolusMod.RoleData.IntroName;
-            __instance.Title.Color = PolusMod.RoleData.IntroColor;
-            __instance.ImpostorText.Text = PolusMod.RoleData.IntroDesc;
+            __instance.Title.text = PolusMod.RoleData.IntroName;
+            __instance.Title.color = PolusMod.RoleData.IntroColor;
+            __instance.ImpostorText.text = PolusMod.RoleData.IntroDesc;
             __instance.BackgroundBar.material.color = PolusMod.RoleData.IntroColor;
         }
     }
@@ -52,6 +52,8 @@ namespace PolusGG.Patches {
         public class SetYoMamaUp {
             [HarmonyPrefix]
             public static void Prefix() {
+                // TempData.winners.Log(5, "lmao");
+                if (TempData.EndReason == (GameOverReason) 7) return;
                 TempData.winners.Clear();
                 foreach (WinningPlayerData winningPlayerData in PolusMod.RoleData.OutroPlayers) {
                     TempData.winners.Add(winningPlayerData);
@@ -60,8 +62,9 @@ namespace PolusGG.Patches {
 
             [HarmonyPostfix]
             public static void Postfix(EndGameManager __instance) {
+                if (TempData.EndReason == (GameOverReason) 7) return;
                 SoundManager.Instance.StopSound(__instance.DisconnectStinger);
-                __instance.WinText.Text = PolusMod.RoleData.OutroName;
+                __instance.WinText.text = PolusMod.RoleData.OutroName;
                 __instance.BackgroundBar.material.SetColor(Color, PolusMod.RoleData.OutroColor);
                 __instance.gameObject.AddComponent<SetYoMamaUpTheIncredibleQuadrilogy>();
                 _winDescText = Object.Instantiate(__instance.WinText.gameObject).GetComponent<TextRenderer>();
@@ -85,14 +88,14 @@ namespace PolusGG.Patches {
         public class SetYoMamaUpAClassicOutroTrilogy {
             [HarmonyPostfix]
             public static void Start(EndGameManager __instance) {
+                if (TempData.EndReason == (GameOverReason) 7) return;
                 __instance.CancelInvoke();
-                
             }
         }
         
         public class SetYoMamaUpTheIncredibleQuadrilogy : MonoBehaviour {
             public float endTime = 1.1f;
-            public float timer = 0f;
+            public float timer;
             public EndGameManager manager;
             public SetYoMamaUpTheIncredibleQuadrilogy(IntPtr ptr) : base(ptr) {}
 

@@ -1,15 +1,17 @@
-﻿using HarmonyLib;
+﻿using System.Reflection;
+using HarmonyLib;
+using PolusGG.Mods.Patching;
+using TMPro;
 
-namespace PolusGG.Patches.Temporary {
+namespace PolusGG.Patches.Permanent {
     [HarmonyPatch(typeof(VersionShower), nameof(VersionShower.Start))]
     public class StereotypicalClientModderVersionShowerPatch {
+        [PermanentPatch]
         [HarmonyPostfix]
         public static void Start(VersionShower __instance) {
-            #if DEBUG
-            __instance.text.Text += "\n\n  [A80100FF]Sus mod v69[] ([0007AAFF]by Impsustor32[])";
-            #else
-            __instance.text.Text += "\n\n  [A80100FF]Polus.gg Loaded[]";
-            #endif
+            __instance.text.alignment = TextAlignmentOptions.TopLeft;
+            __instance.text.text = "<color=#FF7E7E>Among Us</color>: " + __instance.text.text;
+            __instance.text.text += $"\n<color=#B77EFF>Polus.gg</color>: {Assembly.GetExecutingAssembly().GetName().Version} ({(PogusPlugin.ModManager.AllPatched ? "<color=#0A9D34>Active" : "<color=#FF7E7E>Inactive")}</color>)";
         }
     }
 }

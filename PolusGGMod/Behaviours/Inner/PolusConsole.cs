@@ -2,9 +2,8 @@
 using Hazel;
 using PolusGG.Net;
 using UnhollowerRuntimeLib;
-using UnityEngine;
 
-namespace PolusGG.Inner {
+namespace PolusGG.Behaviours.Inner {
     public class PolusConsole : PnoBehaviour {
         // private float timer;
         public PolusConsole(IntPtr ptr) : base(ptr) { }
@@ -14,7 +13,7 @@ namespace PolusGG.Inner {
         }
         
         private void Start() {
-            pno = IObjectManager.Instance.LocateNetObject(this);
+            pno = PogusPlugin.ObjectManager.LocateNetObject(this);
             pno.OnData = Deserialize;
         }
         

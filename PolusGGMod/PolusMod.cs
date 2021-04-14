@@ -1,16 +1,20 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using BepInEx.Logging;
 using Hazel;
 using InnerNet;
+using PolusGG.Behaviours;
+using PolusGG.Behaviours.Inner;
 using PolusGG.Enums;
 using PolusGG.Extensions;
-using PolusGG.Inner;
 using PolusGG.Mods;
 using PolusGG.Net;
+using PolusGG.Patches.Temporary;
 using PolusGG.Resources;
 using UnityEngine;
 using Exception = System.Exception;
+using Object = UnityEngine.Object;
 using StringComparison = System.StringComparison;
 
 namespace PolusGG {
@@ -31,9 +35,15 @@ namespace PolusGG {
 
         public override void Start(IObjectManager objectManager, ICache cache) {
             objectManager.InnerRpcReceived += OnInnerRpcReceived;
-            objectManager.Register(0x83, RegisterPnos.CreateDeadBodyPrefab());
+            objectManager.Register(0x80, RegisterPnos.CreateImage());
             objectManager.Register(0x81, RegisterPnos.CreateButton());
+            objectManager.Register(0x83, RegisterPnos.CreateDeadBodyPrefab());
+            objectManager.Register(0x87, RegisterPnos.CreatePoi());
+            objectManager.Register(0x88, RegisterPnos.CreateCameraController());
+            objectManager.Register(0x89, RegisterPnos.CreatePrefabHandle());
+            // objectManager.Register(0x89, RegisterPnos.CreatePrefabHandle());
 
+            
             ResolutionManagerPlus.Resolution();
             Cache = cache;
         }
@@ -44,90 +54,89 @@ namespace PolusGG {
             InnerNetObject netObject = (InnerNetObject) sender;
             PlayerControl playerControl;
             switch ((PolusRpcCalls) e.callId) {
-                case PolusRpcCalls.SetString:
-                    switch ((StringLocations) e.reader.ReadByte()) {
-                        case StringLocations.GameCode:
-                            GameStartManager.Instance.GameRoomName.Text = e.reader.ReadString();
-                            break;
-                        case StringLocations.GamePlayerCount:
-                            GameStartManager.Instance.PlayerCounter.Text = e.reader.ReadString();
-                            break;
-                    }
-                    break;
-                case PolusRpcCalls.ChatVisibility:
+                case PolusRpcCalls.ChatVisibility: {
                     var lol = e.reader.ReadByte() > 0;
                     if (HudManager.Instance.Chat.gameObject.active != lol)
                         HudManager.Instance.Chat.SetVisible(lol);
                     break;
-                case PolusRpcCalls.CloseHud:
+                }
+                case PolusRpcCalls.CloseHud: {
                     if (Minigame.Instance != null) Minigame.Instance.Close(true);
                     if (CustomPlayerMenu.Instance != null) CustomPlayerMenu.Instance.Close(true);
                     break;
-                case PolusRpcCalls.SetRole:
+                }
+                case PolusRpcCalls.SetRole: {
                     playerControl = netObject.Cast<PlayerControl>();
+
                     if (e.reader.ReadBoolean()) {
                         if (playerControl == PlayerControl.LocalPlayer) {
-                            "Impsotr set hud".Log();
                             DestroyableSingleton<HudManager>.Instance.KillButton.gameObject.SetActive(true);
                             playerControl.SetKillTimer(PlayerControl.GameOptions.KillCooldown);
                         }
 
                         if (PlayerControl.LocalPlayer.Data.IsImpostor) {
-                            "Impsotr set text".Log();
-                            playerControl.Data.Object.nameText.Color = Palette.ImpostorRed;
-                            
-                            foreach (GameData.PlayerInfo player in GameData.Instance.AllPlayers) {
-                                player.Object.nameText.Color = player.IsImpostor ? Palette.ImpostorRed : Palette.White;
-                            }
+                            playerControl.Data.Object.nameText.color = Palette.ImpostorRed;
                         }
                     } else {
                         if (playerControl == PlayerControl.LocalPlayer) {
-                            "cewmate hud".Log();
                             playerControl.SetKillTimer(21f);
-                                HudManager.Instance.KillButton.gameObject.SetActive(false);
-                                foreach (GameData.PlayerInfo player in GameData.Instance.AllPlayers) {
-                                    player.Object.nameText.Color = Palette.White;
-                                }
+                            HudManager.Instance.KillButton.gameObject.SetActive(false);
+                            foreach (GameData.PlayerInfo player in GameData.Instance.AllPlayers) {
+                                player.Object.nameText.color = Palette.White;
+                            }
                         }
-                        
-                        playerControl.Data.Object.nameText.Color = Palette.White;
+
+                        playerControl.Data.Object.nameText.color = Palette.White;
+                    }
+                    foreach (GameData.PlayerInfo player in GameData.Instance.AllPlayers) {
+                        $"{player.Object.name} - {player.IsImpostor}".Log();
+                        player.Object.nameText.color = player.IsImpostor && PlayerControl.LocalPlayer.Data.IsImpostor ? Palette.ImpostorRed : Palette.White;
                     }
 
                     break;
-                case PolusRpcCalls.PlaySound:
-                    AudioClip ac = Cache.CachedFiles[e.reader.ReadPackedUInt32()].Get<AudioClip>();
-                    bool sfx = e.reader.ReadBoolean();
-                    bool loop = e.reader.ReadBoolean();
-                    float pitch = e.reader.ReadSingle();
-                    byte volume = e.reader.ReadByte();
-                    Vector2 vec2 = PolusNetworkTransform.ReadVector2(e.reader);
-
-                    SoundManager.Instance.PlayDynamicSound(ac.name, ac, loop, new System.Action<AudioSource, float>(
-                        (source, _) => {
-                            source.pitch = pitch;
-                            source.volume =
-                                (volume - Vector2.Distance(PlayerControl.LocalPlayer.GetTruePosition(), vec2) -
-                                 (
-                                     PhysicsHelpers.AnythingBetween(
-                                         vec2,
-                                         PlayerControl.LocalPlayer.GetTruePosition(),
-                                         LayerMask.NameToLayer("Ship") | LayerMask.NameToLayer("Players"),
-                                         false
-                                     )
-                                         ? 15f
-                                         : 0f)) / 100f;
-                        }), sfx);
-                    break;
-                case PolusRpcCalls.Revive:
+                }
+                case PolusRpcCalls.Revive: {
                     netObject.Cast<PlayerControl>().Revive();
                     break;
+                }
+                case PolusRpcCalls.SetHat: {
+                    Cache.CachedFiles[e.reader.ReadPackedUInt32()].Get<Sprite>();
+                    Cache.CachedFiles[e.reader.ReadPackedUInt32()].Get<Sprite>();
+                    Cache.CachedFiles[e.reader.ReadPackedUInt32()].Get<Sprite>();
+                    break;
+                }
+                case PolusRpcCalls.SetOpacity: {
+                    PlayerControl control = netObject.Cast<PlayerControl>();
+                    var color = control.myRend.color;
+                    color = new Color(color.r, color.g, color.b, e.reader.ReadByte() / 255f);
+                    control.myRend.color = color;
+                    control.MyPhysics.Skin.layer.color = new Color32(Byte.MaxValue, Byte.MaxValue, Byte.MaxValue, e.reader.ReadByte());
+                    break;
+                }
+                case PolusRpcCalls.DespawnAllVents: {
+                    IEnumerable<int> enumerable = Enumerable.Range(0, e.reader.ReadByte()).Select(_ => (int)e.reader.ReadByte());
+                    IEnumerable<Vent> vents = Object.FindObjectsOfType<Vent>().Where(v => enumerable.Contains<int>(v.Id));
+                    foreach (Vent vent in vents) {
+                        Object.Destroy(vent);
+                    }
+                    break;
+                }
+                case PolusRpcCalls.BeginAnimationPlayer:
+                    while (e.reader.Position < e.reader.Length) {
+                        MessageReader message = e.reader.ReadMessage();
+                        
+                    }
+                    break;
+                default: {
+                    throw new ArgumentOutOfRangeException();
+                }
             }
         }
 
-        public override void HandleRoot(MessageReader reader) {
+        public override void RootPacketReceived(MessageReader reader) {
             Logger.LogInfo($"LOL {reader.Tag}");
             switch ((PolusRootPackets) reader.Tag) {
-                case PolusRootPackets.FetchResource:
+                case PolusRootPackets.FetchResource: {
                     uint resource = reader.ReadPackedUInt32();
                     string location = reader.ReadString();
                     byte[] hash = reader.ReadBytes(16);
@@ -163,7 +172,8 @@ namespace PolusGG {
                     }
 
                     break;
-                case PolusRootPackets.Intro:
+                }
+                case PolusRootPackets.Intro: {
                     RoleData.IntroName = reader.ReadString();
                     RoleData.IntroDesc = reader.ReadString();
                     RoleData.IntroColor = new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(),
@@ -172,7 +182,8 @@ namespace PolusGG {
                         .Select(_ => reader.ReadByte()).ToList();
                     //todo finish this and outro
                     break;
-                case PolusRootPackets.EndGame:
+                }
+                case PolusRootPackets.EndGame: {
                     RoleData.OutroName = reader.ReadString();
                     RoleData.OutroDesc = reader.ReadString();
                     RoleData.OutroColor = new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(),
@@ -186,10 +197,81 @@ namespace PolusGG {
                     // test go directly to endgame
                     // SceneManager.LoadScene("EndGame");
                     break;
-                default:
+                }
+                case PolusRootPackets.SetString: {
+                    StringLocations stringLocation = (StringLocations) reader.ReadByte();
+                    string text = reader.ReadString();
+                    switch (stringLocation) {
+                        case StringLocations.GameCode: {
+                            GameStartManager.Instance.GameRoomName.text = text;
+                            break;
+                        }
+                        case StringLocations.GamePlayerCount: {
+                            GameStartManager.Instance.PlayerCounter.text = text;
+                            break;
+                        }
+                        case StringLocations.PingTracker: {
+                            PingTrackerTextPatch.PingText = text == "__unset" ? null : text;
+                            break;
+                        }
+                        case StringLocations.RoomTracker: {
+                            RoomTrackerTextPatch.RoomText = text == "__unset" ? null : text;
+                            break;
+                        }
+                        case StringLocations.TaskCompletion: {
+                            HudManager.Instance.TaskCompleteOverlay.GetComponent<TextRenderer>().Text = text;
+                            break;
+                        }
+                        case StringLocations.TaskText: {
+                            if (PlayerControl.LocalPlayer) {
+                                ImportantTextTask importantTextTask = new GameObject("_Player").AddComponent<ImportantTextTask>();
+                                importantTextTask.Text = text;
+                                importantTextTask.transform.SetParent(PlayerControl.LocalPlayer.transform, false);
+                            }
+                            break;
+                        }
+                    }
+
+                    break;
+                }
+                case PolusRootPackets.DeclareHat: {
+                    //new hat
+                    HatBehaviour hat = ScriptableObject.CreateInstance<HatBehaviour>();
+                    uint id = reader.ReadPackedUInt32();
+                    hat.MainImage = Cache.CachedFiles[reader.ReadPackedUInt32()].Get<Sprite>();
+                    uint back = reader.ReadPackedUInt32();
+                    hat.ClimbImage = Cache.CachedFiles[reader.ReadPackedUInt32()].Get<Sprite>();
+                    hat.FloorImage = Cache.CachedFiles[reader.ReadPackedUInt32()].Get<Sprite>();
+                    hat.ChipOffset = reader.ReadVector2();
+                    hat.NoBounce = !reader.ReadBoolean();
+                    if ((hat.InFront = !reader.ReadBoolean()) == true) {
+                        Cache.CachedFiles[back].Get<Sprite>();
+                    }
+
+                    if (reader.ReadBoolean()) {
+                        hat.NotInStore = true;
+                        hat.Free = false;
+                    }
+                    
+                    
+                    break;
+                }
+                default: {
                     Logger.LogError($"Invalid packet with id {reader.Tag}");
                     break;
+                }
             }
+        }
+
+        public override void LobbyJoined() {
+            Logger.LogInfo("Joined Lobby!");
+            GameObject maintenance = new("MaintenanceAlert");
+            maintenance.AddComponent<MaintenanceBehaviour>();
+        }
+
+        public override void LobbyLeft() {
+            PingTrackerTextPatch.PingText = null;
+            RoomTrackerTextPatch.RoomText = null;
         }
 
         private MessageWriter StartSendResourceResponse(uint resource, ResponseType type) {
@@ -223,7 +305,6 @@ namespace PolusGG {
     }
 
     public class RoleData {
-        public bool IsImpostor = false;
         public string IntroName = "Poobscoob";
         public string IntroDesc = "you failed to set this on time";
         public Color IntroColor = Color.magenta;

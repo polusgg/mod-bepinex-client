@@ -1,12 +1,17 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using Hazel;
+using PolusGG.Enums;
 using PolusGG.Extensions;
 using PolusGG.Net;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 
-namespace PolusGG.Inner {
+namespace PolusGG.Behaviours.Inner {
     public class PolusCameraController : PnoBehaviour {
+        private FollowerCamera follower;
+        private Camera camera;
         public PolusCameraController(IntPtr ptr) : base(ptr) { }
 
         static PolusCameraController() {
@@ -14,13 +19,73 @@ namespace PolusGG.Inner {
         }
 
         private void Start() {
-            pno = IObjectManager.Instance.LocateNetObject(this);
+            follower = HudManager.Instance.PlayerCam;
+            camera = follower.GetComponent<Camera>();
+            pno = PogusPlugin.ObjectManager.LocateNetObject(this);
             pno.OnData = Deserialize;
             pno.OnRpc = HandleRpc;
         }
 
         private void HandleRpc(MessageReader reader, byte callid) {
-            
+            if (callid == (int) PolusRpcCalls.BeginAnimationCamera) {
+                List<CameraKeyframe> keyframe = new();
+                while (reader.Position < reader.Length - 1) {
+                    MessageReader message = reader.ReadMessage();
+                    new CameraKeyframe(
+                        message.ReadPackedUInt32(),
+                        message.ReadPackedUInt32(),
+                        message.ReadVector2(),
+                        message.ReadSingle(),
+                        new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte()),
+                        follower,
+                        camera
+                    );
+                }
+
+                this.StartCoroutine(CoPlayAnimation(keyframe.ToArray(), reader.ReadBoolean()));
+            }
+        }
+
+        private CameraKeyframe SerializeCurrentState() {
+            return new(
+                0,
+                0,
+                follower.Offset,
+                Camera.main.transform.eulerAngles.z,
+                HudManager.Instance.FullScreen.color,
+                follower,
+                camera
+            );
+        }
+
+        private IEnumerator CoPlayAnimation(CameraKeyframe[] frames, bool reset) {
+            CameraKeyframe resetTo = SerializeCurrentState();
+            CameraKeyframe previous = resetTo;
+            CameraKeyframe current = null;
+
+            for (int i = 0; i < frames.Length; i++) {
+                current = frames[i];
+
+                yield return new WaitForSeconds(current.Offset / 1000f);
+                yield return Effects.Lerp(current.Duration / 1000f, new Action<float>(dt => {
+                    current.CameraOffset = Vector2.Lerp(previous.CameraOffset, current.CameraOffset, dt);
+                    current.Angle = Mathf.Lerp(previous.Angle, current.Angle, dt);
+                    current.OverlayColor = new Color(
+                        Mathf.Lerp(previous.OverlayColor.r, current.OverlayColor.r, dt),
+                        Mathf.Lerp(previous.OverlayColor.g, current.OverlayColor.g, dt),
+                        Mathf.Lerp(previous.OverlayColor.b, current.OverlayColor.b, dt),
+                        Mathf.Lerp(previous.OverlayColor.a, current.OverlayColor.a, dt)
+                    );
+                }));
+
+                previous = current;
+            }
+
+            if (reset) {
+                resetTo.CameraOffset = resetTo.CameraOffset;
+                resetTo.Angle = resetTo.Angle;
+                resetTo.OverlayColor = resetTo.OverlayColor;
+            }
         }
 
         private void FixedUpdate() {
@@ -36,6 +101,45 @@ namespace PolusGG.Inner {
             // ResolutionManager.ResolutionChanged.Invoke((float)Screen.width / Screen.height);
             // todo add scale later on
             HudManager.Instance.PlayerCam.Offset = reader.ReadVector2();
+        }
+
+        public class CameraKeyframe {
+            public FollowerCamera FollowerCamera;
+            public Camera Camera;
+            public uint Offset;
+            public uint Duration;
+            private Vector2 cameraOffset;
+            private float angle;
+            private Color overlayColor;
+
+            public Vector2 CameraOffset {
+                get => cameraOffset;
+                set => FollowerCamera.Offset = value;
+            }
+            public float Angle {
+                get => angle;
+                set {
+                    Transform transform1 = Camera.transform;
+                    Vector3 ea = transform1.eulerAngles;
+                    ea.y = value;
+                    transform1.eulerAngles = ea;
+                }
+            }
+
+            public Color OverlayColor {
+                get => overlayColor;
+                set => HudManager.Instance.FullScreen.color = value;
+            }
+
+            public CameraKeyframe(uint animOffset, uint duration, Vector2 cameraOffset, float angle, Color32 color, FollowerCamera followerCamera, Camera camera) {
+                Offset = animOffset;
+                Duration = duration;
+                this.cameraOffset = cameraOffset;
+                this.angle = angle;
+                overlayColor = color;
+                FollowerCamera = followerCamera;
+                Camera = camera;
+            }
         }
     }
 }

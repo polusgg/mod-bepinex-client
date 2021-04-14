@@ -1,5 +1,7 @@
 ﻿namespace PolusGG.Enums {
-    public class OptionType {
-        
+    public enum OptionType {
+        Number,
+        Boolean,
+        Enum
     }
 }

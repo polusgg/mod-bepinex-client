@@ -3,7 +3,7 @@ using PolusGG.Net;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 
-namespace PolusGG.Inner {
+namespace PolusGG.Behaviours.Inner {
     public class PolusPrefabHandle : PnoBehaviour {
         public PolusPrefabHandle(IntPtr ptr) : base(ptr) { }
 

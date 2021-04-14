@@ -1,8 +1,7 @@
 ﻿using HarmonyLib;
 using UnityEngine;
 
-namespace PolusGG.Patches.Permanent {
-    #if DEBUG
+namespace PolusGG.Patches.Temporary {
     [HarmonyPatch(typeof(FollowerCamera), nameof(FollowerCamera.Update))]
     public class ObnoxiousFollowerCameraShakePatch {
         [HarmonyPrefix]
@@ -15,5 +14,4 @@ namespace PolusGG.Patches.Permanent {
             return false;
         }
     }
-    #endif
 }

@@ -2,9 +2,8 @@
 using Hazel;
 using PolusGG.Net;
 using UnhollowerRuntimeLib;
-using UnityEngine;
 
-namespace PolusGG.Inner {
+namespace PolusGG.Behaviours.Inner {
     public class PolusVent : PnoBehaviour {
         private Vent vent;
         public PolusVent(IntPtr ptr) : base(ptr) { }
@@ -14,7 +13,8 @@ namespace PolusGG.Inner {
         }
 
         private void Start() {
-            pno = IObjectManager.Instance.LocateNetObject(this);
+            vent = GetComponent<Vent>();
+            pno = PogusPlugin.ObjectManager.LocateNetObject(this);
             pno.OnData = Deserialize;
         }
         

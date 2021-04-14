@@ -1,9 +1,11 @@
 ﻿using HarmonyLib;
+using PolusGG.Mods.Patching;
 using UnityEngine;
 
-namespace PolusGG.Patches {
+namespace PolusGG.Patches.Permanent {
     [HarmonyPatch(typeof(ShadowCamera), nameof(ShadowCamera.OnEnable))]
     public static class ShadowCameraOnEnablePatch {
+        [PermanentPatch]
         [HarmonyPostfix]
         public static void Postfix(ShadowCamera __instance) {
             Camera shadowCamera = __instance.GetComponent<Camera>();
@@ -19,11 +21,13 @@ namespace PolusGG.Patches {
 
     [HarmonyPatch(typeof(SurveillanceMinigame), nameof(SurveillanceMinigame.Begin))]
     public static class SurveillanceMinigameBeginPatch {
+        [PermanentPatch]
         [HarmonyPrefix]
         public static void Prefix() {
             RenderTextureGetTemporaryPatch.Enabled = true;
         }
 
+        [PermanentPatch]
         [HarmonyPostfix]
         public static void Postfix() {
             RenderTextureGetTemporaryPatch.Enabled = false;
@@ -35,6 +39,7 @@ namespace PolusGG.Patches {
     public static class RenderTextureGetTemporaryPatch {
         public static bool Enabled;
 
+        [PermanentPatch]
         [HarmonyPrefix]
         public static void Prefix([HarmonyArgument(0)] ref int width, [HarmonyArgument(1)] ref int height) {
             if (!Enabled) return;

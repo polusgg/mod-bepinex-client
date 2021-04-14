@@ -6,7 +6,7 @@ using PolusGG.Resources;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 
-namespace PolusGG.Inner {
+namespace PolusGG.Behaviours.Inner {
     public class PolusGraphic : PnoBehaviour {
         public SpriteRenderer renderer;
         public PolusGraphic(IntPtr ptr) : base(ptr) { }
@@ -16,9 +16,9 @@ namespace PolusGG.Inner {
         }
 
         private void Start() {
-            pno = IObjectManager.Instance.LocateNetObject(this);
+            pno = PogusPlugin.ObjectManager.LocateNetObject(this);
             pno.OnData = Deserialize;
-            renderer = this.EnsureComponent<SpriteRenderer>();
+            renderer = gameObject.EnsureComponent<SpriteRenderer>();
         }
 
         private void FixedUpdate() {
@@ -26,7 +26,7 @@ namespace PolusGG.Inner {
         }
 
         private void Deserialize(MessageReader reader) {
-            renderer.sprite = ICache.Instance.CachedFiles[reader.ReadPackedUInt32()].Get<Sprite>();
+            renderer.sprite = PogusPlugin.Cache.CachedFiles[reader.ReadPackedUInt32()].Get<Sprite>();
         }
     }
 }

@@ -4,7 +4,7 @@ using PolusGG.Net;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace PolusGG.Inner {
+namespace PolusGG.Behaviours.Inner {
     public class RegisterPnos {
         public static PnoBehaviour CreateDeadBodyPrefab() {
             PlayerControl pc = AmongUsClient.Instance.PlayerPrefab;
@@ -98,6 +98,12 @@ namespace PolusGG.Inner {
             }).ToArray();
 
             return pee.AddComponent<PolusVent>();
+        }
+
+        public static PnoBehaviour CreateCameraController() {
+            GameObject cameraController = new("uwuCameraManager") { active = false };
+            cameraController.DontDestroy();
+            return cameraController.AddComponent<PolusCameraController>();
         }
     }
 }

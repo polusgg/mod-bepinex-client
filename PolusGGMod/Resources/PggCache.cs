@@ -15,11 +15,8 @@ namespace PolusGG {
         private HttpClient _client = new();
         public Dictionary<uint, CacheFile> CachedFiles => _cacheFiles;
 
-        public PggCache() {
-            ICache.Instance = this;
-        }
-        
-        public CacheFile AddToCache(uint id, string location, byte[] hash, ResourceType type, uint parentId = uint.MaxValue) {
+        public CacheFile AddToCache(uint id, string location, byte[] hash, ResourceType type,
+            uint parentId = uint.MaxValue) {
             string path = Path.Join(PggConstants.DownloadFolder, $"{id}");
 
             if (!IsCachedAndValid(id, hash)) {
@@ -35,7 +32,8 @@ namespace PolusGG {
                 if (!responseMessage.IsSuccessStatusCode) {
                     //todo log and report failure on startup or during server requested download
                     PogusPlugin.Logger.LogFatal($"Failed with: {responseMessage.StatusCode}");
-                    throw new CacheRequestException($"Unsuccessful attempt at getting {location}", responseMessage.StatusCode);
+                    throw new CacheRequestException($"Unsuccessful attempt at getting {location}",
+                        responseMessage.StatusCode);
                 }
 
                 AssetOnly:
@@ -62,7 +60,9 @@ namespace PolusGG {
                         AssetBundle bundle = AssetBundle.LoadFromMemory(data);
                         cacheFile.InternalData = bundle;
 
-                        Bundle bundone = JsonConvert.DeserializeObject<Bundle>(bundle.LoadAsset("Assets/AssetListing.json").TryCast<TextAsset>().text);
+                        Bundle bundone =
+                            JsonConvert.DeserializeObject<Bundle>(bundle.LoadAsset("Assets/AssetListing.json")
+                                .TryCast<TextAsset>().text);
 
                         uint assetId = bundone.BaseId;
                         foreach (string bundoneAsset in bundone.Assets)
@@ -77,9 +77,13 @@ namespace PolusGG {
                 }
 
                 _cacheFiles[id] = cacheFile;
-                BinaryWriter writer = new(File.Create(PggConstants.CacheLocation));
-                Serialize(writer);
-                writer.Close();
+                // if (!WaitForFile(PggConstants.CacheLocation)) {
+                //     throw new Exception("Failed to get unlocked cache file!");
+                // }
+
+                using (BinaryWriter writer = new(File.Create(PggConstants.CacheLocation))) {
+                    Serialize(writer);
+                }
                 PogusPlugin.Logger.LogMessage($"Downloaded and cached file at {location} ({id}, {hash})");
                 return cacheFile;
             }
@@ -111,6 +115,7 @@ namespace PolusGG {
                         foreach (string s in extra) {
                             writer.Write(s);
                         }
+
                         break;
                     }
                     case ResourceType.Asset: {
@@ -122,6 +127,29 @@ namespace PolusGG {
                     }
                 }
             }
+        }
+
+        public bool WaitForFile(string fullPath) {
+            int numTries = 0;
+            while (true) {
+                ++numTries;
+                try {
+                    // Attempt to open the file exclusively.
+                    using FileStream fs = File.OpenRead(fullPath);
+                    fs.ReadByte();
+
+                    // If we got this far the file is ready
+                    break;
+                } catch (Exception) {
+                    if (numTries > 20) {
+                        return false;
+                    } 
+                    System.Threading.Thread.Sleep(250);
+                }
+            }
+
+            PogusPlugin.Logger.LogError($"WaitForFile {fullPath} returning true after {numTries} tries");
+            return true;
         }
 
         public void Deserialize(BinaryReader reader) {
@@ -142,7 +170,8 @@ namespace PolusGG {
             };
             file.ExtraData = file.Type switch {
                 ResourceType.Assembly => reader.ReadString(),
-                ResourceType.AssetBundle => Enumerable.Range(0, reader.ReadInt32()).Select(x => reader.ReadString()).ToArray(),
+                ResourceType.AssetBundle => Enumerable.Range(0, reader.ReadInt32()).Select(x => reader.ReadString())
+                    .ToArray(),
                 ResourceType.Asset => reader.ReadUInt32(),
                 _ => null
             };
