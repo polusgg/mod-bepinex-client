@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using HarmonyLib;
-using PolusGG.Patches.Permanent;
 
 namespace PolusGG.Patching {
     namespace Common.Utilities {
@@ -23,7 +22,7 @@ namespace PolusGG.Patching {
             {
                 List<PatchDetails> patchDetails = new();
 
-                MethodBase? originalMethod = null;
+                MethodBase originalMethod = null;
                 List<MethodBase> bulkOriginalMethods = new();
                 List<MethodInfo> prefixPatches = new();
                 List<MethodInfo> postfixPatches = new();
@@ -42,7 +41,7 @@ namespace PolusGG.Patching {
 
                     var allCustomAttributes = method.GetCustomAttributes(true);
 
-                    HashSet<string>? allHarmonyAttributes = new((method.GetCustomAttributes(true))
+                    HashSet<string> allHarmonyAttributes = new((method.GetCustomAttributes(true))
                         .Select(attr => attr.GetType().FullName)
                         .Where(name => name.StartsWith("Harmony"))
                     );
@@ -53,16 +52,18 @@ namespace PolusGG.Patching {
                         if (name == method.Name || allHarmonyAttributes.Contains($"HarmonyLib.Harmony{name}")) {
                             // Debug.Log($"Harmony lmoa {permanentPatch is null} {patchPermanently}");
                             switch (patchType) {
-                                case HarmonyPatchType.Prefix:
+                                case HarmonyPatchType.Prefix: {
                                     if ((permanentPatch is not null || !patchPermanently) &&
                                         (permanentPatch is null || patchPermanently))
                                         prefixPatches.Add(method);
                                     break;
-                                case HarmonyPatchType.Postfix:
+                                }
+                                case HarmonyPatchType.Postfix: {
                                     if ((permanentPatch is not null || !patchPermanently) &&
                                         (permanentPatch is null || patchPermanently))
                                         postfixPatches.Add(method);
                                     break;
+                                }
                             }
                         }
                     }
@@ -96,22 +97,26 @@ namespace PolusGG.Patching {
                 return patchDetails;
             }
 
-            private static MethodBase? GetOriginalMethodBase(HarmonyMethod attr) {
+            private static MethodBase GetOriginalMethodBase(HarmonyMethod attr) {
                 switch (attr.methodType) {
-                    case MethodType.Normal:
+                    case MethodType.Normal: {
                         return AccessTools.DeclaredMethod(attr.declaringType, attr.methodName, attr.argumentTypes);
-                    case MethodType.Getter:
+                    }
+                    case MethodType.Getter: {
                         return AccessTools.DeclaredProperty(attr.declaringType, attr.methodName).GetGetMethod(true);
-                    case MethodType.Setter:
+                    }
+                    case MethodType.Setter: {
                         return AccessTools.DeclaredProperty(attr.declaringType, attr.methodName).GetSetMethod(true);
+                    }
                     //case MethodType.Constructor:
                     //    return AccessTools.DeclaredConstructor(attr.declaringType, attr.argumentTypes);
                     //case MethodType.StaticConstructor:
                     //    return AccessTools.GetDeclaredConstructors(attr.declaringType)
                     //            .Where(c => c.IsStatic)
                     //            .FirstOrDefault();
-                    default:
+                    default: {
                         return null;
+                    }
                 }
             }
         }

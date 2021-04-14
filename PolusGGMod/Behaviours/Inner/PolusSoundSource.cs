@@ -1,0 +1,52 @@
+﻿using System;
+using Hazel;
+using PolusGG.Enums;
+using PolusGG.Extensions;
+using PolusGG.Net;
+using UnhollowerRuntimeLib;
+using UnityEngine;
+
+namespace PolusGG.Inner {
+    public class PolusSoundSource : PnoBehaviour {
+        private AudioSource source;
+        private float falloffMultiplier;
+        private float falloffRadius;
+        public PolusSoundSource(IntPtr ptr) : base(ptr) { }
+
+        static PolusSoundSource() {
+            ClassInjector.RegisterTypeInIl2Cpp<PolusSoundSource>();
+        }
+
+        private void Start() {
+            pno = IObjectManager.Instance.LocateNetObject(this);
+            pno.OnData = Deserialize;
+            source = GetComponent<AudioSource>();
+        }
+
+        private void FixedUpdate() {
+            if (pno.HasSpawnData()) Deserialize(pno.GetSpawnData());
+
+            if (PlayerControl.LocalPlayer) {
+                source.rolloffMode = AudioRolloffMode.Linear;
+                source.rolloffFactor = falloffMultiplier;
+                source.maxDistance = falloffRadius;
+            }
+        }
+
+        private void Deserialize(MessageReader reader) {
+            source.clip = PogusPlugin.Cache.CachedFiles[reader.ReadPackedUInt32()].Get<AudioClip>();
+            source.pitch = reader.ReadSingle();
+            source.volume = reader.ReadSingle();
+            source.loop = reader.ReadBoolean();
+            source.volume *= (SoundType) reader.ReadByte() switch {
+                SoundType.None => 1f,
+                SoundType.SoundEffect => SoundManager.SfxVolume,
+                SoundType.Music => SoundManager.MusicVolume,
+                _ => throw new Exception("Invalid sound type")
+            };
+            source.time = reader.ReadSingle() / 1000f;
+            if (reader.ReadBoolean()) source.Pause();
+            else source.UnPause();
+        }
+    }
+}

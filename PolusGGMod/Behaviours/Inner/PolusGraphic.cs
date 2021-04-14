@@ -1,5 +1,6 @@
 ﻿using System;
 using Hazel;
+using PolusGG.Extensions;
 using PolusGG.Net;
 using PolusGG.Resources;
 using UnhollowerRuntimeLib;
@@ -17,7 +18,7 @@ namespace PolusGG.Inner {
         private void Start() {
             pno = IObjectManager.Instance.LocateNetObject(this);
             pno.OnData = Deserialize;
-            renderer = GetComponent<SpriteRenderer>();
+            renderer = this.EnsureComponent<SpriteRenderer>();
         }
 
         private void FixedUpdate() {
@@ -25,10 +26,7 @@ namespace PolusGG.Inner {
         }
 
         private void Deserialize(MessageReader reader) {
-            uint id = reader.ReadPackedUInt32();
-            // if (!ICache.Instance.IsCachedAndValid(id, )) return;
-            Sprite sprite = ICache.Instance.CachedFiles[id].Get<Sprite>();
-            renderer.sprite = sprite;
+            renderer.sprite = ICache.Instance.CachedFiles[reader.ReadPackedUInt32()].Get<Sprite>();
         }
     }
 }

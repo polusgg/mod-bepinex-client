@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
-using System.Threading;
 using Newtonsoft.Json;
 using PolusGG.Extensions;
 using PolusGG.Resources;
@@ -14,9 +13,12 @@ namespace PolusGG {
     public class PggCache : ICache {
         private Dictionary<uint, CacheFile> _cacheFiles = new();
         private HttpClient _client = new();
+        public Dictionary<uint, CacheFile> CachedFiles => _cacheFiles;
 
-        public Dictionary<uint, CacheFile> CachedFiles { get; }
-
+        public PggCache() {
+            ICache.Instance = this;
+        }
+        
         public CacheFile AddToCache(uint id, string location, byte[] hash, ResourceType type, uint parentId = uint.MaxValue) {
             string path = Path.Join(PggConstants.DownloadFolder, $"{id}");
 
@@ -48,29 +50,30 @@ namespace PolusGG {
 
                 byte[] data;
                 switch (type) {
-                    case ResourceType.Assembly:
+                    case ResourceType.Assembly: {
                         data = responseMessage.Content.ReadAsByteArrayAsync().Result;
                         File.WriteAllBytes(path, data);
                         cacheFile.ExtraData = Assembly.ReflectionOnlyLoad(data).GetName().Name;
                         break;
-                    case ResourceType.AssetBundle:
+                    }
+                    case ResourceType.AssetBundle: {
                         data = responseMessage.Content.ReadAsByteArrayAsync().Result;
                         File.WriteAllBytes(path, data);
-                        "Woozy".Log(2, "asset bundle");
-                        UnityEngine.AssetBundle bundle = UnityEngine.AssetBundle.LoadFromMemory(data);
+                        AssetBundle bundle = AssetBundle.LoadFromMemory(data);
+                        cacheFile.InternalData = bundle;
 
-                        Thread.CurrentThread.ManagedThreadId.Log(16, "CURRENT THREAD AT Load");
-                        Bundle bundone = JsonConvert.DeserializeObject<Bundle>(bundle.LoadAsset("Assets/AssetListing.json".Log(2)).TryCast<TextAsset>().Log(2).Log(2).text.Log(2));
-                        "Loggers".Log(2, "asset bundle");
+                        Bundle bundone = JsonConvert.DeserializeObject<Bundle>(bundle.LoadAsset("Assets/AssetListing.json").TryCast<TextAsset>().text);
 
                         uint assetId = bundone.BaseId;
                         foreach (string bundoneAsset in bundone.Assets)
-                            AddToCache(++assetId, bundoneAsset, hash, ResourceType.Asset, parentId);
+                            AddToCache(++assetId, bundoneAsset, hash, ResourceType.Asset, id);
                         cacheFile.ExtraData = bundone.Assets;
                         break;
-                    case ResourceType.Asset:
+                    }
+                    case ResourceType.Asset: {
                         cacheFile.ExtraData = parentId;
                         break;
+                    }
                 }
 
                 _cacheFiles[id] = cacheFile;
@@ -98,22 +101,25 @@ namespace PolusGG {
                 writer.Write(y.LocalLocation);
                 writer.Write(y.Location);
                 switch (y.Type) {
-                    case ResourceType.Assembly:
+                    case ResourceType.Assembly: {
                         writer.Write(y.ExtraData as string ?? string.Empty);
                         break;
-                    case ResourceType.AssetBundle:
+                    }
+                    case ResourceType.AssetBundle: {
                         var extra = (string[]) y.ExtraData;
                         writer.Write(extra.Length);
                         foreach (string s in extra) {
                             writer.Write(s);
                         }
                         break;
-                    case ResourceType.Asset:
-                        (y.ExtraData == null).Log();
-                        writer?.Write((uint) y.ExtraData);
+                    }
+                    case ResourceType.Asset: {
+                        writer.Write((uint) y.ExtraData);
                         break;
-                    default:
+                    }
+                    default: {
                         throw new ArgumentOutOfRangeException();
+                    }
                 }
             }
         }
@@ -127,7 +133,8 @@ namespace PolusGG {
         }
 
         private void DeserializeIndexFile(BinaryReader reader) {
-            CacheFile file = _cacheFiles[reader.ReadUInt32()] = new CacheFile {
+            uint id = reader.ReadUInt32();
+            CacheFile file = _cacheFiles[id] = new CacheFile {
                 Type = (ResourceType) reader.ReadByte(),
                 Hash = reader.ReadBytes(16),
                 LocalLocation = reader.ReadString(),
@@ -139,6 +146,7 @@ namespace PolusGG {
                 ResourceType.Asset => reader.ReadUInt32(),
                 _ => null
             };
+            (file.ExtraData == null).Log(comment: $"for null on {id} which is {file.Type}");
         }
 
         public void Invalidate() {

@@ -9,7 +9,7 @@ namespace PolusGG.Patches {
             Camera shadowCamera = __instance.GetComponent<Camera>();
 
             int res = Mathf.Max(Screen.width, Screen.height);
-            RenderTexture highResTexture = new RenderTexture(res, res, 0) {antiAliasing = 4};
+            RenderTexture highResTexture = new(res, res, 0) {antiAliasing = 4};
 
             shadowCamera.targetTexture = highResTexture;
             shadowCamera.allowMSAA = true;

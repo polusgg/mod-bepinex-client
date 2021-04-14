@@ -8,6 +8,7 @@ using PolusGG.Net;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 using UnityEngine.UI;
+using Object = UnityEngine.Object;
 
 namespace PolusGG.Inner {
     public class PolusClickBehaviour : PnoBehaviour {
@@ -36,15 +37,16 @@ namespace PolusGG.Inner {
             button.OnClick.AddListener(new Action(OnClick));
             button.Colliders = button.Colliders.AddItem(GetComponent<BoxCollider2D>()).ToArray();
             graphic = GetComponent<PolusGraphic>();
-            timerText = GetComponentInChildren<TextRenderer>();
             KillButtonManager kb = HudManager.Instance.KillButton;
             graphic.renderer.SetMaterial(kb.renderer.GetMaterial());
-            timerText.render.SetMaterial(kb.TimerText.render.GetMaterial());
-            timerText.FontData = kb.TimerText.FontData;
+            timerText = Instantiate(kb.TimerText, transform);
         }
 
         private void FixedUpdate() {
-            if (pno.HasSpawnData()) Deserialize(pno.GetSpawnData());
+            if (pno.HasSpawnData()) {
+                Deserialize(pno.GetSpawnData());
+                CooldownHelpers.SetCooldownNormalizedUvs(graphic.renderer);
+            }
             if (counting) {
                 currentTimer -= Time.deltaTime;
                 if (currentTimer < 0) currentTimer = 0;
@@ -57,25 +59,31 @@ namespace PolusGG.Inner {
                 currentTimer = reader.ReadSingle();
                 counting = reader.ReadBoolean();
                 color = new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
+            } else {
+                counting = false;
+                currentTimer = 0;
+                color = Palette.EnabledColor;
             }
         }
 
         public void SetCooldown()
         {
-            float num = Mathf.Clamp(currentTimer / maxTimer, 0f, 1f);
+            float num = Mathf.Clamp(currentTimer / maxTimer, 0f, 1f).Log();
             graphic.renderer.material.SetFloat(Percent, num);
-            bool isCoolingDown = num > 0f && counting;
+            bool isCoolingDown = num > 0f && counting && PlayerControl.LocalPlayer.CanMove;
             if (isCoolingDown)
             {
+                graphic.renderer.color = Palette.DisabledClear;
                 timerText.Text = Mathf.CeilToInt(currentTimer).ToString();
                 timerText.gameObject.SetActive(true);
                 timerText.Color = color;
                 return;
             }
             timerText.gameObject.SetActive(false);
+            graphic.renderer.color = Palette.EnabledColor;
         }
 
         public void OnClick() =>
-            AmongUsClient.Instance.SendRpcImmediately(pno.NetId, (byte) PolusRpcCalls.Click, SendOption.Reliable);
+            AmongUsClient.Instance.SendRpcImmediately(pno.NetId, (byte) PolusRpcCalls.Click);
     }
 }
