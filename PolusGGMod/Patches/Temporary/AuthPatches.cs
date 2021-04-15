@@ -16,8 +16,9 @@ namespace PolusGG.Patches.Temporary {
 
         private static HMAC _hmac = HMAC.Create();
         
-        [HarmonyPatch(typeof(InnerNetClient), nameof(UnityUdpClientConnection.WriteBytesToConnection))]
+        [HarmonyPatch(typeof(UnityUdpClientConnection), nameof(UnityUdpClientConnection.WriteBytesToConnection))]
         public class RuinPacketSending {
+            [HarmonyPrefix]
             public static void Prefix([HarmonyArgument(0)] ref Il2CppStructArray<byte> data, [HarmonyArgument(1)] ref int length) {
                 _hmac.Key = Encoding.UTF8.GetBytes(PolusAuth.Token);
                 byte[] hash = _hmac.ComputeHash(data, 0, length);

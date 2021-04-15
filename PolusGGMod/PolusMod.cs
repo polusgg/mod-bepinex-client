@@ -12,6 +12,7 @@ using PolusGG.Mods;
 using PolusGG.Net;
 using PolusGG.Patches.Temporary;
 using PolusGG.Resources;
+using TMPro;
 using UnityEngine;
 using Exception = System.Exception;
 using Object = UnityEngine.Object;
@@ -20,24 +21,24 @@ using StringComparison = System.StringComparison;
 namespace PolusGG {
     [Mod(Id, "1.0.0", "Sanae6")]
     public class PolusMod : Mod {
-        public const string Id = "PolusMod Lmoa";
+        public const string Id = "PolusMain";
         public bool loaded;
         public ICache Cache;
         public static RoleData RoleData = new();
 
         public override void Load() {
-            if (!loaded) {
-                loaded = true;
-            }
-
             Logger.LogInfo("Loaded " + Id);
         }
 
         public override void Start(IObjectManager objectManager, ICache cache) {
+            if (!loaded) {
+                loaded = true;
+            }
             objectManager.InnerRpcReceived += OnInnerRpcReceived;
             objectManager.Register(0x80, RegisterPnos.CreateImage());
             objectManager.Register(0x81, RegisterPnos.CreateButton());
             objectManager.Register(0x83, RegisterPnos.CreateDeadBodyPrefab());
+            objectManager.Register(0x85, RegisterPnos.CreateSoundSource());
             objectManager.Register(0x87, RegisterPnos.CreatePoi());
             objectManager.Register(0x88, RegisterPnos.CreateCameraController());
             objectManager.Register(0x89, RegisterPnos.CreatePrefabHandle());
@@ -242,6 +243,7 @@ namespace PolusGG {
                     uint back = reader.ReadPackedUInt32();
                     hat.ClimbImage = Cache.CachedFiles[reader.ReadPackedUInt32()].Get<Sprite>();
                     hat.FloorImage = Cache.CachedFiles[reader.ReadPackedUInt32()].Get<Sprite>();
+                    hat.AltShader = Cache.CachedFiles[reader.ReadPackedUInt32()].Get<Material>();
                     hat.ChipOffset = reader.ReadVector2();
                     hat.NoBounce = !reader.ReadBoolean();
                     if ((hat.InFront = !reader.ReadBoolean()) == true) {
@@ -252,8 +254,12 @@ namespace PolusGG {
                         hat.NotInStore = true;
                         hat.Free = false;
                     }
-                    
-                    
+
+                    HatManager.Instance.AllHats[(Index) (int) id] = hat;
+                    break;
+                }
+                case PolusRootPackets.DisplaySystemAnnouncement: {
+                    MaintenanceBehaviour.Instance.ShowToast(reader.ReadString());
                     break;
                 }
                 default: {

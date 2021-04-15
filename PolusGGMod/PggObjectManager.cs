@@ -79,7 +79,7 @@ namespace PolusGG {
 					return;
 				}
 
-				netId.Log(4, "l");
+				// netId.Log(4, "l");
 				if (!AddNetObject(polusNetObject)) {
 					polusNetObject.NetId = uint.MaxValue;
 					Object.Destroy(polusNetObject.PnoBehaviour.gameObject);
@@ -89,7 +89,7 @@ namespace PolusGG {
 				MessageReader messageReader = reader.ReadMessage();
 				if (messageReader.Length > 0) {
 					// childNetObject.GetType().FullName.Log(2);
-					messageReader.Length.Log(6, "spawn length");
+					// messageReader.Length.Log(6, "spawn length");
 					polusNetObject.Spawn(messageReader);
 					// "did it really".Log();
 				}

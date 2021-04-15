@@ -8,6 +8,7 @@ using BepInEx.Logging;
 using HarmonyLib;
 using PolusGG.Extensions;
 using PolusGG.Net;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Debug = System.Diagnostics.Debug;
@@ -25,6 +26,7 @@ namespace PolusGG {
         private static AssetBundle _bundle;
         public static IObjectManager ObjectManager;
 
+        public static TMP_FontAsset font;
         public static AssetBundle Bundle {
             get {
                 if (_bundle == null) {
@@ -62,6 +64,7 @@ namespace PolusGG {
                 ObjectManager = new PggObjectManager();
                 ModManager = new PggModManager(Log);
                 ModManager.LoadMods();
+                font = Bundle.LoadAsset("Assets/Fonts/ComicSansMs3 SDF.asset").Cast<TMP_FontAsset>();
             }
             catch (Exception e) {
                 Log.LogFatal($"Failed to load!");

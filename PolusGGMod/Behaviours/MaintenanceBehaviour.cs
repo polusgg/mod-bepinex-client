@@ -7,7 +7,7 @@ using UnhollowerRuntimeLib;
 using UnityEngine;
 
 namespace PolusGG.Behaviours {
-    public class MaintenanceBehaviour : MonoBehaviour {
+    public class MaintenanceBehaviour : DestroyableSingleton<MaintenanceBehaviour> {
         private static GameObject disguisedToast;
         private CoroutineManager coroutineManager;
         private float duration = 1f;
@@ -54,9 +54,9 @@ namespace PolusGG.Behaviours {
 
             yield return new WaitForSeconds(10f);
             
-            // top = AspectPosition.ComputePosition(AspectPosition.EdgeAlignments.Top, new Vector3(0, distance, -10f));
-            // vec = AspectPosition.ComputePosition(AspectPosition.EdgeAlignments.Top, new Vector3(0, -distance, -10f));
-            // yield return Effects.Slide2D(toastransform, top, vec, duration);
+            top = AspectPosition.ComputePosition(AspectPosition.EdgeAlignments.Top, new Vector3(0, distance, -10f));
+            vec = AspectPosition.ComputePosition(AspectPosition.EdgeAlignments.Top, new Vector3(0, -distance, -10f));
+            yield return Effects.Slide2D(toastransform, top, vec, duration);
         }
     }
 }
