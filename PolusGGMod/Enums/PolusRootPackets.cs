@@ -6,8 +6,8 @@
         EndGame = 0x83,
         SetString = 0x84,
         DeclareHat = 0x85,
-        SetGameOptions = 0x89,
-        DeleteGameOptions = 0x8A,
+        SetGameOption = 0x89,
+        DeleteGameOption = 0x8A,
         DisplaySystemAnnouncement = 0xFA,
     }
 }

@@ -10,7 +10,7 @@
         <GameVersion>2021.4.12s</GameVersion>
 <!--        <Mappings>2021.4.12s.json</Mappings>-->
         <Mappings>NuclearPowered/Mappings:0.4.0</Mappings>
-        <AmongUs>C:\Users\Sanae\Downloads\depotdownloader-2.3.6\depots\945361\6529205</AmongUs>
+        <AmongUs>../../../AmongUsModded2021.4.12</AmongUs>
         <Description>Polus.gg official mod</Description>
         <Authors>Sanae6</Authors>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>

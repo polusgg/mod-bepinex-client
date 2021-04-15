@@ -262,6 +262,44 @@ namespace PolusGG {
                     MaintenanceBehaviour.Instance.ShowToast(reader.ReadString());
                     break;
                 }
+                case PolusRootPackets.SetGameOption:
+                {
+
+                    var name = reader.ReadString();
+                    var optionType = (OptionType) reader.ReadByte();
+                    
+                    if (GameOptionsPatches.Options.TryGetValue(name, out GameOption option))
+                    {
+                        option.Value = optionType switch
+                        {
+                            OptionType.Boolean => new BooleanValue(reader.ReadBoolean()),
+                            OptionType.Number => new FloatValue(reader.ReadSingle(), reader.ReadSingle(),
+                                reader.ReadSingle(), reader.ReadSingle()),
+                            OptionType.Enum => EnumValue.ConstructEnumValue(reader.ReadPackedUInt32(),
+                                reader.ReadPackedUInt32(), reader),
+                            _ => throw new ArgumentOutOfRangeException()
+                        };
+                    }
+                    else
+                    {
+                        GameOptionsPatches.Options.Add(name, new GameOption
+                        {
+                            Type = optionType,
+                            Value = optionType switch
+                            {
+                                OptionType.Boolean => new BooleanValue(reader.ReadBoolean()),
+                                OptionType.Number => new FloatValue(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()),
+                                OptionType.Enum => EnumValue.ConstructEnumValue(reader.ReadPackedUInt32(), reader.ReadPackedUInt32(), reader),
+                                _ => throw new ArgumentOutOfRangeException()
+                            }
+                        });
+                    }
+                    break;
+                }
+                case PolusRootPackets.DeleteGameOption:
+                {
+                    break;
+                }
                 default: {
                     Logger.LogError($"Invalid packet with id {reader.Tag}");
                     break;
