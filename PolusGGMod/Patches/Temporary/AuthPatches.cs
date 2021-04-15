@@ -23,7 +23,7 @@ namespace PolusGG.Patches.Temporary {
                 byte[] hash = _hmac.ComputeHash(data, 0, length);
                 byte[] output = new byte[1 + UuidSize + HashSize + length];
                 output[0] = AuthByte;
-                PolusAuth.Uuid.CopyTo(output, 1);
+                PolusAuth.Uuid.CopyTo(0, output, 1, PolusAuth.Uuid.Length);
                 hash.CopyTo(output, 1 + UuidSize);
                 data.CopyTo(output, 1 + UuidSize + HashSize);
                 data = output;

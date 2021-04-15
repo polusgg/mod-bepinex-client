@@ -5,8 +5,6 @@ using System.Linq;
 using System.Reflection;
 using BepInEx.Logging;
 using PolusGG.Mods;
-using PolusGG.Net;
-using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace PolusGG {

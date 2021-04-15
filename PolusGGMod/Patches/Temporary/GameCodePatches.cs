@@ -3,6 +3,7 @@ using InnerNet;
 
 namespace PolusGG.Patches.Temporary {
     public class GameCodePatches {
+        
         [HarmonyPatch(typeof(GameCode), nameof(GameCode.GameNameToInt))]
         public class GameNameToIntPatch {
             [HarmonyPrefix]

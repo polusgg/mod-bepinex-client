@@ -22,8 +22,16 @@ namespace PolusGG.Patches.Permanent {
             PggConstants.Region.cachedServers = new[] {
                 new ServerInfo(PggConstants.Region.Name, PggConstants.Region.DefaultIp, PggConstants.Region.Port)
             };
-            ServerManager.DefaultRegions =
-                ServerManager.DefaultRegions.Prepend(PggConstants.Region.Duplicate()).ToArray();
+            // ServerManager.DefaultRegions =
+            //     ServerManager.DefaultRegions.Prepend(PggConstants.Region.Duplicate()).ToArray();
+
+            ServerManager.DefaultRegions = new[]
+            {
+                new StaticRegionInfo("Polus.gg Modded", StringNames.NoTranslation, "127.0.0.1", new[]
+                {
+                    new ServerInfo("Polus.gg Modded", "127.0.01", 22023)
+                }).Cast<IRegionInfo>()
+            };
             // __instance.CurrentRegion = PggConstants.Region.Duplicate();
             // __instance.CurrentServer = (from s in __instance.AvailableServers
             // orderby s.ConnectionFailures, s.Players
