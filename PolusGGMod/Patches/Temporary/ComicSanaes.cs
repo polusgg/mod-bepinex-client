@@ -10,7 +10,7 @@ namespace PolusGG.Patches.Temporary {
         [PermanentPatch]
         [HarmonyPrefix]
         public static void Lmao(TextMeshPro __instance) {
-            __instance.color = Color.black;
+            __instance.outlineColor = Color.black;
             __instance.SetOutlineThickness(0.4f);
             __instance.font = PogusPlugin.font;
             // __instance.LoadFontAsset();

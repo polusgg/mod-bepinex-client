@@ -52,8 +52,7 @@ namespace PolusGG.Patches.Temporary {
         public class SetYoMamaUp {
             [HarmonyPrefix]
             public static void Prefix() {
-                // TempData.winners.Log(5, "lmao");
-                if (TempData.EndReason == (GameOverReason) 7) return;
+                if (TempData.EndReason != (GameOverReason) 7) return;
                 TempData.winners.Clear();
                 foreach (WinningPlayerData winningPlayerData in PolusMod.RoleData.OutroPlayers) {
                     TempData.winners.Add(winningPlayerData);
@@ -62,7 +61,7 @@ namespace PolusGG.Patches.Temporary {
 
             [HarmonyPostfix]
             public static void Postfix(EndGameManager __instance) {
-                if (TempData.EndReason == (GameOverReason) 7) return;
+                if (TempData.EndReason != (GameOverReason) 7) return;
                 SoundManager.Instance.StopSound(__instance.DisconnectStinger);
                 __instance.WinText.text = PolusMod.RoleData.OutroName;
                 __instance.BackgroundBar.material.SetColor(Color, PolusMod.RoleData.OutroColor);
@@ -78,6 +77,7 @@ namespace PolusGG.Patches.Temporary {
         public class SetYoMamaUpTheSequel {
             [HarmonyPrefix]
             public static void YoMama(EndGameManager._CoBegin_d__18 __instance) {
+                if (TempData.EndReason != (GameOverReason) 7) return;
                 float num = Mathf.Min(1f, __instance._timer_5__5 / 3f);
                 _descColor.a = Mathf.Lerp(0f, PolusMod.RoleData.OutroColor.a, (num - 0.3f) * 3f);
                 _winDescText.Color = _descColor;
@@ -88,7 +88,7 @@ namespace PolusGG.Patches.Temporary {
         public class SetYoMamaUpAClassicOutroTrilogy {
             [HarmonyPostfix]
             public static void Start(EndGameManager __instance) {
-                if (TempData.EndReason == (GameOverReason) 7) return;
+                if (TempData.EndReason != (GameOverReason) 7) return;
                 __instance.CancelInvoke();
             }
         }

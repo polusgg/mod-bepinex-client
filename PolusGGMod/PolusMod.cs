@@ -309,8 +309,7 @@ namespace PolusGG {
 
         public override void LobbyJoined() {
             Logger.LogInfo("Joined Lobby!");
-            GameObject maintenance = new("MaintenanceAlert");
-            maintenance.AddComponent<MaintenanceBehaviour>();
+            new GameObject().AddComponent<MaintenanceBehaviour>();
         }
 
         public override void LobbyLeft() {

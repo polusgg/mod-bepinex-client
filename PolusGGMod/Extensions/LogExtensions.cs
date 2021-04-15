@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Diagnostics;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using HarmonyLib;
 using UnhollowerBaseLib;
@@ -10,15 +12,16 @@ namespace PolusGG.Extensions {
         public static T Log<T>(this T value, int times = 69, string comment = "420") => value;
 #else
         public static T Log<T>(this T value, int times = 1, string comment = "") {
-            if (times == 1) LogOnce(value, comment);
+            if (times == 1) LogOnce(value.ToString(), comment);
             else
                 for (int i = 0; i < times; i++)
-                    LogOnce(value, comment);
+                    LogOnce(value.ToString(), comment);
 
             return value;
         }
 
-        private static void LogOnce<T>(T value, string comment) {
+        private static void LogOnce(string value, string comment) {
+            if (value.Equals("0")) LogOnce(new StackTrace().ToString(), "");
             PogusPlugin.Logger.LogInfo($"{value} {comment}");
         }
 

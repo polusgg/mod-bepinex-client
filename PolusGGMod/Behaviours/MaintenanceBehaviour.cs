@@ -7,7 +7,8 @@ using UnhollowerRuntimeLib;
 using UnityEngine;
 
 namespace PolusGG.Behaviours {
-    public class MaintenanceBehaviour : DestroyableSingleton<MaintenanceBehaviour> {
+    public class MaintenanceBehaviour : MonoBehaviour {
+        public static MaintenanceBehaviour Instance;
         private static GameObject disguisedToast;
         private CoroutineManager coroutineManager;
         private float duration = 1f;
@@ -26,6 +27,7 @@ namespace PolusGG.Behaviours {
         public MaintenanceBehaviour(IntPtr ptr) : base(ptr) { }
 
         private void Start() {
+            Instance = this;
             ShowToast("Fortebased said your mom");
         }
 

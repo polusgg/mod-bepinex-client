@@ -36,7 +36,13 @@ namespace PolusGG {
                 }
 
                 if (scene.name == "MMOnline") {
-                    AccountMenu.InitializeAccountMenu(scene);
+                    // AccountMenu.InitializeAccountMenu(scene);
+                    /*
+                     * [Error  :Unhollower] Exception in IL2CPP-to-Managed trampoline, not passing it to il2cpp: System.NullReferenceException: Object reference not set to an instance of an object
+  at PolusGG.AccountMenu.InitializeAccountMenu (UnityEngine.SceneManagement.Scene scene) [0x000d8] in <dfdb1e9cdbae4917936027d2a7370784>:0
+  at PolusGG.PggModManager.<.ctor>b__7_0 (UnityEngine.SceneManagement.Scene scene, UnityEngine.SceneManagement.LoadSceneMode mode) [0x000c6] in <dfdb1e9cdbae4917936027d2a7370784>:0
+  at (wrapper dynamic-method) UnhollowerRuntimeLib.DelegateSupport.(il2cpp delegate trampoline) System.Void_UnityEngine.SceneManagement.Scene_UnityEngine.SceneManagement.LoadSceneMode(intptr,UnityEngine.SceneManagement.Scene,UnityEngine.SceneManagement.LoadSceneMode,UnhollowerBaseLib.Runtime.Il2CppMethodInfo*)
+                     */
                 }
             }));
         }

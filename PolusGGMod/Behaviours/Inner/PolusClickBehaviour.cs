@@ -27,7 +27,6 @@ namespace PolusGG.Behaviours.Inner {
         private TMP_Text timerText;
 
         private static readonly int Percent = Shader.PropertyToID("_Percent");
-        // private 
 
         private void Start() {
             pno = PogusPlugin.ObjectManager.LocateNetObject(this);
@@ -51,7 +50,7 @@ namespace PolusGG.Behaviours.Inner {
             }
 
             if (counting) {
-                currentTimer -= Time.deltaTime;
+                currentTimer -= Time.fixedDeltaTime;
                 if (currentTimer < 0) currentTimer = 0;
             }
 
@@ -71,7 +70,7 @@ namespace PolusGG.Behaviours.Inner {
         }
 
         public void SetCooldown() {
-            float num = Mathf.Clamp(currentTimer / maxTimer, 0f, 1f).Log();
+            float num = Mathf.Clamp(currentTimer / maxTimer, 0f, 1f);
             graphic.renderer.material.SetFloat(Percent, num);
             bool isCoolingDown = num > 0f && counting && PlayerControl.LocalPlayer.CanMove;
             if (isCoolingDown) {

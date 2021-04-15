@@ -104,9 +104,9 @@ namespace PolusGG {
 			// {
 			// 	_netIdCnt = num;
 			// }
-			_allObjectsFast.Log(2);
-			polusNetObject.Log(2);
-			polusNetObject.NetId.Log(2);
+			// _allObjectsFast.Log(2);
+			// polusNetObject.Log(2);
+			// polusNetObject.NetId.Log(2);
 			
 			_allObjects.Add(polusNetObject);
 			_allObjectsFast.Add(polusNetObject.NetId, polusNetObject);
