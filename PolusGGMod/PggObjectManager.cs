@@ -17,12 +17,11 @@ namespace PolusGG {
 
 		[DllImport("user32.dll")]
 		private static extern void MessageBox(IntPtr hwnd, string text, string caption, uint type = 4);
-		//yeah ????? lol it's so fucking easy
 
 		public void Register(uint index, PnoBehaviour netObject) {
 			PogusPlugin.Logger.LogInfo($"Registered {netObject.GetType().Name} at index {index}");
 			_spawnObjects[index] = netObject;
-		}// you're laughin at me shut the fuck up
+		}
 
 		public PolusNetObject LocateNetObject(PnoBehaviour netBehaviour) {
 			return _allObjects.Find(x => x.PnoBehaviour.Pointer == netBehaviour.Pointer);
@@ -32,10 +31,10 @@ namespace PolusGG {
 			return _allObjectsFast[netId];
 		}
 
-		public event EventHandler<RpcEventArgs> InnerRpcReceived;
+		public event Action<InnerNetObject, MessageReader, byte> InnerRpcReceived;
 
-		public void HandleInnerRpc(InnerNetObject netObject, RpcEventArgs args) {
-			InnerRpcReceived?.Invoke(netObject, args);
+		public void HandleInnerRpc(InnerNetObject netObject, MessageReader reader, byte callId) {
+			InnerRpcReceived?.Invoke(netObject, reader, callId);
 		}
 
 		public void HandleSpawn(uint spawnType, MessageReader reader) {

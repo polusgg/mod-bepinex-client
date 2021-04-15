@@ -21,9 +21,9 @@ using StringComparison = System.StringComparison;
 namespace PolusGG {
     [Mod(Id, "1.0.0", "Sanae6")]
     public class PolusMod : Mod {
-        public const string Id = "PolusMain";
-        public bool loaded;
-        public ICache Cache;
+        private const string Id = "PolusMain";
+        private bool loaded;
+        private ICache Cache;
         public static RoleData RoleData = new();
 
         public override void Load() {
@@ -51,12 +51,11 @@ namespace PolusGG {
 
         public override void Unload() { }
 
-        private void OnInnerRpcReceived(object sender, RpcEventArgs e) {
-            InnerNetObject netObject = (InnerNetObject) sender;
+        private void OnInnerRpcReceived(InnerNetObject netObject, MessageReader reader, byte callId) {
             PlayerControl playerControl;
-            switch ((PolusRpcCalls) e.callId) {
+            switch ((PolusRpcCalls) callId) {
                 case PolusRpcCalls.ChatVisibility: {
-                    var lol = e.reader.ReadByte() > 0;
+                    var lol = reader.ReadByte() > 0;
                     if (HudManager.Instance.Chat.gameObject.active != lol)
                         HudManager.Instance.Chat.SetVisible(lol);
                     break;
@@ -69,7 +68,7 @@ namespace PolusGG {
                 case PolusRpcCalls.SetRole: {
                     playerControl = netObject.Cast<PlayerControl>();
 
-                    if (e.reader.ReadBoolean()) {
+                    if (reader.ReadBoolean()) {
                         if (playerControl == PlayerControl.LocalPlayer) {
                             DestroyableSingleton<HudManager>.Instance.KillButton.gameObject.SetActive(true);
                             playerControl.SetKillTimer(PlayerControl.GameOptions.KillCooldown);
@@ -101,21 +100,21 @@ namespace PolusGG {
                     break;
                 }
                 case PolusRpcCalls.SetHat: {
-                    Cache.CachedFiles[e.reader.ReadPackedUInt32()].Get<Sprite>();
-                    Cache.CachedFiles[e.reader.ReadPackedUInt32()].Get<Sprite>();
-                    Cache.CachedFiles[e.reader.ReadPackedUInt32()].Get<Sprite>();
+                    Cache.CachedFiles[reader.ReadPackedUInt32()].Get<Sprite>();
+                    Cache.CachedFiles[reader.ReadPackedUInt32()].Get<Sprite>();
+                    Cache.CachedFiles[reader.ReadPackedUInt32()].Get<Sprite>();
                     break;
                 }
                 case PolusRpcCalls.SetOpacity: {
                     PlayerControl control = netObject.Cast<PlayerControl>();
                     var color = control.myRend.color;
-                    color = new Color(color.r, color.g, color.b, e.reader.ReadByte() / 255f);
+                    color = new Color(color.r, color.g, color.b, reader.ReadByte() / 255f);
                     control.myRend.color = color;
-                    control.MyPhysics.Skin.layer.color = new Color32(Byte.MaxValue, Byte.MaxValue, Byte.MaxValue, e.reader.ReadByte());
+                    control.MyPhysics.Skin.layer.color = new Color32(Byte.MaxValue, Byte.MaxValue, Byte.MaxValue, reader.ReadByte());
                     break;
                 }
                 case PolusRpcCalls.DespawnAllVents: {
-                    IEnumerable<int> enumerable = Enumerable.Range(0, e.reader.ReadByte()).Select(_ => (int)e.reader.ReadByte());
+                    IEnumerable<int> enumerable = Enumerable.Range(0, reader.ReadByte()).Select(_ => (int)reader.ReadByte());
                     IEnumerable<Vent> vents = Object.FindObjectsOfType<Vent>().Where(v => enumerable.Contains<int>(v.Id));
                     foreach (Vent vent in vents) {
                         Object.Destroy(vent);
@@ -123,10 +122,9 @@ namespace PolusGG {
                     break;
                 }
                 case PolusRpcCalls.BeginAnimationPlayer:
-                    while (e.reader.Position < e.reader.Length) {
-                        MessageReader message = e.reader.ReadMessage();
-                        
-                    }
+                    playerControl = netObject.Cast<PlayerControl>();
+                    PlayerAnimPlayer anim = playerControl.gameObject.EnsureComponent<PlayerAnimPlayer>();
+                    anim.HandleMessage(reader);
                     break;
                 default: {
                     throw new ArgumentOutOfRangeException();
@@ -246,7 +244,8 @@ namespace PolusGG {
                     hat.AltShader = Cache.CachedFiles[reader.ReadPackedUInt32()].Get<Material>();
                     hat.ChipOffset = reader.ReadVector2();
                     hat.NoBounce = !reader.ReadBoolean();
-                    if ((hat.InFront = !reader.ReadBoolean()) == true) {
+                    // ReSharper disable once AssignmentInConditionalExpression (resharper can whine and cry at my superior intellect
+                    if (hat.InFront = !reader.ReadBoolean()) {
                         Cache.CachedFiles[back].Get<Sprite>();
                     }
 

@@ -96,7 +96,7 @@ namespace PolusGG.Patches.Temporary {
                             // PogusPlugin.Logger.LogInfo($"WOO RPC FOR {call}");
                             if (call >= 0x80)
                                 PogusPlugin.ObjectManager.HandleInnerRpc(instance.allObjectsFast[netId],
-                                    new RpcEventArgs(call, reader));
+                                    reader, call);
                             else instance.allObjectsFast[netId].HandleRpc(call, reader);
                             return false;
                         }

@@ -61,7 +61,7 @@ namespace PolusGG.Behaviours.Inner {
         private IEnumerator CoPlayAnimation(CameraKeyframe[] frames, bool reset) {
             CameraKeyframe resetTo = SerializeCurrentState();
             CameraKeyframe previous = resetTo;
-            CameraKeyframe current = null;
+            CameraKeyframe current;
 
             for (int i = 0; i < frames.Length; i++) {
                 current = frames[i];
@@ -70,12 +70,7 @@ namespace PolusGG.Behaviours.Inner {
                 yield return Effects.Lerp(current.Duration / 1000f, new Action<float>(dt => {
                     current.CameraOffset = Vector2.Lerp(previous.CameraOffset, current.CameraOffset, dt);
                     current.Angle = Mathf.Lerp(previous.Angle, current.Angle, dt);
-                    current.OverlayColor = new Color(
-                        Mathf.Lerp(previous.OverlayColor.r, current.OverlayColor.r, dt),
-                        Mathf.Lerp(previous.OverlayColor.g, current.OverlayColor.g, dt),
-                        Mathf.Lerp(previous.OverlayColor.b, current.OverlayColor.b, dt),
-                        Mathf.Lerp(previous.OverlayColor.a, current.OverlayColor.a, dt)
-                    );
+                    current.OverlayColor = Color.Lerp(previous.OverlayColor, current.OverlayColor, dt);
                 }));
 
                 previous = current;

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using Hazel;
+using PolusGG.Extensions;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 
@@ -20,10 +22,66 @@ namespace PolusGG.Behaviours {
 
         public void HandleMessage(MessageReader reader) {
             //todo handle player messages reading like camera controller
+            List<PlayerKeyframe> playerKeyframes = new();
+            while (reader.Position < reader.Length - 1) {
+                MessageReader message = reader.ReadMessage();
+                playerKeyframes.Add(new PlayerKeyframe {
+                    Offset = message.ReadPackedUInt32(),
+                    Duration = message.ReadPackedUInt32(),
+                    PlayerOpacity = message.ReadSingle(),
+                    HatOpacity = message.ReadSingle(),
+                    PetOpacity = message.ReadSingle(),
+                    SkinOpacity = message.ReadSingle(),
+                    Scale = message.ReadVector2(),
+                    Position = message.ReadVector2(),
+                    Angle = message.ReadSingle(),
+                });
+            }
+
+            this.StartCoroutine(CoPlayAnimation(playerKeyframes.ToArray(), reader.ReadBoolean()));
         }
 
-        public IEnumerator CoPlayAnimation() {
-            yield break;
+        public IEnumerator CoPlayAnimation(PlayerKeyframe[] frames, bool reset) {
+            PlayerKeyframe resetTo = SerializeCurrentState();
+            PlayerKeyframe previous = resetTo;
+            PlayerKeyframe current;
+
+            for (int i = 0; i < frames.Length; i++) {
+                current = frames[i];
+
+                yield return new WaitForSeconds(current.Offset / 1000f);
+                yield return Effects.Lerp(current.Duration / 1000f, new Action<float>(dt => {
+                    current.PlayerOpacity = Mathf.Lerp(previous.PlayerOpacity, current.PlayerOpacity, dt);
+                    current.HatOpacity = Mathf.Lerp(previous.HatOpacity, current.HatOpacity, dt);
+                    current.PetOpacity = Mathf.Lerp(previous.PetOpacity, current.PetOpacity, dt);
+                    current.SkinOpacity = Mathf.Lerp(previous.SkinOpacity, current.SkinOpacity, dt);
+                    current.SetPlayerColors(
+                        Color.Lerp(previous.MainColor, current.MainColor, dt),
+                        Color.Lerp(previous.MainColor, current.MainColor, dt),
+                        Color.Lerp(previous.MainColor, current.MainColor, dt)
+                    );
+                    current.Scale = Vector2.Lerp(previous.Scale, current.Scale, dt);
+                    current.Position = Vector2.Lerp(previous.Position, current.Position, dt);
+                    current.Angle = Mathf.Lerp(previous.Angle, current.Angle, dt);
+                }));
+
+                previous = current;
+            }
+
+            if (reset) {
+                resetTo.PlayerOpacity = resetTo.PlayerOpacity;
+                resetTo.HatOpacity = resetTo.HatOpacity;
+                resetTo.PetOpacity = resetTo.PetOpacity;
+                resetTo.SkinOpacity = resetTo.SkinOpacity;
+                resetTo.SetPlayerColors(resetTo.MainColor, resetTo.ShadowColor, resetTo.VisorColor);
+                resetTo.Scale = resetTo.Scale;
+                resetTo.Position = resetTo.Position;
+                resetTo.Angle = resetTo.Angle;
+            }
+        }
+
+        private PlayerKeyframe SerializeCurrentState() {
+            throw new NotImplementedException();
         }
 
         public class PlayerKeyframe {
@@ -62,9 +120,9 @@ namespace PolusGG.Behaviours {
                 set => playerControl.MyPhysics.Skin.layer.color = new Color(1f, 1f, 1f, value);
             }
 
-            public Color32 MainColor => mainColor;
-            public Color32 ShadowColor => shadowColor;
-            public Color32 VisorColor => visorColor;
+            public Color MainColor => mainColor;
+            public Color ShadowColor => shadowColor;
+            public Color VisorColor => visorColor;
 
             public Vector2 Scale {
                 get => scale;
@@ -89,8 +147,12 @@ namespace PolusGG.Behaviours {
                     transform1.eulerAngles = ea;
                 }
             }
-            
-            
+
+            public void SetPlayerColors(Color playerColor, Color shadowColor, Color visorColor) {
+                playerControl.myRend.material.SetColor("_BackColor", playerColor);
+                playerControl.myRend.material.SetColor("_BodyColor", shadowColor);
+                playerControl.myRend.material.SetColor("_VisorColor", visorColor);
+            }
         }
     }
 }

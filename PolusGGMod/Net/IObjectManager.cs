@@ -12,8 +12,8 @@ namespace PolusGG.Net {
         /// <param name="netObject"></param>
         public void Register(uint index, PnoBehaviour netObject);
         public PolusNetObject LocateNetObject(PnoBehaviour netBehaviour);
-        public event EventHandler<RpcEventArgs> InnerRpcReceived;
-        public void HandleInnerRpc(InnerNetObject netObject, RpcEventArgs args);
+        public event Action<InnerNetObject, MessageReader, byte> InnerRpcReceived;
+        public void HandleInnerRpc(InnerNetObject netObject, MessageReader reader, byte callId);
         public void HandleSpawn(uint spawnType, MessageReader reader);
         public void RemoveNetObject(PolusNetObject obj);
         public bool HasObject(uint netId, out PolusNetObject obj);
