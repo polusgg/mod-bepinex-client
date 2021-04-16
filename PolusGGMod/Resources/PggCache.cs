@@ -30,7 +30,7 @@ namespace PolusGG {
                     _client.GetAsync(PggConstants.DownloadServer + location,
                         HttpCompletionOption.ResponseHeadersRead).Result;
                 if (!responseMessage.IsSuccessStatusCode) {
-                    //todo log and report failure on startup or during server requested download
+                    PlayerControl.LocalPlayer.SetThickAssAndBigDumpy(true, true);
                     PogusPlugin.Logger.LogFatal($"Failed with: {responseMessage.StatusCode}");
                     throw new CacheRequestException($"Unsuccessful attempt at getting {location}",
                         responseMessage.StatusCode);

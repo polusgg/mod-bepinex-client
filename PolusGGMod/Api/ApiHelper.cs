@@ -1,10 +1,11 @@
 ﻿using System.Net;
+using System.Net.Http;
 
 namespace PolusGG.Api {
     public static class ApiHelper {
-        internal static WebClient WebClient;
+        internal static HttpClient Client;
         static ApiHelper() {
-            WebClient = new WebClient();
+            Client = new HttpClient();
         }
     }
 }

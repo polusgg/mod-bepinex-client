@@ -74,7 +74,7 @@ namespace PolusGG.Behaviours.Inner {
             graphic.renderer.material.SetFloat(Percent, num);
             bool isCoolingDown = num > 0f && counting && PlayerControl.LocalPlayer.CanMove;
             if (isCoolingDown) {
-                graphic.renderer.color = Palette.DisabledClear;
+                graphic.renderer.color = Palette.EnabledColor;
                 timerText.text = Mathf.CeilToInt(currentTimer).ToString();
                 timerText.gameObject.SetActive(true);
                 timerText.color = color;

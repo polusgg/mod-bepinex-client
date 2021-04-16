@@ -145,7 +145,7 @@ namespace PolusGG {
                         Logger.LogInfo($"{resource} is already cached");
                         writer = StartSendResourceResponse(resource, ResponseType.DownloadEnded);
                         writer.Write(1);
-                        EndSendResourceResponse(writer);
+                        EndSend(writer);
                         return;
                     }
 
@@ -155,7 +155,7 @@ namespace PolusGG {
                             (ResourceType) resourceType);
                         writer = StartSendResourceResponse(resource, ResponseType.DownloadEnded);
                         writer.Write(0);
-                        EndSendResourceResponse(writer);
+                        EndSend(writer);
                         Logger.LogInfo($"Cached {resource}!");
                     } catch (Exception e) {
                         Logger.LogError($"Failed to cache {resource}");
@@ -167,7 +167,7 @@ namespace PolusGG {
                             writer.WritePacked(0x69420);
                         }
 
-                        EndSendResourceResponse(writer);
+                        EndSend(writer);
                     }
 
                     break;
@@ -274,8 +274,7 @@ namespace PolusGG {
                             OptionType.Boolean => new BooleanValue(reader.ReadBoolean()),
                             OptionType.Number => new FloatValue(reader.ReadSingle(), reader.ReadSingle(),
                                 reader.ReadSingle(), reader.ReadSingle()),
-                            OptionType.Enum => EnumValue.ConstructEnumValue(reader.ReadPackedUInt32(),
-                                reader.ReadPackedUInt32(), reader),
+                            OptionType.Enum => EnumValue.ConstructEnumValue(reader),
                             _ => throw new ArgumentOutOfRangeException()
                         };
                     }
@@ -288,7 +287,7 @@ namespace PolusGG {
                             {
                                 OptionType.Boolean => new BooleanValue(reader.ReadBoolean()),
                                 OptionType.Number => new FloatValue(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()),
-                                OptionType.Enum => EnumValue.ConstructEnumValue(reader.ReadPackedUInt32(), reader.ReadPackedUInt32(), reader),
+                                OptionType.Enum => EnumValue.ConstructEnumValue(reader),
                                 _ => throw new ArgumentOutOfRangeException()
                             }
                         });
@@ -325,7 +324,7 @@ namespace PolusGG {
             return writer;
         }
 
-        private void EndSendResourceResponse(MessageWriter writer) {
+        public static void EndSend(MessageWriter writer) {
             writer.EndMessage();
             AmongUsClient.Instance.SendOrDisconnect(writer);
             writer.Recycle();

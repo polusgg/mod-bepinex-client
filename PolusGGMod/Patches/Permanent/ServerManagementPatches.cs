@@ -12,7 +12,7 @@ namespace PolusGG.Patches.Permanent {
         [PermanentPatch]
         [HarmonyPrefix]
         public static bool Prefix(ServerManager __instance) {
-            if (_hasStarted) return false;
+            if (_hasStarted) return true;
             _hasStarted = true;
 
             PogusPlugin.ModManager.StartMods();

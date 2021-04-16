@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Linq;
 using PolusGG.Extensions;
+using TMPro;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -18,7 +20,7 @@ namespace PolusGG.Resources {
 		}
 
 		public T Get<T>() where T : Object {
-			if (Type != ResourceType.Asset) throw new Exception("Invalid Get call to non-asset");
+			if (Type != ResourceType.Asset) throw new Exception($"Invalid Get call to non-asset {Type} {PogusPlugin.Cache.CachedFiles.First(x => x.Value == this).Key}");
 			// return ICache.Instance.CachedFiles[(uint) cacheFile.ExtraData].LoadAssetBundle().LoadAsset(cacheFile.Location).Cast<T>();
 			if (InternalData == null) {
 				T dontDestroy = PogusPlugin.Cache.CachedFiles[(uint) ExtraData].LoadAssetBundle().LoadAsset(Location).Cast<T>().DontDestroy();

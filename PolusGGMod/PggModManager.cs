@@ -36,7 +36,7 @@ namespace PolusGG {
                 }
 
                 if (scene.name == "MMOnline") {
-                    // AccountMenu.InitializeAccountMenu(scene);
+                    AccountMenu.InitializeAccountMenu(scene);
                     /*
                      * [Error  :Unhollower] Exception in IL2CPP-to-Managed trampoline, not passing it to il2cpp: System.NullReferenceException: Object reference not set to an instance of an object
   at PolusGG.AccountMenu.InitializeAccountMenu (UnityEngine.SceneManagement.Scene scene) [0x000d8] in <dfdb1e9cdbae4917936027d2a7370784>:0

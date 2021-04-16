@@ -10,35 +10,22 @@ namespace PolusGG.Api {
         public static bool IsPlayerSignedIn { get; private set; }
 
         public static bool Login(string email, string password) {
-            ApiHelper.WebClient.BaseAddress = PggConstants.AuthBaseUrl;
+            ApiHelper.Client.BaseAddress = new Uri(PggConstants.AuthBaseUrl);
+            //
+            // var response = ApiHelper.Client.PostAsync("/auth/token", JsonConvert.SerializeObject(new {
+            //     Email = email,
+            //     Authorization = $"Bearer {password}"
+            // }));
 
-            var response = ApiHelper.WebClient.UploadString("/log-in", JsonConvert.SerializeObject(new {
-                Email = email,
-                Authorization = $"Bearer {password}"
-            }));
-
-            var obj = JsonConvert.DeserializeObject(response);
-            if (obj is LogInSuccess success) {
-                Uuid = new Guid(success.Data.ClientId);
-                Token = success.Data.ClientToken;
-                
-                return true;
-            } else {
+            // var obj = JsonConvert.DeserializeObject(response);
+            // if (obj is LogInSuccess success) {
+            //     Uuid = new Guid(success.Data.ClientId);
+            //     Token = success.Data.ClientToken;
+            //     
+            //     return true;
+            // } else {
                 return false;
-            }
-        }
-
-        public static bool GetUserInfo() {
-            var response = ApiHelper.WebClient.UploadString("/log-in", JsonConvert.SerializeObject(new {
-                Authorization = $"Bearer {Token}"
-            }));
-
-            var obj = JsonConvert.DeserializeObject(response);
-            if (obj is UserDataResponse dataResponse) {
-                DisplayName = dataResponse.Data.DisplayName;
-            }
-
-            return false;
+            // }
         }
     }
 }

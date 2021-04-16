@@ -64,14 +64,13 @@ namespace PolusGG {
                 ObjectManager = new PggObjectManager();
                 ModManager = new PggModManager(Log);
                 ModManager.LoadMods();
-                font = Bundle.LoadAsset("Assets/Fonts/ComicSansMs3 SDF.asset").Cast<TMP_FontAsset>();
             }
             catch (Exception e) {
                 Log.LogFatal($"Failed to load!");
                 Log.LogFatal(e);
                 throw;
             }
-
+            font = Bundle.LoadAsset("Assets/Fonts/ComicSansMs3 SDF.asset").Cast<TMP_FontAsset>();
             ModManager.PostLoad = true;
         }
 

@@ -38,13 +38,13 @@ namespace PolusGG.Behaviours.Inner {
 
             Vector2 posv2 = transform.position;
             Vector2 p = _target - posv2;
-            if (p.sqrMagnitude >= 0.0001f) {
-                p *= Vector2.Lerp(_target, posv2, 0.1f);//todo figure out a better value for lerp
-            } else {
-                p = new Vector2(0, 0);
-            }
+            // if (p.sqrMagnitude >= 0.0001f) {
+            //     p *= Vector2.Lerp(_target, posv2, 0.1f);
+            // } else {
+            //     p = new Vector2(0, 0);
+            // }
 
-            transform.position += (Vector3) (p * Time.fixedDeltaTime);
+            // transform.position += (Vector3) (p * Time.fixedDeltaTime);
         }
 
         public void Deserialize(MessageReader reader) {

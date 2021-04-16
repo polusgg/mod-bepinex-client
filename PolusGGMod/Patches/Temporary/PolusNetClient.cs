@@ -138,17 +138,13 @@ namespace PolusGG.Patches.Temporary {
                     case 206:
                     case 7:
                     case 6: {
+                        PlayerControl.LocalPlayer.SetThickAssAndBigDumpy(true, true);
                         reader.Position = pos;
                         return true;
                     }
                 }
                 
-                Debug.Log(string.Format("Pgg bad tag {0} at {1}+{2}={3}:  ", new object[] {
-                    reader.Tag,
-                    reader.Offset,
-                    reader.Position,
-                    reader.Length
-                }) + string.Join<byte>(" ", reader.Buffer));
+                Debug.Log(string.Format("Pgg bad tag {0} at {1}+{2}={3}:  ", reader.Tag, reader.Offset, reader.Position, reader.Length) + string.Join(" ", reader.Buffer));
                 return false;
             }
         }
