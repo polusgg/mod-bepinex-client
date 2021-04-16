@@ -54,7 +54,7 @@ namespace PolusGG.Behaviours.Inner {
             if (_aspectPosition.Alignment != 0) {
                 transform.parent = HudManager.Instance.gameObject.transform;
                 _aspectPosition.enabled = true;
-                _aspectPosition.DistanceFromEdge = new Vector3(0, 0, -9) + pos;
+                _aspectPosition.DistanceFromEdge = new Vector3(0, 0, -9) - pos;
                 _aspectPosition.AdjustPosition();
             } else {
                 _aspectPosition.enabled = false;

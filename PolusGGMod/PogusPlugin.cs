@@ -70,6 +70,7 @@ namespace PolusGG {
                 Log.LogFatal(e);
                 throw;
             }
+            // font = Bundle.LoadAsset("Assets/Fonts/AmongUsButton2-Regular SDF.asset").Cast<TMP_FontAsset>();
             font = Bundle.LoadAsset("Assets/Fonts/ComicSansMs3 SDF.asset").Cast<TMP_FontAsset>();
             ModManager.PostLoad = true;
         }
@@ -78,9 +79,5 @@ namespace PolusGG {
             "Unload is never used".Log();
             return base.Unload();
         }
-
-        // class LolPog : MonoBehaviour {
-        //     public LolPog(IntPtr ptr) : base(ptr) {}
-        // }
     }
 }

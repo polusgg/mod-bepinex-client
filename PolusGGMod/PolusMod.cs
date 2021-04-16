@@ -24,6 +24,7 @@ namespace PolusGG {
         private const string Id = "PolusMain";
         private bool loaded;
         private ICache Cache;
+        private bool optionsDirty;
         public static RoleData RoleData = new();
 
         public override void Load() {
@@ -31,9 +32,12 @@ namespace PolusGG {
         }
 
         public override void Start(IObjectManager objectManager, ICache cache) {
-            if (!loaded) {
-                loaded = true;
+            if (loaded) {
+                return;
             }
+
+            loaded = true;
+
             objectManager.InnerRpcReceived += OnInnerRpcReceived;
             objectManager.Register(0x80, RegisterPnos.CreateImage());
             objectManager.Register(0x81, RegisterPnos.CreateButton());
@@ -44,7 +48,7 @@ namespace PolusGG {
             objectManager.Register(0x89, RegisterPnos.CreatePrefabHandle());
             // objectManager.Register(0x89, RegisterPnos.CreatePrefabHandle());
 
-            
+
             ResolutionManagerPlus.Resolution();
             Cache = cache;
         }
@@ -88,9 +92,12 @@ namespace PolusGG {
 
                         playerControl.Data.Object.nameText.color = Palette.White;
                     }
+
                     foreach (GameData.PlayerInfo player in GameData.Instance.AllPlayers) {
                         $"{player.Object.name} - {player.IsImpostor}".Log();
-                        player.Object.nameText.color = player.IsImpostor && PlayerControl.LocalPlayer.Data.IsImpostor ? Palette.ImpostorRed : Palette.White;
+                        player.Object.nameText.color = player.IsImpostor && PlayerControl.LocalPlayer.Data.IsImpostor
+                            ? Palette.ImpostorRed
+                            : Palette.White;
                     }
 
                     break;
@@ -110,15 +117,26 @@ namespace PolusGG {
                     var color = control.myRend.color;
                     color = new Color(color.r, color.g, color.b, reader.ReadByte() / 255f);
                     control.myRend.color = color;
-                    control.MyPhysics.Skin.layer.color = new Color32(Byte.MaxValue, Byte.MaxValue, Byte.MaxValue, reader.ReadByte());
+                    control.HatRenderer.color = color;
+                    control.MyPhysics.Skin.layer.color = color;
+                    control.CurrentPet.rend.color = color;
+                    break;
+                }
+                case PolusRpcCalls.SetOutline: {
+                    PlayerControl control = netObject.Cast<PlayerControl>();
+                    control.myRend.material.SetFloat(Outline, reader.ReadByte());
+                    control.myRend.material.SetColor(OutlineColor, Color.red);
                     break;
                 }
                 case PolusRpcCalls.DespawnAllVents: {
-                    IEnumerable<int> enumerable = Enumerable.Range(0, reader.ReadByte()).Select(_ => (int)reader.ReadByte());
-                    IEnumerable<Vent> vents = Object.FindObjectsOfType<Vent>().Where(v => enumerable.Contains<int>(v.Id));
+                    IEnumerable<int> enumerable =
+                        Enumerable.Range(0, reader.ReadByte()).Select(_ => (int) reader.ReadByte());
+                    IEnumerable<Vent> vents = Object.FindObjectsOfType<Vent>()
+                        .Where(v => enumerable.Contains<int>(v.Id));
                     foreach (Vent vent in vents) {
                         Object.Destroy(vent);
                     }
+
                     break;
                 }
                 case PolusRpcCalls.BeginAnimationPlayer:
@@ -223,10 +241,12 @@ namespace PolusGG {
                         }
                         case StringLocations.TaskText: {
                             if (PlayerControl.LocalPlayer) {
-                                ImportantTextTask importantTextTask = new GameObject("_Player").AddComponent<ImportantTextTask>();
+                                ImportantTextTask importantTextTask =
+                                    new GameObject("_Player").AddComponent<ImportantTextTask>();
                                 importantTextTask.Text = text;
                                 importantTextTask.transform.SetParent(PlayerControl.LocalPlayer.transform, false);
                             }
+
                             break;
                         }
                     }
@@ -261,47 +281,52 @@ namespace PolusGG {
                     MaintenanceBehaviour.Instance.ShowToast(reader.ReadString());
                     break;
                 }
-                case PolusRootPackets.SetGameOption:
-                {
-
+                case PolusRootPackets.SetGameOption: {
                     var name = reader.ReadString();
                     var optionType = (OptionType) reader.ReadByte();
-                    
-                    if (GameOptionsPatches.Options.TryGetValue(name, out GameOption option))
-                    {
-                        option.Value = optionType switch
-                        {
+
+                    optionsDirty = true;
+                    if (GameOptionsPatches.Options.TryGetValue(name, out GameOption option)) {
+                        option.Value = optionType switch {
                             OptionType.Boolean => new BooleanValue(reader.ReadBoolean()),
                             OptionType.Number => new FloatValue(reader.ReadSingle(), reader.ReadSingle(),
                                 reader.ReadSingle(), reader.ReadSingle()),
                             OptionType.Enum => EnumValue.ConstructEnumValue(reader),
                             _ => throw new ArgumentOutOfRangeException()
                         };
-                    }
-                    else
-                    {
-                        GameOptionsPatches.Options.Add(name, new GameOption
-                        {
+                    } else {
+                        GameOptionsPatches.Options.Add(name, new GameOption {
                             Type = optionType,
-                            Value = optionType switch
-                            {
+                            Value = optionType switch {
                                 OptionType.Boolean => new BooleanValue(reader.ReadBoolean()),
-                                OptionType.Number => new FloatValue(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()),
+                                OptionType.Number => new FloatValue(reader.ReadSingle(), reader.ReadSingle(),
+                                    reader.ReadSingle(), reader.ReadSingle()),
                                 OptionType.Enum => EnumValue.ConstructEnumValue(reader),
                                 _ => throw new ArgumentOutOfRangeException()
                             }
                         });
                     }
+
                     break;
                 }
-                case PolusRootPackets.DeleteGameOption:
-                {
+                case PolusRootPackets.DeleteGameOption: {
+                    optionsDirty = true;
+                    GameOptionsPatches.Options.Remove(reader.ReadString());
                     break;
                 }
                 default: {
                     Logger.LogError($"Invalid packet with id {reader.Tag}");
                     break;
                 }
+            }
+        }
+
+        public override void FixedUpdate() {
+            if (optionsDirty) {
+                GameSettingMenu menu = Object.FindObjectOfType<GameSettingMenu>();
+                if (menu) menu.OnEnable();
+                if (LobbyBehaviour.Instance)
+                    GameOptionsPatches.UpdateHudString();
             }
         }
 
@@ -332,6 +357,8 @@ namespace PolusGG {
 
         public override string Name => "PolusMod";
         public static ManualLogSource _loggee;
+        private static readonly int OutlineColor = Shader.PropertyToID("_OutlineColor");
+        private static readonly int Outline = Shader.PropertyToID("_Outline");
 
         public override ManualLogSource Logger {
             get => _loggee;

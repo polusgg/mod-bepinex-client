@@ -11,7 +11,17 @@ using Object = UnityEngine.Object;
 
 namespace PolusGG.Patches.Temporary {
     public static class GameOptionsPatches {
-        public static Dictionary<string, GameOption> Options = new();
+        public static Dictionary<string, GameOption> Options = new() {
+            {"Piss", new GameOption {Type = OptionType.Number, Value = new FloatValue(5, 5, 0, 420)}}, {
+                "Tinkle",
+                new GameOption {
+                    Type = OptionType.Enum,
+                    Value = new EnumValue(1, new[] {"dnf", "alex", "natsu", "rose", "subzeroextabyteonyt"})
+                }
+            },
+            {"Pee", new GameOption {Type = OptionType.Boolean, Value = new BooleanValue(true)}},
+        };
+
         private static KeyValueOption enumOption;
         private static NumberOption numbOption;
         private static ToggleOption boolOption;
@@ -20,6 +30,7 @@ namespace PolusGG.Patches.Temporary {
         public class OnEnablePatch {
             [HarmonyPrefix]
             public static bool OnEnable(GameSettingMenu __instance) {
+                if (!CustomPlayerMenu.Instance || CustomPlayerMenu.Instance.selectedTab != 4) return true;
                 if (enumOption == null) {
                     enumOption = Object.Instantiate(__instance.AllItems[1].gameObject, __instance.transform)
                         .GetComponent<KeyValueOption>().DontDestroy();
@@ -77,11 +88,15 @@ namespace PolusGG.Patches.Temporary {
                             option.transform.parent = enumOption.transform.parent;
                             option.name = title;
                             option.Values =
-                            new Il2CppSystem.Collections.Generic.List<
-                            Il2CppSystem.Collections.Generic.KeyValuePair<string, int>>();
+                                new Il2CppSystem.Collections.Generic.List<
+                                    Il2CppSystem.Collections.Generic.KeyValuePair<string, int>>();
                             for (var i = 0; i < value.Values.Length; i++) {
-                                option.Values.Add(null);
+                                option.Values.Add(new Il2CppSystem.Collections.Generic.KeyValuePair<string, int> {
+                                    key = title,
+                                    value = i
+                                });
                             }
+
                             option.Selected = (int) value.OptionIndex;
                             option.ValueText.text = value.Values[value.OptionIndex];
                             option.TitleText.text = title;
@@ -112,21 +127,27 @@ namespace PolusGG.Patches.Temporary {
             }
 
             public static void HandleToggleChanged(OptionBehaviour toggleBehaviour) {
+                UpdateHudString();
+                ToggleOption toggle = toggleBehaviour.Cast<ToggleOption>();
+                BooleanValue value = (BooleanValue) Options.First(x => x.Key == toggle.TitleText.text).Value.Value;
+                value.Value = toggle.CheckMark.enabled;
                 MessageWriter writer = MessageWriter.Get(SendOption.Reliable);
                 writer.StartMessage((byte) PolusRootPackets.SetGameOption);
-                ToggleOption toggle = toggleBehaviour.Cast<ToggleOption>();
                 writer.Write(toggle.TitleText.text);
                 writer.Write(toggle.CheckMark.enabled);
                 PolusMod.EndSend(writer);
             }
 
             public static void HandleNumberChanged(OptionBehaviour toggleBehaviour) {
+                UpdateHudString();
+                NumberOption toggle = toggleBehaviour.Cast<NumberOption>();
+                FloatValue value = (FloatValue) Options.First(x => x.Key == toggle.TitleText.text).Value.Value;
+                value.Value = (uint) toggle.Value;
                 MessageWriter writer = MessageWriter.Get(SendOption.Reliable);
                 writer.StartMessage((byte) PolusRootPackets.SetGameOption);
-                NumberOption toggle = toggleBehaviour.Cast<NumberOption>();
                 writer.Write(toggle.TitleText.text);
                 writer.Write(toggle.Value);
-                // these ones are for the fans (not used on server, just to avoid server crashes)
+                // just for the fans (not used on server, just to avoid server crashes)
                 writer.Write(toggle.Increment);
                 writer.Write(toggle.ValidRange.min);
                 writer.Write(toggle.ValidRange.max);
@@ -134,9 +155,12 @@ namespace PolusGG.Patches.Temporary {
             }
 
             public static void HandleStringChanged(OptionBehaviour toggleBehaviour) {
+                UpdateHudString();
+                KeyValueOption toggle = toggleBehaviour.Cast<KeyValueOption>();
+                EnumValue value = (EnumValue) Options.First(x => x.Key == toggle.TitleText.text).Value.Value;
+                value.OptionIndex = (uint) toggle.Selected;
                 MessageWriter writer = MessageWriter.Get(SendOption.Reliable);
                 writer.StartMessage((byte) PolusRootPackets.SetGameOption);
-                KeyValueOption toggle = toggleBehaviour.Cast<KeyValueOption>();
                 writer.Write(toggle.TitleText.text);
                 writer.Write(toggle.Values[(Index) toggle.Selected]
                     .Cast<Il2CppSystem.Collections.Generic.KeyValuePair<string, int>>().Key);
@@ -175,17 +199,28 @@ namespace PolusGG.Patches.Temporary {
         [HarmonyPatch(typeof(KeyValueOption), nameof(KeyValueOption.FixedUpdate))]
         public class StringButtonUpdatePatch {
             [HarmonyPrefix]
-            public static bool Prefix() {
+            public static bool Prefix(KeyValueOption __instance) {
+                if (__instance.oldValue != __instance.Selected) {
+                    __instance.oldValue = __instance.Selected;
+                    __instance.ValueText.text =
+                        ((EnumValue) Options[__instance.TitleText.text].Value).Values[__instance.Selected];
+                }
+
                 return false;
             }
         }
 
-        [HarmonyPatch(typeof(KeyValueOption), nameof(KeyValueOption.Increase))]
+        [HarmonyPatch(typeof(KeyValueOption), nameof(KeyValueOption.GetInt))]
         public class StringButtonIncreasePatch {
             [HarmonyPrefix]
-            public static bool Prefix() {
+            public static bool Prefix(KeyValueOption __instance, out int __result) {
+                __result = 0;
                 return false;
             }
+        }
+
+        public static void UpdateHudString() {
+            HudManager.Instance.GameSettings.text = PlayerControl.GameOptions.ToHudString(69);
         }
     }
 
@@ -201,7 +236,7 @@ namespace PolusGG.Patches.Temporary {
             Value = value;
         }
 
-        public bool Value { get; }
+        public bool Value;
     }
 
     public class EnumValue : IGameOptionValue {
@@ -210,8 +245,8 @@ namespace PolusGG.Patches.Temporary {
             Values = values;
         }
 
-        public uint OptionIndex { get; }
-        public string[] Values { get; }
+        public uint OptionIndex;
+        public string[] Values;
 
         public static EnumValue ConstructEnumValue(MessageReader reader) {
             List<string> strings = new();
@@ -232,9 +267,30 @@ namespace PolusGG.Patches.Temporary {
             Upper = upper;
         }
 
-        public float Value { get; }
-        public float Step { get; }
-        public float Lower { get; }
-        public float Upper { get; }
+        public float Value;
+        public float Step;
+        public float Lower;
+        public float Upper;
+    }
+
+    [HarmonyPatch(typeof(GameOptionsData), nameof(GameOptionsData.ToHudString))]
+    public class HudStringPatch {
+        [HarmonyPrefix]
+        public static bool ToHudString(out string __result) {
+            __result = "Game Settings:\n";
+
+            foreach ((string a, GameOption b) in GameOptionsPatches.Options) {
+                __result += $"{a}: ";
+                __result += b.Type switch {
+                    OptionType.Number => ((FloatValue) b.Value).Value,
+                    OptionType.Boolean => ((BooleanValue) b.Value).Value ? "On" : "Off",
+                    OptionType.Enum => ((EnumValue) b.Value).Values[((EnumValue) b.Value).OptionIndex],
+                    _ => throw new ArgumentOutOfRangeException()
+                };
+                __result += '\n';
+            }
+
+            return false;
+        }
     }
 }

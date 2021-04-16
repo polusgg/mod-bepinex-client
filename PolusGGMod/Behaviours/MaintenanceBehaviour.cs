@@ -28,7 +28,7 @@ namespace PolusGG.Behaviours {
 
         private void Start() {
             Instance = this;
-            ShowToast("Fortebased said your mom");
+            // ShowToast("Fortebased said your mom");
         }
 
         [HideFromIl2Cpp]
@@ -59,6 +59,8 @@ namespace PolusGG.Behaviours {
             top = AspectPosition.ComputePosition(AspectPosition.EdgeAlignments.Top, new Vector3(0, distance, -10f));
             vec = AspectPosition.ComputePosition(AspectPosition.EdgeAlignments.Top, new Vector3(0, -distance, -10f));
             yield return Effects.Slide2D(toastransform, top, vec, duration);
+            
+            Destroy(toast);
         }
     }
 }

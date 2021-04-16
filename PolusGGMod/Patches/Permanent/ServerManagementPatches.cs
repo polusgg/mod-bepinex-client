@@ -46,7 +46,7 @@ namespace PolusGG.Patches.Permanent {
         [PermanentPatch]
         [HarmonyPrefix]
         public static void Postfix(AnnouncementPopUp._Init_d__12 __instance) {
-            if (ServerManager.Instance.OnlineNetAddress.Equals(PggConstants.Region.DefaultIp)) {
+            if (ServerManager.Instance.OnlineNetAddress.Equals(PggConstants.Region.DefaultIp) && !PogusPlugin.ModManager.AllPatched) {
                 PogusPlugin.ModManager.PatchMods();
                 PogusPlugin.ModManager.LoadMods();
             }

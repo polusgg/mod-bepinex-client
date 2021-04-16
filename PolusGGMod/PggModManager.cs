@@ -4,12 +4,15 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using BepInEx.Logging;
+using PolusGG.Extensions;
 using PolusGG.Mods;
+using UnhollowerRuntimeLib;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace PolusGG {
     public class PggModManager {
-        public (PggMod, Mod)[] TemporaryMods;
+        public (PggMod, Mod)[] TemporaryMods = new (PggMod, Mod)[0];
         public bool AllPatched;
         public ManualLogSource Logger;
         private AppDomain _domain;
@@ -19,7 +22,10 @@ namespace PolusGG {
 
         public PggModManager(ManualLogSource logger) {
             Logger = logger;
-            
+            GameObject gameObject = new("ModManager");
+            gameObject.DontDestroy();
+            gameObject.AddComponent<EventHandlerBehaviour>().ModManager = this;
+
             SceneManager.add_sceneLoaded(new Action<Scene, LoadSceneMode>((scene, mode) => {
                 // yeah i could be putting this shit in a better place but who cares
     
@@ -36,7 +42,7 @@ namespace PolusGG {
                 }
 
                 if (scene.name == "MMOnline") {
-                    AccountMenu.InitializeAccountMenu(scene);
+                    // AccountMenu.InitializeAccountMenu(scene);
                     /*
                      * [Error  :Unhollower] Exception in IL2CPP-to-Managed trampoline, not passing it to il2cpp: System.NullReferenceException: Object reference not set to an instance of an object
   at PolusGG.AccountMenu.InitializeAccountMenu (UnityEngine.SceneManagement.Scene scene) [0x000d8] in <dfdb1e9cdbae4917936027d2a7370784>:0
@@ -113,9 +119,22 @@ namespace PolusGG {
         
         public void UnloadMods() {
             TemporaryMods = new (PggMod, Mod)[0];
-            AppDomain.Unload(_domain);
+            // AppDomain.Unload(_domain);
             _domain = null;
             PostLoad = false;
+        }
+
+        public class EventHandlerBehaviour : MonoBehaviour {
+            public PggModManager ModManager;
+            static EventHandlerBehaviour() {
+                ClassInjector.RegisterTypeInIl2Cpp<EventHandlerBehaviour>();
+            }
+            public EventHandlerBehaviour(IntPtr ptr) : base(ptr) {}
+
+            private void FixedUpdate() {
+                for (int i = 0; i < ModManager.TemporaryMods.Length; i++)
+                    ModManager.TemporaryMods[i].Item2.FixedUpdate();
+            }
         }
     }
 }

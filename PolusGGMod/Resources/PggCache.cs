@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
+using System.Threading;
 using Newtonsoft.Json;
 using PolusGG.Extensions;
 using PolusGG.Resources;
@@ -62,7 +63,7 @@ namespace PolusGG {
 
                         Bundle bundone =
                             JsonConvert.DeserializeObject<Bundle>(bundle.LoadAsset("Assets/AssetListing.json")
-                                .TryCast<TextAsset>().text);
+                                .Cast<TextAsset>().text);
 
                         uint assetId = bundone.BaseId;
                         foreach (string bundoneAsset in bundone.Assets)
@@ -84,6 +85,7 @@ namespace PolusGG {
                 using (BinaryWriter writer = new(File.Create(PggConstants.CacheLocation))) {
                     Serialize(writer);
                 }
+
                 PogusPlugin.Logger.LogMessage($"Downloaded and cached file at {location} ({id}, {hash})");
                 return cacheFile;
             }
@@ -143,8 +145,9 @@ namespace PolusGG {
                 } catch (Exception) {
                     if (numTries > 20) {
                         return false;
-                    } 
-                    System.Threading.Thread.Sleep(250);
+                    }
+
+                    Thread.Sleep(250);
                 }
             }
 
