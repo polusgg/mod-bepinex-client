@@ -27,11 +27,9 @@ namespace PolusGG {
         private bool optionsDirty;
         public static RoleData RoleData = new();
 
-        public override void Load() {
-            Logger.LogInfo("Loaded " + Id);
-        }
-
         public override void Start(IObjectManager objectManager, ICache cache) {
+            // DiscordManager.Instance.OnDestroy();
+            // new GameObject("PolusDiscordManager").DontDestroy().AddComponent<PolusDiscordManager>();
             if (loaded) {
                 return;
             }
@@ -48,12 +46,14 @@ namespace PolusGG {
             objectManager.Register(0x89, RegisterPnos.CreatePrefabHandle());
             // objectManager.Register(0x89, RegisterPnos.CreatePrefabHandle());
 
-
             ResolutionManagerPlus.Resolution();
             Cache = cache;
         }
 
-        public override void Unload() { }
+        public override void Stop() {
+            // if (PolusDiscordManager.Instance) Object.Destroy(PolusDiscordManager.Instance.gameObject);
+            // DiscordManager.Instance.Start();
+        }
 
         private void OnInnerRpcReceived(InnerNetObject netObject, MessageReader reader, byte callId) {
             PlayerControl playerControl;
@@ -290,7 +290,7 @@ namespace PolusGG {
                         option.Value = optionType switch {
                             OptionType.Boolean => new BooleanValue(reader.ReadBoolean()),
                             OptionType.Number => new FloatValue(reader.ReadSingle(), reader.ReadSingle(),
-                                reader.ReadSingle(), reader.ReadSingle()),
+                                reader.ReadSingle(), reader.ReadSingle(), reader.ReadBoolean(), reader.ReadString()),
                             OptionType.Enum => EnumValue.ConstructEnumValue(reader),
                             _ => throw new ArgumentOutOfRangeException()
                         };
@@ -300,7 +300,8 @@ namespace PolusGG {
                             Value = optionType switch {
                                 OptionType.Boolean => new BooleanValue(reader.ReadBoolean()),
                                 OptionType.Number => new FloatValue(reader.ReadSingle(), reader.ReadSingle(),
-                                    reader.ReadSingle(), reader.ReadSingle()),
+                                    reader.ReadSingle(), reader.ReadSingle(), reader.ReadBoolean(),
+                                    reader.ReadString()),
                                 OptionType.Enum => EnumValue.ConstructEnumValue(reader),
                                 _ => throw new ArgumentOutOfRangeException()
                             }
@@ -312,6 +313,11 @@ namespace PolusGG {
                 case PolusRootPackets.DeleteGameOption: {
                     optionsDirty = true;
                     GameOptionsPatches.Options.Remove(reader.ReadString());
+                    break;
+                }
+                case PolusRootPackets.LoadHat: {
+                    HatManager.Instance.AllHats.Insert((int) reader.ReadPackedUInt32(),
+                        Cache.CachedFiles[reader.ReadPackedUInt32()].Get<HatBehaviour>());
                     break;
                 }
                 default: {

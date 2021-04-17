@@ -12,11 +12,11 @@ using Object = UnityEngine.Object;
 namespace PolusGG.Patches.Temporary {
     public static class GameOptionsPatches {
         public static Dictionary<string, GameOption> Options = new() {
-            {"Piss", new GameOption {Type = OptionType.Number, Value = new FloatValue(5, 5, 0, 420)}}, {
+            {"Piss", new GameOption {Type = OptionType.Number, Value = new FloatValue(5, 5, 0, 420, true, "{0}")}}, {
                 "Tinkle",
                 new GameOption {
                     Type = OptionType.Enum,
-                    Value = new EnumValue(1, new[] {"dnf", "alex", "natsu", "rose", "subzeroextabyteonyt"})
+                    Value = new EnumValue(1, new[] {"dnf", "alex", "natsu", "rose", "subzeroextabyteonyt", "shitting mark", "saghetti"})
                 }
             },
             {"Pee", new GameOption {Type = OptionType.Boolean, Value = new BooleanValue(true)}},
@@ -65,6 +65,8 @@ namespace PolusGG.Patches.Temporary {
                             option.ValidRange = new FloatRange(value.Lower, value.Upper);
                             option.Value = value.Value;
                             option.TitleText.text = title;
+                            option.FormatString = value.FormatString;
+                            option.ZeroIsInfinity = value.IsInfinity;
                             option.OnValueChanged = new Action<OptionBehaviour>(HandleNumberChanged);
                             optionBehaviours.Add(option);
                             break;
@@ -92,7 +94,7 @@ namespace PolusGG.Patches.Temporary {
                                     Il2CppSystem.Collections.Generic.KeyValuePair<string, int>>();
                             for (var i = 0; i < value.Values.Length; i++) {
                                 option.Values.Add(new Il2CppSystem.Collections.Generic.KeyValuePair<string, int> {
-                                    key = title,
+                                    key = value.Values[i],
                                     value = i
                                 });
                             }
@@ -122,6 +124,7 @@ namespace PolusGG.Patches.Temporary {
                     transforms.localPosition = new Vector3(0, __instance.YStart - index++ * __instance.YOffset, -1);
                     transforms.gameObject.SetActive(true);
                 }
+                __instance.GetComponent<Scroller>().YBounds.max = index * __instance.YOffset - 2f * __instance.YStart - 0.1f;
 
                 return true;
             }
@@ -134,6 +137,7 @@ namespace PolusGG.Patches.Temporary {
                 MessageWriter writer = MessageWriter.Get(SendOption.Reliable);
                 writer.StartMessage((byte) PolusRootPackets.SetGameOption);
                 writer.Write(toggle.TitleText.text);
+                writer.Write((byte)1);
                 writer.Write(toggle.CheckMark.enabled);
                 PolusMod.EndSend(writer);
             }
@@ -146,11 +150,14 @@ namespace PolusGG.Patches.Temporary {
                 MessageWriter writer = MessageWriter.Get(SendOption.Reliable);
                 writer.StartMessage((byte) PolusRootPackets.SetGameOption);
                 writer.Write(toggle.TitleText.text);
+                writer.Write((byte)0);
                 writer.Write(toggle.Value);
                 // just for the fans (not used on server, just to avoid server crashes)
                 writer.Write(toggle.Increment);
                 writer.Write(toggle.ValidRange.min);
                 writer.Write(toggle.ValidRange.max);
+                writer.Write(toggle.ZeroIsInfinity);
+                writer.Write(toggle.FormatString);
                 PolusMod.EndSend(writer);
             }
 
@@ -162,10 +169,11 @@ namespace PolusGG.Patches.Temporary {
                 MessageWriter writer = MessageWriter.Get(SendOption.Reliable);
                 writer.StartMessage((byte) PolusRootPackets.SetGameOption);
                 writer.Write(toggle.TitleText.text);
-                writer.Write(toggle.Values[(Index) toggle.Selected]
-                    .Cast<Il2CppSystem.Collections.Generic.KeyValuePair<string, int>>().Key);
+                writer.Write((byte)OptionType.Enum);
+                writer.WritePacked(toggle.Selected);
+                // just for the fans (not used on server, just to avoid server crashes)
                 foreach (Il2CppSystem.Collections.Generic.KeyValuePair<string, int> keyValuePair in toggle.Values) {
-                    writer.Write(keyValuePair.Key);
+                    writer.Write(keyValuePair.key);
                 }
 
                 PolusMod.EndSend(writer);
@@ -184,6 +192,19 @@ namespace PolusGG.Patches.Temporary {
         public class NumberButtonDisableStartPatch {
             [HarmonyPrefix]
             public static bool Prefix() {
+                return false;
+            }
+        }
+
+        [HarmonyPatch(typeof(NumberOption), nameof(NumberOption.FixedUpdate))]
+        public class NumberButtonFixedUpdatePatch {
+            [HarmonyPrefix]
+            public static bool Prefix(NumberOption __instance) {
+                if (Math.Abs(__instance.oldValue - __instance.Value) > 0.001f) {
+                    __instance.oldValue = __instance.Value;
+                    __instance.ValueText.text = string.Format(__instance.FormatString, __instance.Value);
+                }
+
                 return false;
             }
         }
@@ -260,17 +281,21 @@ namespace PolusGG.Patches.Temporary {
     }
 
     public class FloatValue : IGameOptionValue {
-        public FloatValue(float value, float step, float lower, float upper) {
+        public FloatValue(float value, float step, float lower, float upper, bool isInfinity, string formatString) {
             Value = value;
             Step = step;
             Lower = lower;
             Upper = upper;
+            IsInfinity = isInfinity;
+            FormatString = formatString;
         }
 
         public float Value;
         public float Step;
         public float Lower;
         public float Upper;
+        public bool IsInfinity;
+        public string FormatString;
     }
 
     [HarmonyPatch(typeof(GameOptionsData), nameof(GameOptionsData.ToHudString))]

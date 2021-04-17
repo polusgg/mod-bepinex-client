@@ -15,9 +15,6 @@ namespace PolusGG {
 		private HashSet<uint> _destroyedObjects = new();
 		private Dictionary<uint, PnoBehaviour> _spawnObjects = new();
 
-		[DllImport("user32.dll")]
-		private static extern void MessageBox(IntPtr hwnd, string text, string caption, uint type = 4);
-
 		public void Register(uint index, PnoBehaviour netObject) {
 			PogusPlugin.Logger.LogInfo($"Registered {netObject.GetType().Name} at index {index}");
 			_spawnObjects[index] = netObject;
@@ -138,7 +135,6 @@ namespace PolusGG {
 		}
 
 		public void EndedGame() {
-			PogusPlugin.Logger.LogInfo("Lmao");
 			_allObjects = new List<PolusNetObject>();
 			_allObjectsFast = new Dictionary<uint, PolusNetObject>();
 			_destroyedObjects = new HashSet<uint>();

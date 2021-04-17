@@ -10,7 +10,12 @@
         <GameVersion>2021.4.12s</GameVersion>
 <!--        <Mappings>2021.4.12s.json</Mappings>-->
         <Mappings>NuclearPowered/Mappings:0.4.0</Mappings>
+        <!-- Build env Among Us -->
         <AmongUs>C:\Users\Sanae\Downloads\depotdownloader-2.3.6\depots\945361\6529205</AmongUs>
+        <!-- Runtime env Among Us-->
+        <AmongAss>D:\SteamLibrary\steamapps\common\Among Us</AmongAss>
+        <!--<AmongAss>$(AmongUs)</AmongAss>-->
+
         <Description>Polus.gg official mod</Description>
         <Authors>Sanae6</Authors>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -28,6 +33,6 @@
     </ItemGroup>
 
     <Target Name="Copy" AfterTargets="Reobfuscate">
-        <Copy SourceFiles="$(OutputPath)reobfuscated/$(AssemblyName)-$(GameVersion).dll" DestinationFolder="$(AmongUs)/BepInEx/plugins/" />
+        <Copy SourceFiles="$(OutputPath)reobfuscated/$(AssemblyName)-$(GameVersion).dll" DestinationFolder="$(AmongAss)/BepInEx/plugins/" />
     </Target>
 </Project>

@@ -63,7 +63,6 @@ namespace PolusGG {
                 PermanentMod.Patch();
                 ObjectManager = new PggObjectManager();
                 ModManager = new PggModManager(Log);
-                ModManager.LoadMods();
             }
             catch (Exception e) {
                 Log.LogFatal($"Failed to load!");

@@ -8,6 +8,7 @@
         DeclareHat = 0x85,
         SetGameOption = 0x89,
         DeleteGameOption = 0x8A,
+        LoadHat = 0x8B,
         DisplaySystemAnnouncement = 0xFA,
     }
 }

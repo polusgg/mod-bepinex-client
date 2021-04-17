@@ -8,6 +8,7 @@
   &lt;Assembly Path="C:\Program Files\dotnet\shared\Microsoft.NETCore.App\5.0.1\System.Console.dll" /&gt;&#xD;
   &lt;Assembly Path="C:\Users\Sanae\AppData\Roaming\.reactor\2021.3.31.3s\85e0eded8ee80660260b70cf4797fcea\references\Assembly-CSharp-Deobfuscated.dll" /&gt;&#xD;
   &lt;Assembly Path="D:\SteamLibrary\steamapps\common\Among Us\BepInEx\unhollowed\Assembly-CSharp.dll" /&gt;&#xD;
+  &lt;Assembly Path="C:\Users\Sanae\Downloads\depotdownloader-2.3.6\depots\945361\6529205\BepInEx\unhollowed\Assembly-CSharp-firstpass.dll" /&gt;&#xD;
 &lt;/AssemblyExplorer&gt;</s:String>
 	
 	

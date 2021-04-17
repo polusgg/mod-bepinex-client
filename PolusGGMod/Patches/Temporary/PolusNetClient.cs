@@ -34,7 +34,6 @@ namespace PolusGG.Patches.Temporary {
 
         [HarmonyPatch(typeof(InnerNetClient), nameof(InnerNetClient.HandleMessage))]
         public class InnerNetClientHandleMessagePatch {
-            [PermanentPatch]
             [HarmonyPrefix]
             public static bool HandleMessage(InnerNetClient __instance, [HarmonyArgument(0)] MessageReader reader,
                 [HarmonyArgument(1)] SendOption yoMama) {
@@ -54,7 +53,6 @@ namespace PolusGG.Patches.Temporary {
 
         [HarmonyPatch(typeof(InnerNetClient._HandleGameDataInner_d__42), nameof(InnerNetClient._HandleGameDataInner_d__42.MoveNext))]
         public class GameDataTempClass {
-            [PermanentPatch]
             [HarmonyPrefix]
             public static bool HandleGameDataInner(InnerNetClient._HandleGameDataInner_d__42 __instance) {
                 PlayerControl.LocalPlayer.SetThickAssAndBigDumpy(true, true);

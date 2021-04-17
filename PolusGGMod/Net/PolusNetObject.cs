@@ -21,7 +21,7 @@ namespace PolusGG.Net {
         }
 
         public void Spawn(MessageReader reader) {
-            reader.Length.Log(3, "3 times i will cry in real life");
+            // reader.Length.Log(3, "3 times i will cry in real life");
             hasSpawn = true;
             data = reader;
         }
