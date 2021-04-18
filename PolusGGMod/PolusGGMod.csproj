@@ -6,15 +6,14 @@
         <TargetFramework>netstandard2.1</TargetFramework>
         <Version>2021.4.12</Version>
         <AssemblyName>Polus</AssemblyName>
-        <!--        <GameVersion>2021.3.31.3s</GameVersion>-->
+<!--        <GameVersion>2021.3.31.3s</GameVersion>-->
         <GameVersion>2021.4.12s</GameVersion>
-        <!--        <Mappings>2021.4.12s.json</Mappings>-->
+<!--        <Mappings>2021.4.12s.json</Mappings>-->
         <Mappings>NuclearPowered/Mappings:0.4.0</Mappings>
         <!-- Build env Among Us -->
-        <AmongUs>D:\SteamLibrary\steamapps\common\Among Us</AmongUs>
-        <!--        <AmongUs>C:\Users\Sanae\Downloads\depotdownloader-2.3.6\depots\945361\6529205</AmongUs>-->
+        <AmongUs>../../../AmongUsModded2021.4.12</AmongUs>
         <!-- Runtime env Among Us-->
-        <!--        <AmongAss>C:\Users\Sanae\Downloads\depotdownloader-2.3.6\depots\945361\6542129</AmongAss>-->
+        <AmongAss>C:\Users\Sanae\Downloads\depotdownloader-2.3.6\depots\945361\6542129</AmongAss>
         <!--<AmongAss>$(AmongUs)</AmongAss>-->
 
         <Description>Polus.gg official mod</Description>
@@ -23,101 +22,16 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="DokanNet" Version="1.4.0"/>
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.1"/>
+        <PackageReference Include="DokanNet" Version="1.4.0" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+        <PackageReference Include="Reactor.OxygenFilter.MSBuild" Version="0.3.0" />
     </ItemGroup>
 
     <ItemGroup>
-        <Reference Include="0Harmony, Version=2.4.0.0, Culture=neutral, PublicKeyToken=null">
-            <HintPath>$(AmongUs)\BepInEx\core\0Harmony.dll</HintPath>
-        </Reference>
-        <Reference Include="Assembly-CSharp, Version=3.7.1.6, Culture=neutral, PublicKeyToken=null">
-            <HintPath>$(AmongUs)\BepInEx\unhollowed\Assembly-CSharp.dll</HintPath>
-        </Reference>
-        <Reference Include="Assembly-CSharp-firstpass, Version=3.7.1.6, Culture=neutral, PublicKeyToken=null">
-            <HintPath>$(AmongUs)\BepInEx\unhollowed\Assembly-CSharp-firstpass.dll</HintPath>
-        </Reference>
-        <Reference Include="AssemblyUnhollower, Version=0.4.13.0, Culture=neutral, PublicKeyToken=null">
-            <HintPath>$(AmongUs)\BepInEx\core\AssemblyUnhollower.dll</HintPath>
-        </Reference>
-        <Reference Include="BepInEx.Core, Version=6.0.0.18, Culture=neutral, PublicKeyToken=null">
-            <HintPath>$(AmongUs)\BepInEx\core\BepInEx.Core.dll</HintPath>
-        </Reference>
-        <Reference Include="BepInEx.IL2CPP, Version=6.0.0.18, Culture=neutral, PublicKeyToken=null">
-            <HintPath>$(AmongUs)\BepInEx\core\BepInEx.IL2CPP.dll</HintPath>
-        </Reference>
-        <Reference Include="Hazel, Version=3.7.1.6, Culture=neutral, PublicKeyToken=null">
-            <HintPath>$(AmongUs)\BepInEx\unhollowed\Hazel.dll</HintPath>
-        </Reference>
-        <Reference Include="Il2CppDumper, Version=6.5.3.0, Culture=neutral, PublicKeyToken=null">
-            <HintPath>$(AmongUs)\BepInEx\core\Il2CppDumper.dll</HintPath>
-        </Reference>
-        <Reference Include="Il2Cppmscorlib, Version=3.7.1.6, Culture=neutral, PublicKeyToken=null">
-            <HintPath>$(AmongUs)\BepInEx\unhollowed\Il2Cppmscorlib.dll</HintPath>
-        </Reference>
-        <Reference Include="Il2CppSystem, Version=3.7.1.6, Culture=neutral, PublicKeyToken=null">
-            <HintPath>$(AmongUs)\BepInEx\unhollowed\Il2CppSystem.dll</HintPath>
-        </Reference>
-        <Reference Include="Il2CppSystem.Core, Version=3.7.1.6, Culture=neutral, PublicKeyToken=null">
-            <HintPath>$(AmongUs)\BepInEx\unhollowed\Il2CppSystem.Core.dll</HintPath>
-        </Reference>
-        <Reference Include="Mono.Cecil, Version=0.11.3.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e">
-            <HintPath>$(AmongUs)\BepInEx\core\Mono.Cecil.dll</HintPath>
-        </Reference>
-        <Reference Include="UnhollowerBaseLib, Version=0.4.13.0, Culture=neutral, PublicKeyToken=null">
-            <HintPath>$(AmongUs)\BepInEx\core\UnhollowerBaseLib.dll</HintPath>
-        </Reference>
-        <Reference Include="UnhollowerRuntimeLib, Version=0.4.11.1, Culture=neutral, PublicKeyToken=null">
-            <HintPath>$(AmongUs)\BepInEx\core\UnhollowerRuntimeLib.dll</HintPath>
-        </Reference>
-        <Reference Include="Unity.TextMeshPro, Version=3.7.1.6, Culture=neutral, PublicKeyToken=null">
-            <HintPath>$(AmongUs)\BepInEx\unhollowed\Unity.TextMeshPro.dll</HintPath>
-        </Reference>
-        <Reference Include="UnityEngine, Version=3.7.1.6, Culture=neutral, PublicKeyToken=null">
-            <HintPath>$(AmongUs)\BepInEx\unhollowed\UnityEngine.dll</HintPath>
-        </Reference>
-        <Reference Include="UnityEngine.AssetBundleModule, Version=3.7.1.6, Culture=neutral, PublicKeyToken=null">
-            <HintPath>$(AmongUs)\BepInEx\unhollowed\UnityEngine.AssetBundleModule.dll</HintPath>
-        </Reference>
-        <Reference Include="UnityEngine.AudioModule, Version=3.7.1.6, Culture=neutral, PublicKeyToken=null">
-            <HintPath>$(AmongUs)\BepInEx\unhollowed\UnityEngine.AudioModule.dll</HintPath>
-        </Reference>
-        <Reference Include="UnityEngine.CoreModule, Version=3.7.1.6, Culture=neutral, PublicKeyToken=null">
-            <HintPath>$(AmongUs)\BepInEx\unhollowed\UnityEngine.CoreModule.dll</HintPath>
-        </Reference>
-        <Reference Include="UnityEngine.IMGUIModule, Version=3.7.1.6, Culture=neutral, PublicKeyToken=null">
-            <HintPath>$(AmongUs)\BepInEx\unhollowed\UnityEngine.IMGUIModule.dll</HintPath>
-        </Reference>
-        <Reference Include="UnityEngine.InputLegacyModule, Version=3.7.1.6, Culture=neutral, PublicKeyToken=null">
-            <HintPath>$(AmongUs)\BepInEx\unhollowed\UnityEngine.InputLegacyModule.dll</HintPath>
-        </Reference>
-        <Reference Include="UnityEngine.InputModule, Version=3.7.1.6, Culture=neutral, PublicKeyToken=null">
-            <HintPath>$(AmongUs)\BepInEx\unhollowed\UnityEngine.InputModule.dll</HintPath>
-        </Reference>
-        <Reference Include="UnityEngine.Physics2DModule, Version=3.7.1.6, Culture=neutral, PublicKeyToken=null">
-            <HintPath>$(AmongUs)\BepInEx\unhollowed\UnityEngine.Physics2DModule.dll</HintPath>
-        </Reference>
-        <Reference Include="UnityEngine.TextCoreModule, Version=3.7.1.6, Culture=neutral, PublicKeyToken=null">
-            <HintPath>$(AmongUs)\BepInEx\unhollowed\UnityEngine.TextCoreModule.dll</HintPath>
-        </Reference>
-        <Reference Include="UnityEngine.TextRenderingModule, Version=3.7.1.6, Culture=neutral, PublicKeyToken=null">
-            <HintPath>$(AmongUs)\BepInEx\unhollowed\UnityEngine.TextRenderingModule.dll</HintPath>
-        </Reference>
-        <Reference Include="UnityEngine.UI, Version=3.7.1.6, Culture=neutral, PublicKeyToken=null">
-            <HintPath>$(AmongUs)\BepInEx\unhollowed\UnityEngine.UI.dll</HintPath>
-        </Reference>
+      <EmbeddedResource Include="bepinexresources" />
     </ItemGroup>
 
-    <ItemGroup>
-        <EmbeddedResource Include="bepinexresources"/>
-    </ItemGroup>
-
-    <!--    <Target Name="Copy" AfterTargets="CoreCompile">-->
-    <!--        <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFolder="$(AmongUs)/BepInEx/plugins/" />-->
-    <!--        <Copy SourceFiles="$(OutputPath)reobfuscated/$(AssemblyName)-$(GameVersion).dll" DestinationFolder="$(AmongAss)/BepInEx/plugins/" />-->
-    <!--    </Target>-->
-    <Target Name="AnotherCustomTarget" AfterTargets="CoreCompile">
-        <Message Text="Should run after build" Importance="High"/>
-        <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFolder="$(AmongUs)/BepInEx/plugins/"/>
+    <Target Name="Copy" AfterTargets="Reobfuscate">
+        <Copy SourceFiles="$(OutputPath)reobfuscated/$(AssemblyName)-$(GameVersion).dll" DestinationFolder="$(AmongAss)/BepInEx/plugins/" />
     </Target>
 </Project>
