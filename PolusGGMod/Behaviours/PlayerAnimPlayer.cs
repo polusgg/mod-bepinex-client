@@ -25,17 +25,23 @@ namespace PolusGG.Behaviours {
             List<PlayerKeyframe> playerKeyframes = new();
             while (reader.Position < reader.Length - 1) {
                 MessageReader message = reader.ReadMessage();
-                playerKeyframes.Add(new PlayerKeyframe {
-                    Offset = message.ReadPackedUInt32(),
-                    Duration = message.ReadPackedUInt32(),
-                    PlayerOpacity = message.ReadSingle(),
-                    HatOpacity = message.ReadSingle(),
-                    PetOpacity = message.ReadSingle(),
-                    SkinOpacity = message.ReadSingle(),
-                    Scale = message.ReadVector2(),
-                    Position = message.ReadVector2(),
-                    Angle = message.ReadSingle(),
-                });
+                playerKeyframes.Add(new PlayerKeyframe (
+                     message.ReadPackedUInt32(),
+                    message.ReadPackedUInt32(),
+                    message.ReadSingle(),
+                     message.ReadSingle(),
+                    message.ReadSingle(),
+                     message.ReadSingle(),
+                     new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(),
+                         reader.ReadByte()),
+                     new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(),
+                         reader.ReadByte()),
+                     new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(),
+                        reader.ReadByte()),
+                    message.ReadVector2(),
+                     message.ReadVector2(),
+                    message.ReadSingle()
+                ));
             }
 
             this.StartCoroutine(CoPlayAnimation(playerKeyframes.ToArray(), reader.ReadBoolean()));
@@ -99,6 +105,15 @@ namespace PolusGG.Behaviours {
             private Vector2 scale;
             private Vector2 position;
             private float angle;
+
+            public PlayerKeyframe(uint offset, uint duration, float playerOpacity, float hatOpacity, float petOpacity, float skinOpacity, Color32 mainColor, Color32 shadowColor, Color32 visorColor, Vector2 scale, Vector2 position, float angle) {
+                Offset = offset;
+                Duration = duration;
+                this.playerOpacity = playerOpacity;
+                this.hatOpacity = hatOpacity;
+                this.petOpacity = petOpacity;
+                this.skinOpacity = skinOpacity;
+            }
 
             public float PlayerOpacity {
                 get => playerOpacity;

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using PolusGG.Api;
 using PolusGG.Extensions;
 using TMPro;
 using UnityEngine;
@@ -23,11 +22,8 @@ namespace PolusGG {
             PlayerControl.LocalPlayer.SetThickAssAndBigDumpy(true, true);
             GameObject nameText = gameObject.FindRecursive(x => x.name.Contains("NameText"));
             GameObject passwordText = gameObject.FindRecursive(x => x.name.Contains("PasswordText"));
-            if (!PolusAuth.IsPlayerSignedIn) {
-                var name = nameText.GetComponent<TextMeshPro>();
-                var password = passwordText.GetComponent<TextMeshPro>();
-                PolusAuth.Login(name.text, password.text);
-            }
+            var name = nameText.GetComponent<TextMeshPro>();
+            var password = passwordText.GetComponent<TextMeshPro>();
         }
     }
 }

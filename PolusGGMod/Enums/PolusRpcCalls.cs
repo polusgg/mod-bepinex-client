@@ -14,7 +14,6 @@
         SetOpacity = 0x8b,
         BeginAnimationPlayer = 0x8c,
         BeginAnimationCamera = 0x8d,
-        EnterVent = 0x8e,
-        
+        EnterVent = 0x8e
     }
 }

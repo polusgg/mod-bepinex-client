@@ -28,7 +28,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Remove="bepinexresources" />
       <EmbeddedResource Include="bepinexresources" />
     </ItemGroup>
 

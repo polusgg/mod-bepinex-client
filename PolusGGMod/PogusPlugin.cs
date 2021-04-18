@@ -8,6 +8,7 @@ using BepInEx.Logging;
 using HarmonyLib;
 using PolusGG.Extensions;
 using PolusGG.Net;
+using PolusGG.Patches.Permanent;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -45,16 +46,6 @@ namespace PolusGG {
             Logger = Log;
             if (File.Exists(PggConstants.CacheLocation)) {
                 Stream file = null;
-                try {
-                    BinaryReader reader = new(file = File.OpenRead(PggConstants.CacheLocation));
-                    Cache.Deserialize(reader);
-                    reader.Close();
-                } catch {
-                    Logger.LogError("Cache is invalid! Not using anything from it");
-                    Cache.Invalidate();
-                } finally {
-                    file?.Dispose();
-                }
             }
             try {
                 PermanentMod.LoadPatches("gg.polus.permanent",
@@ -63,6 +54,7 @@ namespace PolusGG {
                 PermanentMod.Patch();
                 ObjectManager = new PggObjectManager();
                 ModManager = new PggModManager(Log);
+                ModManager.LoadMods();
             }
             catch (Exception e) {
                 Log.LogFatal($"Failed to load!");
@@ -71,6 +63,7 @@ namespace PolusGG {
             }
             // font = Bundle.LoadAsset("Assets/Fonts/AmongUsButton2-Regular SDF.asset").Cast<TMP_FontAsset>();
             font = Bundle.LoadAsset("Assets/Fonts/ComicSansMs3 SDF.asset").Cast<TMP_FontAsset>();
+            FontMwenuwuPatches.Load();
             ModManager.PostLoad = true;
         }
 

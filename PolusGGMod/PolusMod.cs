@@ -168,7 +168,7 @@ namespace PolusGG {
                     }
 
                     try {
-                        Logger.LogInfo($"Trying to download and cache {resource}");
+                        Logger.LogInfo($"Trying to download and cache {resource} ({location})");
                         Cache.AddToCache(resource, location, hash,
                             (ResourceType) resourceType);
                         writer = StartSendResourceResponse(resource, ResponseType.DownloadEnded);
@@ -176,7 +176,7 @@ namespace PolusGG {
                         EndSend(writer);
                         Logger.LogInfo($"Cached {resource}!");
                     } catch (Exception e) {
-                        Logger.LogError($"Failed to cache {resource}");
+                        Logger.LogError($"Failed to cache {resource} ({location})");
                         Logger.LogError(e);
                         writer = StartSendResourceResponse(resource, ResponseType.DownloadFailed);
                         if (e is CacheRequestException exception) {

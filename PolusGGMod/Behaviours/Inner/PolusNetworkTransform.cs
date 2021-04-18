@@ -25,6 +25,7 @@ namespace PolusGG.Behaviours.Inner {
             pno.OnRpc = HandleRpc;
             pno.OnData = Deserialize;
             _aspectPosition = gameObject.AddComponent<AspectPosition>();
+            _aspectPosition.updateAlways = true;
             // _rigidbody2D = GetComponent<Rigidbody2D>();
             // _rigidbody2D.constraints = RigidbodyConstraints2D.FreezeAll;
         }
