@@ -4,13 +4,18 @@
         <TargetFramework>netstandard2.1</TargetFramework>
         <AssemblyName>Polusgg</AssemblyName>
         <LangVersion>latest</LangVersion>
+        <CopyLocalLockFileAssemblies></CopyLocalLockFileAssemblies>
     </PropertyGroup>
     
     <ItemGroup>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.1">
+            <PrivateAssets>true</PrivateAssets>
+        </PackageReference>
         <PackageReference Include="Reactor.OxygenFilter.MSBuild" Version="0.3.0" />
     </ItemGroup>
     
     <ItemGroup>
+      <Folder Include="Patches\RpcPacket" />
       <Folder Include="Resources\BundledAssets" />
     </ItemGroup>
 

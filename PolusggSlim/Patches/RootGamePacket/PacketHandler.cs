@@ -93,12 +93,12 @@ namespace PolusggSlim.Patches.RootGamePacket
                         var hasBack = reader.ReadBoolean();
 
                         if (hasBack)
-                            hat.BackImage = ;
+                            hat.BackImage = new Sprite();
                         else
-                            hat.MainImage = ;
+                            hat.MainImage = new Sprite();
                         
-                        hat.FloorImage = ;
-                        hat.ClimbImage = ;
+                        hat.FloorImage = new Sprite();
+                        hat.ClimbImage = new Sprite();
                         hat.ChipOffset = reader.ReadVector2();
                         
                         hat.NoBounce = !bounce;

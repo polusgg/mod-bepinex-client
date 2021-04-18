@@ -1,17 +1,31 @@
 using System.Linq;
+using System.Reflection;
 using HarmonyLib;
 using PolusggSlim.Utils;
 
 namespace PolusggSlim
 {
-    public static class ServerManagerDynamicPatcher
+    public static class PermanentPatches
     {
-        [HarmonyPatch(typeof(ServerManager), nameof(ServerManager.Awake))]
+        public static void PatchAll(Harmony harmony)
+        {
+            harmony.Patch(
+                typeof(ServerManager).GetMethod(nameof(ServerManager.Awake)),
+                new HarmonyMethod(ServerManager_Awake.PrefixMethod)
+            );
+
+            harmony.Patch(
+                typeof(ServerManager).GetMethod(nameof(ServerManager.SetRegion)),
+                new HarmonyMethod(ServerManager_SetRegion.PrefixMethod)
+            );
+        }
+
         public static class ServerManager_Awake
         {
+            public static MethodInfo PrefixMethod => typeof(ServerManager_Awake).GetMethod(nameof(Prefix));
             public static void Prefix(ServerManager __instance)
             {
-                var serverConfig = PluginSingleton<PolusggMod>.Instance.Config.Server;
+                var serverConfig = PluginSingleton<PolusggMod>.Instance.Configuration.Server;
                 ServerManager.DefaultRegions = new[]
                 {
                     new StaticRegionInfo(
@@ -27,13 +41,13 @@ namespace PolusggSlim
             }
         }
         
-        [HarmonyPatch(typeof(ServerManager), nameof(ServerManager.SetRegion))]
         public static class ServerManager_SetRegion
         {
+            public static MethodInfo PrefixMethod => typeof(ServerManager_SetRegion).GetMethod(nameof(Prefix));
             public static void Prefix([HarmonyArgument(0)] IRegionInfo regionInfo)
             {
                 var plugin = PluginSingleton<PolusggMod>.Instance;
-                var serverConfig = plugin.Config.Server;
+                var serverConfig = plugin.Configuration.Server;
 
                 if (regionInfo.PingServer == serverConfig.IpAddress)
                     plugin.LocalLoad();

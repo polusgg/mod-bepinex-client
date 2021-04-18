@@ -1,42 +1,67 @@
 using BepInEx;
 using BepInEx.IL2CPP;
-using BepInEx.Logging;
 using HarmonyLib;
+using PolusggSlim.Auth;
 using PolusggSlim.Patches.Misc;
 using PolusggSlim.Utils;
 using PolusggSlim.Utils.Attributes;
 
 namespace PolusggSlim
 {
-    [BepInPlugin(Id, "Polus.gg", "0.69")]
+    [BepInPlugin(Id, "Polus.gg", "0.1.0")]
     public class PolusggMod : BasePlugin
     {
         public const string Id = "gg.polus.bepinexmod";
 
+        private Harmony PermanentHarmony { get; set; }
         private Harmony Harmony { get; set; }
         
-        public PggConfiguration Config { get; private set; }
+        public PggConfiguration Configuration { get; private set; }
+
+        // Domain-Specific objects
+        internal AuthContext AuthContext { get; private set; }
+        internal AuthHelper AuthHelper { get; private set; }
 
         public override void Load()
         {
+            // Harmony
+            PermanentHarmony = new Harmony(Id);
             Harmony = new Harmony(Id);
-            Config = new PggConfiguration();
             
-            RegisterInIl2CppAttribute.Register();
+            // Configuration
+            Configuration = new PggConfiguration();
+
+            // Services
+            AuthContext = new AuthContext();
+            AuthHelper = new AuthHelper(AuthContext);
             
             
             // Domain-Specific patches
-            SkipIntroSplash.Init();
+            RegisterInIl2CppAttribute.Register();
+            PermanentPatches.PatchAll(PermanentHarmony);
+            SkipIntroSplash.Load();
+            
+            LocalLoad();
         }
 
-        public void LocalLoad()
+        public override bool Unload()
+        {
+            Harmony.UnpatchSelf();
+            SkipIntroSplash.Unload();
+            AuthContext.Dispose();
+            PermanentHarmony.UnpatchSelf();
+
+            return base.Unload();
+        }
+
+        internal void LocalLoad()
         {
             PggLog.Message("Loading Polusgg mod");
-            PggLog.Message($"Polusgg Server at {Config.Server.IpAddress}");
+            PggLog.Message($"Polusgg Server at {Configuration.Server.IpAddress}");
             Harmony.PatchAll();
         }
 
-        public void LocalUnload()
+        internal void LocalUnload()
         {
             PggLog.Message("Unloading Polusgg mod");
             Harmony.UnpatchSelf();
