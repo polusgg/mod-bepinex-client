@@ -15,7 +15,7 @@ namespace PolusggSlim.Patches.Misc
             }
         }
 
-        [HarmonyPatch(typeof(AuthManager._CoConnect_d__4))]
+        // [HarmonyPatch(typeof(AuthManager._CoConnect_d__4))]
         public static class AuthManager_CoConnect
         {
             public static bool Prefix(ref bool __result)
@@ -24,7 +24,7 @@ namespace PolusggSlim.Patches.Misc
             }
         }
 
-        [HarmonyPatch(typeof(AuthManager._CoWaitForNonce_d__5))]
+        // [HarmonyPatch(typeof(AuthManager._CoWaitForNonce_d__5))]
         public static class AuthManager_CoWaitForNonce
         {
             public static bool Prefix(ref bool __result)
@@ -62,6 +62,7 @@ namespace PolusggSlim.Patches.Misc
                 return false;
             }
         }
+
         [HarmonyPatch(typeof(SaveManager), nameof(SaveManager.BirthDateYear), MethodType.Getter)]
         public static class SaveManagerGetBirthDateYearPatch
         {

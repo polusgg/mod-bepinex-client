@@ -1,3 +1,4 @@
+using System;
 using PolusggSlim.Utils;
 using PolusggSlim.Utils.Attributes;
 using PolusggSlim.Utils.Extensions;
@@ -13,6 +14,8 @@ namespace PolusggSlim.Behaviours
         private GameObject _passwordTextBox;
         private GameObject _loginButton;
         private GameObject _closeButton;
+
+        public AccountLoginBehaviour(IntPtr ptr) : base(ptr) { }
 
         public void Awake()
         {

@@ -20,10 +20,12 @@ namespace PolusggSlim
 
         // Domain-Specific objects
         internal AuthContext AuthContext { get; private set; }
-        internal AuthHelper AuthHelper { get; private set; }
+        internal SigningHelper SigningHelper { get; private set; }
 
         public override void Load()
         {
+            PluginSingleton<PolusggMod>.Instance = this;
+
             // Harmony
             PermanentHarmony = new Harmony(Id);
             Harmony = new Harmony(Id);
@@ -33,7 +35,7 @@ namespace PolusggSlim
 
             // Services
             AuthContext = new AuthContext();
-            AuthHelper = new AuthHelper(AuthContext);
+            SigningHelper = new SigningHelper(AuthContext);
             
             
             // Domain-Specific patches
@@ -59,6 +61,17 @@ namespace PolusggSlim
             PggLog.Message("Loading Polusgg mod");
             PggLog.Message($"Polusgg Server at {Configuration.Server.IpAddress}");
             Harmony.PatchAll();
+            
+            var result = AuthContext.ApiClient.LogIn("saghetti@polus.gg", "SDPRYpxr2vhz8xf").GetAwaiter().GetResult();
+            if (result != null)
+            {
+                AuthContext.ParseClientIdAsUuid(result.Data.ClientId);
+                AuthContext.ClientToken = result.Data.ClientToken;
+                AuthContext.DisplayName = result.Data.DisplayName;
+                AuthContext.Perks = result.Data.Perks;
+                
+                PggLog.Info($"Client Id: {AuthContext.ClientId}, Display name: {AuthContext.DisplayName}");
+            }
         }
 
         internal void LocalUnload()

@@ -13,18 +13,17 @@ namespace PolusggSlim.Patches.GameTransitionScreen
         [HarmonyPatch(typeof(IntroCutscene), nameof(IntroCutscene.BeginCrewmate))]
         public static class IntroCutscene_BeginCrewmate
         {
-            public static void Prefix(ref Il2CppReferenceArray<PlayerControl> yourTeam) => IntroCutscenePrefix(ref yourTeam);
+            public static void Prefix([HarmonyArgument(0)] ref Il2CppReferenceArray<PlayerControl> yourTeam) => IntroCutscenePrefix(ref yourTeam);
 
-            public static void Postfix(ref IntroCutscene __instance) => IntroCutscenePostfix(ref __instance);
+            public static void Postfix([HarmonyArgument(0)] ref IntroCutscene __instance) => IntroCutscenePostfix(ref __instance);
         }
 
         [HarmonyPatch(typeof(IntroCutscene), nameof(IntroCutscene.BeginImpostor))]
-
         public static class IntroCutscene_BeginImpostor
         {
-            public static void Prefix(ref Il2CppReferenceArray<PlayerControl> yourTeam) => IntroCutscenePrefix(ref yourTeam);
+            public static void Prefix([HarmonyArgument(0)] ref Il2CppReferenceArray<PlayerControl> yourTeam) => IntroCutscenePrefix(ref yourTeam);
 
-            public static void Postfix(ref IntroCutscene __instance) => IntroCutscenePostfix(ref __instance);
+            public static void Postfix([HarmonyArgument(0)] ref IntroCutscene __instance) => IntroCutscenePostfix(ref __instance);
         }
 
         public static void IntroCutscenePrefix(ref Il2CppReferenceArray<PlayerControl> yourTeam)

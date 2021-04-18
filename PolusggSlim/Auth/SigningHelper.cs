@@ -6,7 +6,7 @@ using UnhollowerBaseLib;
 
 namespace PolusggSlim.Auth
 {
-    public class AuthHelper
+    public class SigningHelper
     {
         private const byte AuthByte = 0x80;
         private const byte UuidSize = 16;
@@ -15,7 +15,7 @@ namespace PolusggSlim.Auth
         private readonly AuthContext _authContext;
         private readonly HMAC _hmac;
 
-        public AuthHelper(AuthContext authContext)
+        public SigningHelper(AuthContext authContext)
         {
             _hmac = HMAC.Create();
             _authContext = authContext;
@@ -30,7 +30,7 @@ namespace PolusggSlim.Auth
             byte[] output = new byte[1 + UuidSize + HashSize + bytes.Length];
             
             output[0] = AuthByte;
-            _hmac.Key.CopyTo(output, 1);
+            Encoding.UTF8.GetBytes(_authContext.ClientId).CopyTo(output, 1);
             hash.CopyTo(output, 1 + UuidSize);
             bytes.CopyTo(output, 1 + UuidSize + HashSize);
             

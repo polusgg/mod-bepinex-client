@@ -1,9 +1,11 @@
 using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using PolusggSlim.Api.Request;
 using PolusggSlim.Api.Response;
 using PolusggSlim.Utils;
 
@@ -42,9 +44,12 @@ namespace PolusggSlim.Api
             {
                 RequestUri = new Uri(_client.BaseAddress, "auth/token"),
                 Method = HttpMethod.Post,
+                Content = new StringContent(JsonConvert.SerializeObject(new LogInRequest
+                {
+                    Email = email,
+                    Password = password
+                }), Encoding.UTF8, "application/json")
             };
-            request.Headers.Add("Email", email);
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", password);
             
             var response = await _client.SendAsync(request);
             

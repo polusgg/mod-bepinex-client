@@ -12,6 +12,8 @@ namespace PolusggSlim.Auth
         public string[] Perks { get; set; } = { };
 
         public ApiClient ApiClient { get; } = new();
+        
+        public void ParseClientIdAsUuid(string uuid) => ClientId = uuid.Replace("-", "");
 
         public void Dispose() => ApiClient.Dispose();
     }

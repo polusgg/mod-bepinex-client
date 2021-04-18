@@ -12,7 +12,6 @@ using PolusGG.Mods;
 using PolusGG.Net;
 using PolusGG.Patches.Temporary;
 using PolusGG.Resources;
-using TMPro;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -27,7 +26,6 @@ namespace PolusGG {
         private ICache Cache;
         private bool loaded;
         private bool optionsDirty;
-        public static PolusMod Instance;
 
         public override string Name => "PolusMod";
 
@@ -36,23 +34,25 @@ namespace PolusGG {
             set => _loggee = value;
         }
 
-        public override void Start() {
-            Instance = this;
+        public override void Start(IObjectManager objectManager, ICache cache) {
+            // DiscordManager.Instance.OnDestroy();
+            // new GameObject("PolusDiscordManager").DontDestroy().AddComponent<PolusDiscordManager>();
             if (loaded) return;
 
             loaded = true;
 
-            PogusPlugin.ObjectManager.InnerRpcReceived += OnInnerRpcReceived;
-            PogusPlugin.ObjectManager.Register(0x80, RegisterPnos.CreateImage());
-            PogusPlugin.ObjectManager.Register(0x81, RegisterPnos.CreateButton());
-            PogusPlugin.ObjectManager.Register(0x83, RegisterPnos.CreateDeadBodyPrefab());
-            PogusPlugin.ObjectManager.Register(0x85, RegisterPnos.CreateSoundSource());
-            PogusPlugin.ObjectManager.Register(0x87, RegisterPnos.CreatePoi());
-            PogusPlugin.ObjectManager.Register(0x88, RegisterPnos.CreateCameraController());
-            PogusPlugin.ObjectManager.Register(0x89, RegisterPnos.CreatePrefabHandle());
+            objectManager.InnerRpcReceived += OnInnerRpcReceived;
+            objectManager.Register(0x80, RegisterPnos.CreateImage());
+            objectManager.Register(0x81, RegisterPnos.CreateButton());
+            objectManager.Register(0x83, RegisterPnos.CreateDeadBodyPrefab());
+            objectManager.Register(0x85, RegisterPnos.CreateSoundSource());
+            objectManager.Register(0x87, RegisterPnos.CreatePoi());
+            objectManager.Register(0x88, RegisterPnos.CreateCameraController());
+            objectManager.Register(0x89, RegisterPnos.CreatePrefabHandle());
+            // objectManager.Register(0x89, RegisterPnos.CreatePrefabHandle());
 
             ResolutionManagerPlus.Resolution();
-            Cache = PogusPlugin.Cache;
+            Cache = cache;
         }
 
         public override void Stop() {
@@ -116,10 +116,9 @@ namespace PolusGG {
                     break;
                 }
                 case PolusRpcCalls.SetOpacity: {
-                    "SET PASSITY".Log(10);
                     PlayerControl control = netObject.Cast<PlayerControl>();
-                    Color32 color = control.myRend.color;
-                    color.a = reader.ReadByte();
+                    Color color = control.myRend.color;
+                    color = new Color(color.r, color.g, color.b, reader.ReadByte() / 255f);
                     control.myRend.color = color;
                     control.HatRenderer.color = color;
                     control.MyPhysics.Skin.layer.color = color;
@@ -142,15 +141,18 @@ namespace PolusGG {
                     break;
                 }
                 case PolusRpcCalls.BeginAnimationPlayer:
-                    netObject.gameObject.EnsureComponent<PlayerAnimPlayer>().HandleMessage(reader);
+                    playerControl = netObject.Cast<PlayerControl>();
+                    PlayerAnimPlayer anim = playerControl.gameObject.EnsureComponent<PlayerAnimPlayer>();
+                    anim.HandleMessage(reader);
                     break;
-                default:
+                default: {
                     throw new ArgumentOutOfRangeException();
+                }
             }
         }
 
         public override void RootPacketReceived(MessageReader reader) {
-            // Logger.LogInfo($"LOL {reader.Tag}");
+            Logger.LogInfo($"LOL {reader.Tag}");
             switch ((PolusRootPackets) reader.Tag) {
                 case PolusRootPackets.FetchResource: {
                     uint resource = reader.ReadPackedUInt32();
@@ -206,9 +208,6 @@ namespace PolusGG {
                     RoleData.OutroPlayers = Enumerable.Repeat(15, reader.Length - reader.Position - 2)
                         .Select(_ => new WinningPlayerData(GameData.Instance.GetPlayerById(reader.ReadByte())))
                         .ToList();
-                    if (RoleData.OutroPlayers.Count == 1) {
-                        RoleData.OutroPlayers[0].IsYou = true;
-                    }
                     RoleData.ShowQuit = reader.ReadBoolean();
                     RoleData.ShowPlayAgain = reader.ReadBoolean();
 
@@ -217,8 +216,8 @@ namespace PolusGG {
                     break;
                 }
                 case PolusRootPackets.SetString: {
-                    string text = reader.ReadString();
                     StringLocations stringLocation = (StringLocations) reader.ReadByte();
+                    string text = reader.ReadString();
                     switch (stringLocation) {
                         case StringLocations.GameCode: {
                             GameStartManager.Instance.GameRoomName.text = text;
@@ -233,11 +232,11 @@ namespace PolusGG {
                             break;
                         }
                         case StringLocations.RoomTracker: {
-                            RoomTrackerTextPatch.RoomText = text == "__unset" ? null : text;
+                            // RoomTrackerTextPatch.RoomText = text == "__unset" ? null : text;
                             break;
                         }
                         case StringLocations.TaskCompletion: {
-                            HudManager.Instance.TaskCompleteOverlay.GetComponent<TextMeshPro>().text = text;
+                            HudManager.Instance.TaskCompleteOverlay.GetComponent<TextRenderer>().Text = text;
                             break;
                         }
                         case StringLocations.TaskText: {
@@ -281,22 +280,51 @@ namespace PolusGG {
                     break;
                 }
                 case PolusRootPackets.SetGameOption: {
-                    ushort sequenceId = reader.ReadUInt16();
-                    GameOptionsPatches.OnEnablePatch.ReceivedGameOptionPacket(new GameOptionsPatches.GameOptionPacket {
-                        Type = OptionPacketType.SetOption,
-                        Reader = reader.ReadBytes(reader.BytesRemaining),
-                        SequenceId = sequenceId
-                    });
+                    // return;
+                    string cat = reader.ReadString();
+                    string name = reader.ReadString();
+                    OptionType optionType = (OptionType) reader.ReadByte();
+
+                    optionsDirty = true;
+
+                    if (!GameOptionsPatches.Categories.ContainsKey(cat))
+                        GameOptionsPatches.Categories.Add(cat, new List<GameOption>());
+                    List<GameOption> category = GameOptionsPatches.Categories[cat];
+                    
+                    if (category.Any(x => x.Title == name)) {
+                        category.Find(x => x.Title == name).Value = optionType switch {
+                            OptionType.Boolean => new BooleanValue(reader.ReadBoolean()),
+                            OptionType.Number => new FloatValue(reader.ReadSingle(), reader.ReadSingle(),
+                                reader.ReadSingle(), reader.ReadSingle(), reader.ReadBoolean(), reader.ReadString()),
+                            OptionType.Enum => EnumValue.ConstructEnumValue(reader),
+                            _ => throw new ArgumentOutOfRangeException()
+                        };
+                    } else {
+                        GameOption option = new GameOption {
+                            Title = name,
+                            Type = optionType,
+                            Value = optionType switch {
+                                OptionType.Boolean => new BooleanValue(reader.ReadBoolean()),
+                                OptionType.Number => new FloatValue(reader.ReadSingle(), reader.ReadSingle(),
+                                    reader.ReadSingle(), reader.ReadSingle(), reader.ReadBoolean(),
+                                    reader.ReadString()),
+                                OptionType.Enum => EnumValue.ConstructEnumValue(reader),
+                                _ => throw new ArgumentOutOfRangeException()
+                            }
+                        };
+                        GameOptionsPatches.OptionMap[name] = option;
+                        category.Add(option);
+                    }
 
                     break;
                 }
                 case PolusRootPackets.DeleteGameOption: {
-                    ushort sequenceId = reader.ReadUInt16();
-                    GameOptionsPatches.OnEnablePatch.ReceivedGameOptionPacket(new GameOptionsPatches.GameOptionPacket {
-                        Type = OptionPacketType.DeleteOption,
-                        Reader = reader.ReadBytes(reader.BytesRemaining),
-                        SequenceId = sequenceId
-                    });
+                    optionsDirty = true;
+                    string name = reader.ReadString();
+                    List<GameOption> category = GameOptionsPatches.Categories.First(x => x.Value.Any(x => x.Title == name)).Value;
+                    category.RemoveAll(x => x.Title == name);
+                    GameOptionsPatches.OptionMap.Remove(name);
+                    if (category.Count == 0) GameOptionsPatches.Categories.Remove(GameOptionsPatches.Categories.First(y => y.Value == category).Key);
                     break;
                 }
                 case PolusRootPackets.LoadHat: {
@@ -311,15 +339,7 @@ namespace PolusGG {
             }
         }
 
-        public void DirtyOptions() {
-            optionsDirty = true;
-        }
-
         public override void FixedUpdate() {
-            
-        }
-
-        public override void Update() {
             if (optionsDirty) {
                 GameSettingMenu menu = Object.FindObjectOfType<GameSettingMenu>();
                 if (menu) menu.OnEnable();
@@ -336,20 +356,7 @@ namespace PolusGG {
 
         public override void LobbyLeft() {
             PingTrackerTextPatch.PingText = null;
-            RoomTrackerTextPatch.RoomText = null;
-            GameOptionsPatches.OnEnablePatch.Reset();
-        }
-
-        public override void PlayerSpawned(PlayerControl player) {
-            
-        }
-
-        public override void PlayerDestroyed(PlayerControl player) {
-            
-        }
-
-        public override void GameEnded() {
-            
+            // RoomTrackerTextPatch.RoomText = null;
         }
 
         private MessageWriter StartSendResourceResponse(uint resource, ResponseType type) {
@@ -375,8 +382,8 @@ namespace PolusGG {
 
     public class RoleData {
         public Color IntroColor = Color.magenta;
-        public string IntroDesc = "Something went horribly wrong\nwhile displaying this intro!";
-        public string IntroName = "uh oh";
+        public string IntroDesc = "you failed to set this on time";
+        public string IntroName = "Poobscoob";
         public List<byte> IntroPlayers = new();
         public Color OutroColor = Color.green;
         public string OutroDesc = "Failed to set ending correctly!";
