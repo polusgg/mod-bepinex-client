@@ -26,6 +26,12 @@ namespace PolusGG {
             gameObject.AddComponent<EventHandlerBehaviour>().ModManager = this;
 
             SceneManager.add_sceneLoaded(new Action<Scene, LoadSceneMode>((scene, mode) => {
+                try {
+                    if (scene.name == "MMOnline") AccountMenu.InitializeAccountMenu(scene);
+                } catch {
+                    // ignored
+                }
+
                 if (!AllPatched) return;
                 if (scene.name != "OnlineGame") {
                     PogusPlugin.ObjectManager.EndedGame();
