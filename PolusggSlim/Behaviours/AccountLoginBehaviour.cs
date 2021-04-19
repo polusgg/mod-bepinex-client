@@ -36,7 +36,7 @@ namespace PolusggSlim.Behaviours
             var result = context.ApiClient.LogIn("test", "me").GetAwaiter().GetResult();
             if (result != null)
             {
-                context.ClientId = result.Data.ClientId;
+                context.ParseClientIdAsUuid(result.Data.ClientId);
                 context.ClientToken = result.Data.ClientToken;
                 context.DisplayName = result.Data.DisplayName;
                 context.Perks = result.Data.Perks;

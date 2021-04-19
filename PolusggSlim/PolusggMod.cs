@@ -1,3 +1,4 @@
+using System;
 using BepInEx;
 using BepInEx.IL2CPP;
 using HarmonyLib;
@@ -25,25 +26,31 @@ namespace PolusggSlim
         public override void Load()
         {
             PluginSingleton<PolusggMod>.Instance = this;
+            try
+            {
+                // Harmony
+                PermanentHarmony = new Harmony(Id);
+                Harmony = new Harmony(Id);
+            
+                // Configuration
+                Configuration = new PggConfiguration();
 
-            // Harmony
-            PermanentHarmony = new Harmony(Id);
-            Harmony = new Harmony(Id);
-            
-            // Configuration
-            Configuration = new PggConfiguration();
-
-            // Services
-            AuthContext = new AuthContext();
-            SigningHelper = new SigningHelper(AuthContext);
+                // Services
+                AuthContext = new AuthContext();
+                SigningHelper = new SigningHelper(AuthContext);
             
             
-            // Domain-Specific patches
-            RegisterInIl2CppAttribute.Register();
-            PermanentPatches.PatchAll(PermanentHarmony);
-            SkipIntroSplash.Load();
+                // Domain-Specific patches
+                RegisterInIl2CppAttribute.Register();
+                PermanentPatches.PatchAll(PermanentHarmony);
+                SkipIntroSplash.Load();
             
-            LocalLoad();
+                LocalLoad();
+            }
+            catch (Exception e)
+            {
+                PggLog.Error($"Error {e.Message}, Stack trace: {e.StackTrace}");
+            }
         }
 
         public override bool Unload()
