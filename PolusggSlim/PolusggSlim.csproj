@@ -16,7 +16,7 @@
     
     <ItemGroup>
       <Folder Include="Patches\RpcPacket" />
-      <Folder Include="Resources\BundledAssets" />
+      <EmbeddedResource Include="Resources\**" />
     </ItemGroup>
 
     <Target Name="Copy" AfterTargets="Reobfuscate">
