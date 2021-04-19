@@ -13,7 +13,7 @@
         <!-- Build env Among Us -->
         <AmongUs>../../../AmongUsModded2021.4.12</AmongUs>
         <!-- Runtime env Among Us-->
-        <AmongAss>C:\Users\Sanae\Downloads\depotdownloader-2.3.6\depots\945361\6542129</AmongAss>
+        <AmongAss>../../../AmongUsModded2021.4.12</AmongAss>
         <!--<AmongAss>$(AmongUs)</AmongAss>-->
 
         <Description>Polus.gg official mod</Description>
