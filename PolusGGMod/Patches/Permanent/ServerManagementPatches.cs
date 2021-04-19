@@ -19,11 +19,11 @@ namespace PolusGG.Patches.Permanent {
             Il2CppStructArray<uint> stats = new(8);
             Array.Copy(StatsManager.Instance.WinReasons, stats, 7);
             StatsManager.Instance.WinReasons = stats;
-            PggConstants.Region.cachedServers = new[] {
-                new ServerInfo(PggConstants.Region.Name, PggConstants.Region.DefaultIp, PggConstants.Region.Port)
-            };
+            // PggConstants.Region.cachedServers = new[] {
+            //     new ServerInfo(PggConstants.Region.Name, PggConstants.Region.PingServer, PggConstants.Region.Port)
+            // };
             ServerManager.DefaultRegions =
-                ServerManager.DefaultRegions.Prepend(PggConstants.Region.Duplicate()).ToArray();
+                ServerManager.DefaultRegions.Prepend(PggConstants.Region).ToArray();
             // __instance.CurrentRegion = PggConstants.Region.Duplicate();
             // __instance.CurrentServer = (from s in __instance.AvailableServers
             // orderby s.ConnectionFailures, s.Players
@@ -46,7 +46,7 @@ namespace PolusGG.Patches.Permanent {
         [PermanentPatch]
         [HarmonyPrefix]
         public static void Postfix(AnnouncementPopUp._Init_d__12 __instance) {
-            if (ServerManager.Instance.OnlineNetAddress.Equals(PggConstants.Region.DefaultIp) && !PogusPlugin.ModManager.AllPatched) {
+            if (ServerManager.Instance.OnlineNetAddress.Equals(PggConstants.Region.PingServer) && !PogusPlugin.ModManager.AllPatched) {
                 PogusPlugin.ModManager.LoadMods();
                 PogusPlugin.ModManager.PatchMods();
             }

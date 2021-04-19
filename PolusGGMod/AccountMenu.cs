@@ -31,8 +31,6 @@ namespace PolusGG {
                     .Cast<GameObject>().DontDestroy().AddComponent<AccountMenuHolder>();
                 _top = PogusPlugin.Bundle.LoadAsset("Assets/Mods/LoginMenu/TopAccount.prefab").Cast<GameObject>()
                     .DontDestroy().AddComponent<TopAccountHolder>();
-                // _top.transform.localScale = new Vector3(0.5f, 0.5f, 1f);
-                // menu.transform.localScale = new Vector3(0.5f, 0.5f, 1f);
                 _stupidGlyphRenderer = new GameObject("stupidspriterendererfix").DontDestroy()
                     .AddComponent<SpriteRenderer>();
 

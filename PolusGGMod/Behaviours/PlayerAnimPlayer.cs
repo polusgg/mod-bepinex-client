@@ -63,8 +63,8 @@ namespace PolusGG.Behaviours {
                     current.SkinOpacity = Mathf.Lerp(previous.SkinOpacity, current.SkinOpacity, dt);
                     current.SetPlayerColors(
                         Color.Lerp(previous.MainColor, current.MainColor, dt),
-                        Color.Lerp(previous.MainColor, current.MainColor, dt),
-                        Color.Lerp(previous.MainColor, current.MainColor, dt)
+                        Color.Lerp(previous.ShadowColor, current.ShadowColor, dt),
+                        Color.Lerp(previous.VisorColor, current.VisorColor, dt)
                     );
                     current.Scale = Vector2.Lerp(previous.Scale, current.Scale, dt);
                     current.Position = Vector2.Lerp(previous.Position, current.Position, dt);
@@ -113,6 +113,12 @@ namespace PolusGG.Behaviours {
                 this.hatOpacity = hatOpacity;
                 this.petOpacity = petOpacity;
                 this.skinOpacity = skinOpacity;
+                this.mainColor = mainColor;
+                this.shadowColor = shadowColor;
+                this.visorColor = visorColor;
+                this.scale = scale;
+                this.position = position;
+                this.angle = angle;
             }
 
             public float PlayerOpacity {

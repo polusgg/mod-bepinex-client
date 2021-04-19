@@ -12,14 +12,14 @@ using Object = UnityEngine.Object;
 namespace PolusGG.Patches.Temporary {
     public static class GameOptionsPatches {
         public static Dictionary<string, GameOption> Options = new() {
-            {"Piss", new GameOption {Type = OptionType.Number, Value = new FloatValue(5, 5, 0, 420, true, "{0}")}}, {
-                "Tinkle",
-                new GameOption {
-                    Type = OptionType.Enum,
-                    Value = new EnumValue(1, new[] {"dnf", "alex", "natsu", "rose", "subzeroextabyteonyt", "shitting mark", "saghetti"})
-                }
-            },
-            {"Pee", new GameOption {Type = OptionType.Boolean, Value = new BooleanValue(true)}},
+            // {"Piss", new GameOption {Type = OptionType.Number, Value = new FloatValue(5, 5, 0, 420, true, "{0}")}}, {
+                // "Tinkle",
+                // new GameOption {
+                    // Type = OptionType.Enum,
+                    // Value = new EnumValue(1, new[] {"dnf", "alex", "natsu", "rose", "subzeroextabyteonyt", "shitting mark", "saghetti"})
+                // }
+            // },
+            // {"Pee", new GameOption {Type = OptionType.Boolean, Value = new BooleanValue(true)}},
         };
 
         private static KeyValueOption enumOption;
