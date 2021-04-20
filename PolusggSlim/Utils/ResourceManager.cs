@@ -11,7 +11,7 @@ namespace PolusggSlim.Utils
         public static Texture2D GetTextureFromImg(string name)
         {
             var imgBuffer = typeof(ResourceManager).Assembly
-                .GetManifestResourceStream($"Polusgg.Resources.{name}")
+                .GetManifestResourceStream($"PolusggSlim.Resources.{name}")
                 .ReadAll();
             if (imgBuffer == null)
                 return null;
@@ -27,7 +27,7 @@ namespace PolusggSlim.Utils
                 return AssetBundleCache[name];
 
             var buffer = typeof(ResourceManager).Assembly
-                .GetManifestResourceStream($"Polusgg.Resources.BundledAssets.{name}")
+                .GetManifestResourceStream($"PolusggSlim.Resources.BundledAssets.{name}")
                 .ReadAll();
             if (buffer == null)
                 return null;

@@ -6,13 +6,13 @@ namespace PolusggSlim.Patches.Misc
 {
     public static class SkipIntroSplash
     {
-        private static UnityAction<Scene, LoadSceneMode> SkipIntroHook = (Action<Scene, LoadSceneMode>) ((scene, _) =>
+        private static Action<Scene, LoadSceneMode> SkipIntroHook = (scene, _) =>
         {
             if (scene.name == "SplashIntro")
             {
                 SceneManager.LoadScene("MainMenu");
             }
-        });
+        };
         
         public static void Load() => SceneManager.add_sceneLoaded(SkipIntroHook);
 

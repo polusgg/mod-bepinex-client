@@ -3,6 +3,7 @@ using BepInEx;
 using BepInEx.IL2CPP;
 using HarmonyLib;
 using PolusggSlim.Auth;
+using PolusggSlim.Behaviours;
 using PolusggSlim.Patches.Misc;
 using PolusggSlim.Utils;
 using PolusggSlim.Utils.Attributes;
@@ -55,10 +56,11 @@ namespace PolusggSlim
 
         public override bool Unload()
         {
-            Harmony.UnpatchSelf();
+            LocalUnload();
+
             SkipIntroSplash.Unload();
-            AuthContext.Dispose();
             PermanentHarmony.UnpatchSelf();
+            AuthContext.Dispose();
 
             return base.Unload();
         }
@@ -67,23 +69,18 @@ namespace PolusggSlim
         {
             PggLog.Message("Loading Polusgg mod");
             PggLog.Message($"Polusgg Server at {Configuration.Server.IpAddress}");
-            Harmony.PatchAll();
             
-            var result = AuthContext.ApiClient.LogIn("saghetti@polus.gg", "SDPRYpxr2vhz8xf").GetAwaiter().GetResult();
-            if (result != null)
-            {
-                AuthContext.ParseClientIdAsUuid(result.Data.ClientId);
-                AuthContext.ClientToken = result.Data.ClientToken;
-                AuthContext.DisplayName = result.Data.DisplayName;
-                AuthContext.Perks = result.Data.Perks;
-                
-                PggLog.Info($"Client Id: {AuthContext.ClientId}, Display name: {AuthContext.DisplayName}");
-            }
+            AccountLoginBehaviour.Load();
+            
+            Harmony.PatchAll();
         }
 
         internal void LocalUnload()
         {
             PggLog.Message("Unloading Polusgg mod");
+            
+            AccountLoginBehaviour.Unload();
+            
             Harmony.UnpatchSelf();
         }
     }

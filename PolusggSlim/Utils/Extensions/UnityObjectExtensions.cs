@@ -15,6 +15,22 @@ namespace PolusggSlim.Utils.Extensions
             return gameObject.GetComponent<T>() ?? gameObject.AddComponent<T>();
         }
 
+        public static bool TryDestroyComponent<T>(this GameObject gameObject) where T : Component
+        {
+            var component = gameObject.GetComponent<T>();
+            if (component != null)
+                Object.Destroy(component);
+            return component != null;
+        }
+
+        public static void TryDestroyGameObject(this GameObject gameObject, bool immediate = false)
+        {
+            if (immediate)
+                Object.DestroyImmediate(gameObject);
+            else
+                Object.Destroy(gameObject);
+        }
+
         public static GameObject FindRecursive(this GameObject obj, Func<GameObject, bool> search)
         {
             GameObject result = null;
