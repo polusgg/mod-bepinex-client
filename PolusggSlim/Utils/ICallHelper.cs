@@ -23,5 +23,4 @@ namespace PolusggSlim.Utils
             return del;
         }
     }
-
 }

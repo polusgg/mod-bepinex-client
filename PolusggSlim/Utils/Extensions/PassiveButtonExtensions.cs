@@ -1,5 +1,4 @@
 using System;
-using Rewired.Utils.Platforms.Windows;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,12 +12,12 @@ namespace PolusggSlim.Utils.Extensions
                 throw new InvalidOperationException(
                     "Cannot add PassiveButton to gameObject, as it doesn't have a SpriteRenderer"
                 );
-            
+
             var button = gameObject.AddComponent<PassiveButton>();
             button.OnClick = new Button.ButtonClickedEvent();
             button.OnMouseOut = new Button.ButtonClickedEvent();
             button.OnMouseOver = new Button.ButtonClickedEvent();
-            
+
             button.OnClick.AddListener(onClick);
 
             if (rollover)

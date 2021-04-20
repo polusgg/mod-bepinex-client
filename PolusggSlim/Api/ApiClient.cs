@@ -13,22 +13,22 @@ namespace PolusggSlim.Api
 {
     public class ApiClient : IDisposable
     {
-        private HttpClient _client;
+        private readonly HttpClient _client;
 
-        private JsonSerializerSettings _settings;
-        
+        private readonly JsonSerializerSettings _settings;
+
         public ApiClient()
         {
             var config = PluginSingleton<PolusggMod>.Instance.Configuration.AuthConfig;
             _client = new HttpClient
             {
-                BaseAddress = new Uri(config.AuthEndpoint + config.PublicApiBaseUrl),
+                BaseAddress = new Uri(config.AuthEndpoint + config.PublicApiBaseUrl)
             };
 
             _client.DefaultRequestHeaders.Accept.Clear();
             _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            
+
             _settings = new JsonSerializerSettings
             {
                 ContractResolver = new DefaultContractResolver
@@ -36,6 +36,11 @@ namespace PolusggSlim.Api
                     NamingStrategy = new SnakeCaseNamingStrategy()
                 }
             };
+        }
+
+        public void Dispose()
+        {
+            _client?.Dispose();
         }
 
         internal async Task<GenericResponse<LoginResponse>> LogIn(string email, string password)
@@ -50,16 +55,14 @@ namespace PolusggSlim.Api
                     Password = password
                 }), Encoding.UTF8, "application/json")
             };
-            
+
             var response = await _client.SendAsync(request);
-            
+
             if (response.IsSuccessStatusCode)
-            {
                 return JsonConvert.DeserializeObject<GenericResponse<LoginResponse>>(
                     await response.Content.ReadAsStringAsync(),
                     _settings
                 );
-            }
 
             return null;
         }
@@ -69,24 +72,20 @@ namespace PolusggSlim.Api
             var request = new HttpRequestMessage
             {
                 RequestUri = new Uri(_client.BaseAddress, "auth/check"),
-                Method = HttpMethod.Post,
+                Method = HttpMethod.Post
             };
             request.Headers.Add("Client-ID", clientId);
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", clientToken);
-            
+
             var response = await _client.SendAsync(request);
-            
+
             if (response.IsSuccessStatusCode)
-            {
                 return JsonConvert.DeserializeObject<GenericResponse<CheckTokenData>>(
                     await response.Content.ReadAsStringAsync(),
                     _settings
                 );
-            }
 
             return null;
         }
-        
-        public void Dispose() => _client?.Dispose();
     }
 }

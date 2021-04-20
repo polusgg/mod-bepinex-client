@@ -13,6 +13,6 @@ namespace PolusggSlim.Patches.RootGamePacket
         DeclareKillAnim = 0x88,
         SetGameOption = 0x89,
         DeleteGameOption = 0x8A,
-        DisplaySystemAlert = 0xFA,
+        DisplaySystemAlert = 0xFA
     }
 }

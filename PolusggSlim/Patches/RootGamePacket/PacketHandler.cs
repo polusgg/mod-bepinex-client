@@ -15,7 +15,8 @@ namespace PolusggSlim.Patches.RootGamePacket
         [HarmonyPatch(typeof(InnerNetClient), nameof(InnerNetClient.HandleMessage))]
         public static class HandleMessage
         {
-            public static void Prefix(InnerNetClient __instance, [HarmonyArgument(0)] MessageReader reader, [HarmonyArgument(1)] SendOption yoMama)
+            public static void Prefix(InnerNetClient __instance, [HarmonyArgument(0)] MessageReader reader,
+                [HarmonyArgument(1)] SendOption yoMama)
             {
                 if (!(reader.Tag > 0x80))
                     return;
@@ -37,12 +38,12 @@ namespace PolusggSlim.Patches.RootGamePacket
                     {
                         IntroCutscenePatch.Data = new CutsceneData
                         {
-                            TitleText =  reader.ReadString(),
+                            TitleText = reader.ReadString(),
                             SubtitleText = reader.ReadString(),
-                            BackgroundColor =  reader.ReadColor(),
+                            BackgroundColor = reader.ReadColor(),
                             YourTeam = reader.ReadBytes(reader.Length - reader.Position)
                         };
-                        
+
                         break;
                     }
                     case RootPacketTypes.OverwriteGameOver:
@@ -56,7 +57,7 @@ namespace PolusggSlim.Patches.RootGamePacket
                             DisplayQuit = reader.ReadBoolean(),
                             DisplayPlayAgain = reader.ReadBoolean()
                         };
-                        
+
                         break;
                     }
                     case RootPacketTypes.SetString:
@@ -65,24 +66,38 @@ namespace PolusggSlim.Patches.RootGamePacket
                         var location = (SetStringLocations) reader.ReadByte();
 
                         if (location == SetStringLocations.GameCode)
+                        {
                             GameStartManager.Instance.GameRoomName.text = newString;
+                        }
                         else if (location == SetStringLocations.GamePlayerCount)
+                        {
                             GameStartManagerPatch.GamePlayerCount = newString;
+                        }
                         else if (location == SetStringLocations.TaskText)
                         {
                             //TODO: Implementation detail uncertain
                         }
                         else if (location == SetStringLocations.RoomTracker)
+                        {
                             RoomTrackerPatch.RoomString = newString;
+                        }
                         else if (location == SetStringLocations.PingTracker)
+                        {
                             PingTrackerPatch.PingText = newString;
+                        }
                         else if (location == SetStringLocations.TaskCompletion)
+                        {
                             DestroyableSingleton<HudManager>.Instance.TaskCompleteOverlay.GetComponent<TextRenderer>()
                                 .Text = newString;
+                        }
                         else if (location == SetStringLocations.GameOptions)
+                        {
                             GameOptionsHudStringPatch.GameOptionsString = newString;
+                        }
                         else
+                        {
                             throw new ArgumentOutOfRangeException();
+                        }
 
                         break;
                     }
@@ -96,11 +111,11 @@ namespace PolusggSlim.Patches.RootGamePacket
                             hat.BackImage = new Sprite();
                         else
                             hat.MainImage = new Sprite();
-                        
+
                         hat.FloorImage = new Sprite();
                         hat.ClimbImage = new Sprite();
                         hat.ChipOffset = reader.ReadVector2();
-                        
+
                         hat.NoBounce = !bounce;
 
                         var accessible = reader.ReadBoolean();

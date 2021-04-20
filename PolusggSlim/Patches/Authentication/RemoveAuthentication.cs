@@ -32,10 +32,12 @@ namespace PolusggSlim.Patches.Misc
                 return __result = false;
             }
         }
-        
+
         [HarmonyPatch(typeof(MainMenuManager), nameof(MainMenuManager.Start))]
-        public static class MainMenuManager_Start {
-            public static void Postfix() {
+        public static class MainMenuManager_Start
+        {
+            public static void Postfix()
+            {
                 var play = GameObject.Find("PlayOnlineButton");
                 play.GetComponent<SpriteRenderer>().color = Color.white;
                 play.GetComponent<PassiveButton>().enabled = true;
@@ -44,7 +46,7 @@ namespace PolusggSlim.Patches.Misc
                 rolloverHandler.OverColor = Color.green;
             }
         }
-        
+
         [HarmonyPatch(typeof(EOSManager), nameof(EOSManager.InitializePlatformInterface))]
         public static class EOSManager_InitializePlatformInterfacePatch
         {

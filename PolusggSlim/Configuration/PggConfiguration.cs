@@ -9,7 +9,9 @@ namespace PolusggSlim
     {
         public AuthEndpointConfig AuthConfig { get; } = new();
         public string DownloadServer { get; } = "https://polusgg-assetbundles.nyc3.digitaloceanspaces.com/";
-        public string DownloadFolder { get; } = Path.Combine(Paths.PluginPath, "PolusggCache", Guid.NewGuid().ToString());
+
+        public string DownloadFolder { get; } =
+            Path.Combine(Paths.PluginPath, "PolusggCache", Guid.NewGuid().ToString());
 
         public ServerConfig Server { get; } = new();
     }

@@ -17,7 +17,7 @@ namespace PolusggSlim
 
         private Harmony PermanentHarmony { get; set; }
         private Harmony Harmony { get; set; }
-        
+
         public PggConfiguration Configuration { get; private set; }
 
         // Domain-Specific objects
@@ -32,20 +32,20 @@ namespace PolusggSlim
                 // Harmony
                 PermanentHarmony = new Harmony(Id);
                 Harmony = new Harmony(Id);
-            
+
                 // Configuration
                 Configuration = new PggConfiguration();
 
                 // Services
                 AuthContext = new AuthContext();
                 SigningHelper = new SigningHelper(AuthContext);
-            
-            
+
+
                 // Domain-Specific patches
                 RegisterInIl2CppAttribute.Register();
                 PermanentPatches.PatchAll(PermanentHarmony);
                 SkipIntroSplash.Load();
-            
+
                 LocalLoad();
             }
             catch (Exception e)
@@ -69,18 +69,18 @@ namespace PolusggSlim
         {
             PggLog.Message("Loading Polusgg mod");
             PggLog.Message($"Polusgg Server at {Configuration.Server.IpAddress}");
-            
+
             AccountLoginBehaviour.Load();
-            
+
             Harmony.PatchAll();
         }
 
         internal void LocalUnload()
         {
             PggLog.Message("Unloading Polusgg mod");
-            
+
             AccountLoginBehaviour.Unload();
-            
+
             Harmony.UnpatchSelf();
         }
     }

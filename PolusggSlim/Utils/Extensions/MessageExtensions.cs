@@ -32,7 +32,7 @@ namespace PolusggSlim.Utils.Extensions
 
         public static Color32 ReadColor(this MessageReader reader)
         {
-            return new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
+            return new(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
         }
     }
 }

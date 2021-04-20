@@ -16,10 +16,10 @@ namespace PolusggSlim.Behaviours
     public class AccountLoginBehaviour : MonoBehaviour
     {
         private const string LOGIN_SCENE = "MMOnline";
-        
+
         private static GameObject? _normalMenu;
-        
-        private static Action<Scene, LoadSceneMode> ShowAccountMenuHook = (scene, _) =>
+
+        private static readonly Action<Scene, LoadSceneMode> ShowAccountMenuHook = (scene, _) =>
         {
             if (scene.name == LOGIN_SCENE)
             {
@@ -29,39 +29,41 @@ namespace PolusggSlim.Behaviours
             }
         };
 
+        private GameObject _createAccountButton;
+
+        private SpriteRenderer _glyphRenderer;
+        private GameObject _openLogInModalButton;
+
+
+        private GameObject _topButtonBar;
+
+        public AccountLoginBehaviour(IntPtr ptr) : base(ptr)
+        {
+        }
+
         public static void Load()
         {
             ShowAccountMenuHook.Invoke(SceneManager.GetActiveScene(), LoadSceneMode.Single);
-            SceneManager.add_sceneLoaded(ShowAccountMenuHook);   
+            SceneManager.add_sceneLoaded(ShowAccountMenuHook);
         }
-        
+
         public static void Unload()
         {
             _normalMenu?.TryDestroyComponent<AccountLoginBehaviour>();
             SceneManager.remove_sceneLoaded(ShowAccountMenuHook);
         }
-        
-        
-        
-        private GameObject _topButtonBar;
-        private GameObject _openLogInModalButton;
-        private GameObject _createAccountButton;
-        
-        private SpriteRenderer _glyphRenderer;
-
-        public AccountLoginBehaviour(IntPtr ptr) : base(ptr) { }
 
         public void Awake()
         {
             if (_normalMenu is null)
                 return;
-            
+
             var bundle = ResourceManager.GetAssetBundle("bepinexresources");
 
             var topButtonBarPrefab = bundle.LoadAsset("Assets/Mods/LoginMenu/TopAccount.prefab").Cast<GameObject>();
             _glyphRenderer = new GameObject("GlyphRendererFix").AddComponent<SpriteRenderer>();
 
-            
+
             var nameTextBar = _normalMenu.FindRecursive(go => go.name.Contains("NameText"));
             nameTextBar.active = false;
             _topButtonBar = Instantiate(topButtonBarPrefab);
@@ -78,13 +80,13 @@ namespace PolusggSlim.Behaviours
                         .LoadAsset("Assets/Mods/LoginMenu/PolusggAccountMenu.prefab")).Cast<GameObject>();
                     var accountMenuHolder = menuObj.AddComponent<AccountMenuHolder>();
                     menuObj.transform.localPosition = new Vector3(0, 0, -500f);
-                
-                    GameObject nameObj = menuObj.FindRecursive(x => x.name.Contains("EmailTextBox"));
-                    GameObject passwordObj = menuObj.FindRecursive(x => x.name.Contains("PasswordTextBox"));
-                    GameObject loginButton = menuObj.FindRecursive(x => x.name.Contains("Login"));
 
-                    GameObject background = menuObj.FindRecursive(x => x.name.Contains("Background"));
-                    GameObject close = menuObj.FindRecursive(x => x.name.Contains("closeButton"));
+                    var nameObj = menuObj.FindRecursive(x => x.name.Contains("EmailTextBox"));
+                    var passwordObj = menuObj.FindRecursive(x => x.name.Contains("PasswordTextBox"));
+                    var loginButton = menuObj.FindRecursive(x => x.name.Contains("Login"));
+
+                    var background = menuObj.FindRecursive(x => x.name.Contains("Background"));
+                    var close = menuObj.FindRecursive(x => x.name.Contains("closeButton"));
 
                     var nameField = accountMenuHolder.nameField = CreateTextBoxTMP(nameObj);
                     var password = accountMenuHolder.password = CreateTextBoxTMP(passwordObj);
@@ -94,24 +96,24 @@ namespace PolusggSlim.Behaviours
 
                     password.allowAllCharacters = true;
                     password.AllowPaste = true;
-                
+
                     password.OnChange.AddListener(new Action(() =>
                     {
-                        var starText = String.Join("", Enumerable.Repeat("*", password.text.Length));
-                        password.outputText.text =  starText  + "<color=#FF0000>" + password.compoText + "</color>";
+                        var starText = string.Join("", Enumerable.Repeat("*", password.text.Length));
+                        password.outputText.text = starText + "<color=#FF0000>" + password.compoText + "</color>";
                         password.outputText.ForceMeshUpdate(true, true);
                     }));
 
                     loginButton.MakePassiveButton(() =>
                     {
                         if (Login(nameField.text, password.text))
-                            Destroy(menuObj);     
+                            Destroy(menuObj);
                     });
-                
+
                     background.MakePassiveButton(() => Destroy(menuObj), false);
 
                     close.MakePassiveButton(() => Destroy(menuObj));
-                    
+
                     PggLog.Message("Entered before transition open add function");
                     menuObj.AddComponent<TransitionOpen>().duration = 0.2f;
                 }
@@ -120,10 +122,7 @@ namespace PolusggSlim.Behaviours
                     PggLog.Error($"Error: {e.Message}, Stack: {e.StackTrace}");
                 }
             });
-            _createAccountButton.MakePassiveButton(() =>
-            {
-                Application.OpenURL("https://account.polus.gg");
-            });
+            _createAccountButton.MakePassiveButton(() => { Application.OpenURL("https://account.polus.gg"); });
         }
 
         private bool Login(string email, string password)
@@ -146,7 +145,7 @@ namespace PolusggSlim.Behaviours
 
         private TextBoxTMP CreateTextBoxTMP(GameObject main)
         {
-            TextBoxTMP box = main.AddComponent<TextBoxTMP>();
+            var box = main.AddComponent<TextBoxTMP>();
             box.outputText = main.transform.Find("BoxLabel").GetComponent<TextMeshPro>();
             box.outputText.text = "";
             box.text = "";
@@ -163,15 +162,17 @@ namespace PolusggSlim.Behaviours
             main.MakePassiveButton(box.GiveFocus);
             return box;
         }
-        
-        
+
+
         [RegisterInIl2Cpp]
         public class AccountMenuHolder : MonoBehaviour
         {
             public TextBoxTMP nameField;
             public TextBoxTMP password;
-            
-            public AccountMenuHolder(IntPtr ptr) : base(ptr)  { }
+
+            public AccountMenuHolder(IntPtr ptr) : base(ptr)
+            {
+            }
         }
     }
 }

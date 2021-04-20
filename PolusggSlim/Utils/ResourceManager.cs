@@ -17,7 +17,7 @@ namespace PolusggSlim.Utils
                 return null;
 
             var tex = new Texture2D(1, 1, TextureFormat.ARGB32, false);
-            tex.LoadImage(imgBuffer, false);
+            tex.LoadImage(imgBuffer);
             return tex;
         }
 

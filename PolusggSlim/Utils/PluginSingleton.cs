@@ -14,10 +14,7 @@ namespace PolusggSlim.Utils
 
             set
             {
-                if (_instance != null)
-                {
-                    throw new Exception($"Instance for {typeof(T).FullName} is already set");
-                }
+                if (_instance != null) throw new Exception($"Instance for {typeof(T).FullName} is already set");
 
                 _instance = value;
             }

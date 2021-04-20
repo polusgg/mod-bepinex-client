@@ -13,7 +13,7 @@ namespace PolusggSlim.Patches.Misc
             {
                 var camera = __instance.GetComponent<Camera>();
 
-                int maxBound = Math.Max(Screen.width, Screen.height);
+                var maxBound = Math.Max(Screen.width, Screen.height);
                 var renderTex = new RenderTexture(maxBound, maxBound, 0)
                 {
                     antiAliasing = 4
@@ -21,7 +21,7 @@ namespace PolusggSlim.Patches.Misc
 
                 camera.targetTexture = renderTex;
                 camera.allowMSAA = true;
-                
+
                 var shadowRend = DestroyableSingleton<HudManager>.Instance.ShadowQuad.GetComponent<MeshRenderer>();
                 shadowRend.material.mainTexture = renderTex;
             }

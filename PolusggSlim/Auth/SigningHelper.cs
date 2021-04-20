@@ -1,7 +1,5 @@
-using System;
 using System.Security.Cryptography;
 using System.Text;
-using PolusggSlim.Utils;
 using UnhollowerBaseLib;
 
 namespace PolusggSlim.Auth
@@ -24,16 +22,16 @@ namespace PolusggSlim.Auth
         public void SignByteArray(ref Il2CppStructArray<byte> bytes)
         {
             _hmac.Key = Encoding.UTF8.GetBytes(_authContext.ClientToken);
-            
-            byte[] hash = _hmac.ComputeHash(bytes);
-            
-            byte[] output = new byte[1 + UuidSize + HashSize + bytes.Length];
-            
+
+            var hash = _hmac.ComputeHash(bytes);
+
+            var output = new byte[1 + UuidSize + HashSize + bytes.Length];
+
             output[0] = AuthByte;
             _authContext.ClientId.CopyTo(output, 1);
             hash.CopyTo(output, 1 + UuidSize);
             bytes.CopyTo(output, 1 + UuidSize + HashSize);
-            
+
             bytes = output;
         }
     }

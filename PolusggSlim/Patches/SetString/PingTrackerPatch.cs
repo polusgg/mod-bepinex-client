@@ -7,7 +7,7 @@ namespace PolusggSlim.Patches.SetString
         public static string PingText { get; set; } = "__unset";
 
         [HarmonyPatch(typeof(PingTracker), nameof(PingTracker.Update))]
-        public class PingTrackerTextPatch 
+        public class PingTrackerTextPatch
         {
             public static void Postfix(PingTracker __instance)
             {

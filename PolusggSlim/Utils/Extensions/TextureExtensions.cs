@@ -14,12 +14,14 @@ namespace PolusggSlim.Utils.Extensions
 
             return iCallLoadImage.Invoke(tex.Pointer, il2CppArray.Pointer, markNonReadable);
         }
-        
-        public static Sprite CreateSprite(this Texture texture, Rect rect, Vector2 pivot, float pixelsPerUnit, uint extrude, Vector4 border)
+
+        public static Sprite CreateSprite(this Texture texture, Rect rect, Vector2 pivot, float pixelsPerUnit,
+            uint extrude, Vector4 border)
         {
             var iCallCreateSprite = ICallHelper.GetICall<d_CreateSprite>("UnityEngine.Sprite::CreateSprite_Injected");
 
-            var ptr = iCallCreateSprite.Invoke(texture.Pointer, ref rect, ref pivot, pixelsPerUnit, extrude, 1, ref border, false);
+            var ptr = iCallCreateSprite.Invoke(texture.Pointer, ref rect, ref pivot, pixelsPerUnit, extrude, 1,
+                ref border, false);
 
             return ptr == IntPtr.Zero ? null : new Sprite(ptr);
         }
@@ -31,12 +33,11 @@ namespace PolusggSlim.Utils.Extensions
                 new Vector2(0.5f, 0.5f),
                 100f, 0u, Vector4.zero);
         }
-        
+
         private delegate bool d_LoadImage(IntPtr tex, IntPtr data, bool markNonReadable);
 
         private delegate IntPtr d_CreateSprite(
             IntPtr texture, ref Rect rect, ref Vector2 pivot, float pixelsPerUnit,
             uint extrude, int meshType, ref Vector4 border, bool generateFallbackPhysicsShape);
-
     }
 }
