@@ -1,6 +1,5 @@
 ﻿using System;
 using HarmonyLib;
-using PolusGG.Extensions;
 using PolusGG.Mods.Patching;
 using UnityEngine.SceneManagement;
 
@@ -17,8 +16,9 @@ namespace PolusGG.Patches.Permanent {
                     bool original = PogusPlugin.ModManager.AllPatched;
                     if (button.Text.text.Contains("Polus")) {
                         if (!PogusPlugin.ModManager.AllPatched) PogusPlugin.ModManager.PatchMods();
-                    } else
+                    } else {
                         PogusPlugin.ModManager.UnpatchMods();
+                    }
 
                     PogusPlugin.Logger.LogInfo(
                         $"IsPatched = {PogusPlugin.ModManager.AllPatched}, original = {original}");

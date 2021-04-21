@@ -10,7 +10,7 @@ namespace PolusGG.Behaviours.Inner {
             PlayerControl pc = AmongUsClient.Instance.PlayerPrefab;
             DeadBody prefab = Object.Instantiate(pc.KillAnimations[0].bodyPrefab);
             prefab.hideFlags = HideFlags.HideInHierarchy;
-            var gameObject = prefab.gameObject;
+            GameObject gameObject = prefab.gameObject;
             gameObject.active = false;
             Object.DontDestroyOnLoad(gameObject);
 
@@ -55,7 +55,7 @@ namespace PolusGG.Behaviours.Inner {
         public static PnoBehaviour CreatePoi() {
             GameObject pointyObject = new("PointOfInterest") {active = false};
             pointyObject.DontDestroy();
-        
+
             pointyObject.AddComponent<PolusPoi>();
             return pointyObject.AddComponent<PolusNetworkTransform>();
         }
@@ -63,7 +63,7 @@ namespace PolusGG.Behaviours.Inner {
         public static PnoBehaviour CreateConsole() {
             GameObject burger = new("Console") {active = false};
             burger.DontDestroy();
-        
+
             burger.AddComponent<PolusConsole>();
             return burger.AddComponent<PolusNetworkTransform>();
         }
@@ -71,7 +71,7 @@ namespace PolusGG.Behaviours.Inner {
         public static PnoBehaviour CreateSoundSource() {
             GameObject wap = new("SoundSource") {active = false};
             wap.DontDestroy();
-        
+
             wap.AddComponent<PolusSoundSource>();
             wap.AddComponent<AudioSource>();
             return wap.AddComponent<PolusNetworkTransform>();
@@ -101,7 +101,7 @@ namespace PolusGG.Behaviours.Inner {
         }
 
         public static PnoBehaviour CreateCameraController() {
-            GameObject cameraController = new("uwuCameraManager") { active = false };
+            GameObject cameraController = new("uwuCameraManager") {active = false};
             cameraController.DontDestroy();
             return cameraController.AddComponent<PolusCameraController>();
         }

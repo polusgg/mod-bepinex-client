@@ -6,11 +6,12 @@ namespace PolusGG.Behaviours.Inner {
     public class PolusPoi : PnoBehaviour {
         private ArrowBehaviour arrow;
         private CustomNetworkTransform cnt;
-        public PolusPoi(IntPtr ptr) : base(ptr) { }
 
         static PolusPoi() {
             ClassInjector.RegisterTypeInIl2Cpp<PolusPoi>();
         }
+
+        public PolusPoi(IntPtr ptr) : base(ptr) { }
 
         private void Start() {
             arrow = GetComponent<ArrowBehaviour>();

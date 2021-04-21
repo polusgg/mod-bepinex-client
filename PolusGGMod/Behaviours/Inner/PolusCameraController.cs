@@ -10,13 +10,14 @@ using UnityEngine;
 
 namespace PolusGG.Behaviours.Inner {
     public class PolusCameraController : PnoBehaviour {
-        private FollowerCamera follower;
         private Camera camera;
-        public PolusCameraController(IntPtr ptr) : base(ptr) { }
+        private FollowerCamera follower;
 
         static PolusCameraController() {
             ClassInjector.RegisterTypeInIl2Cpp<PolusCameraController>();
         }
+
+        public PolusCameraController(IntPtr ptr) : base(ptr) { }
 
         private void Start() {
             follower = HudManager.Instance.PlayerCam;
@@ -24,6 +25,10 @@ namespace PolusGG.Behaviours.Inner {
             pno = PogusPlugin.ObjectManager.LocateNetObject(this);
             pno.OnData = Deserialize;
             pno.OnRpc = HandleRpc;
+        }
+
+        private void FixedUpdate() {
+            if (pno.HasSpawnData()) Deserialize(pno.GetSpawnData());
         }
 
         private void HandleRpc(MessageReader reader, byte callid) {
@@ -83,10 +88,6 @@ namespace PolusGG.Behaviours.Inner {
             }
         }
 
-        private void FixedUpdate() {
-            if (pno.HasSpawnData()) Deserialize(pno.GetSpawnData());
-        }
-
         private void Deserialize(MessageReader reader) {
             // Camera hudCamera = HudManager.Instance.GetComponentInChildren<Camera>();
             // Camera camera = Camera.main;
@@ -99,18 +100,30 @@ namespace PolusGG.Behaviours.Inner {
         }
 
         public class CameraKeyframe {
-            public FollowerCamera FollowerCamera;
+            private readonly float angle;
             public Camera Camera;
-            public uint Offset;
+            private readonly Vector2 cameraOffset;
             public uint Duration;
-            private Vector2 cameraOffset;
-            private float angle;
-            private Color overlayColor;
+            public FollowerCamera FollowerCamera;
+            public uint Offset;
+            private readonly Color overlayColor;
+
+            public CameraKeyframe(uint animOffset, uint duration, Vector2 cameraOffset, float angle, Color32 color,
+                FollowerCamera followerCamera, Camera camera) {
+                Offset = animOffset;
+                Duration = duration;
+                this.cameraOffset = cameraOffset;
+                this.angle = angle;
+                overlayColor = color;
+                FollowerCamera = followerCamera;
+                Camera = camera;
+            }
 
             public Vector2 CameraOffset {
                 get => cameraOffset;
                 set => FollowerCamera.Offset = value;
             }
+
             public float Angle {
                 get => angle;
                 set {
@@ -124,16 +137,6 @@ namespace PolusGG.Behaviours.Inner {
             public Color OverlayColor {
                 get => overlayColor;
                 set => HudManager.Instance.FullScreen.color = value;
-            }
-
-            public CameraKeyframe(uint animOffset, uint duration, Vector2 cameraOffset, float angle, Color32 color, FollowerCamera followerCamera, Camera camera) {
-                Offset = animOffset;
-                Duration = duration;
-                this.cameraOffset = cameraOffset;
-                this.angle = angle;
-                overlayColor = color;
-                FollowerCamera = followerCamera;
-                Camera = camera;
             }
         }
     }

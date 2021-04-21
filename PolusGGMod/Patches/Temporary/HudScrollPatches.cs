@@ -26,9 +26,8 @@ namespace PolusGG.Patches.Temporary {
                 try {
                     if (!AmongUsClient.Instance.IsGameStarted) {
                         Scroller scroller = __instance.GameSettings.GetComponent<Scroller>();
-                        if (scroller != null) {
+                        if (scroller != null)
                             scroller.YBounds = new FloatRange(2.9f, 2.9f + __instance.GameSettings.renderedHeight);
-                        }
 
                         bool wasEnabled = scroller.enabled;
                         scroller.enabled = !CustomPlayerMenu.Instance || Input.GetMouseButton(0) && wasEnabled;

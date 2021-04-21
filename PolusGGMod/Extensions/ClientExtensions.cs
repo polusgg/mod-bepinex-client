@@ -4,7 +4,8 @@ using UnityEngine;
 
 namespace PolusGG.Extensions {
     public static class ClientExtensions {
-        public static void SendRpcImmediately(this AmongUsClient client, uint netId, byte callId, SendOption option = SendOption.Reliable) {
+        public static void SendRpcImmediately(this AmongUsClient client, uint netId, byte callId,
+            SendOption option = SendOption.Reliable) {
             MessageWriter messageWriter = MessageWriter.Get(option);
             messageWriter.StartMessage(5);
             messageWriter.Write(client.GameId);

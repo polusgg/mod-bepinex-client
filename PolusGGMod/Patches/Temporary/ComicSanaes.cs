@@ -1,11 +1,9 @@
 ﻿using HarmonyLib;
-using PolusGG.Extensions;
 using PolusGG.Mods.Patching;
 using TMPro;
-using UnityEngine;
 
 namespace PolusGG.Patches.Temporary {
-    #if DEBUG
+#if DEBUG
     [HarmonyPatch(typeof(TextMeshPro), nameof(TextMeshPro.SetVerticesDirty))]
     public class ComicSanaes {
         [PermanentPatch]
@@ -17,5 +15,5 @@ namespace PolusGG.Patches.Temporary {
             // __instance.LoadFontAsset();
         }
     }
-    #endif
+#endif
 }

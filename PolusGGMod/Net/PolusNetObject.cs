@@ -1,21 +1,23 @@
 ﻿using Hazel;
-using PolusGG.Extensions;
 
 namespace PolusGG.Net {
     public class PolusNetObject {
+        public delegate void OnDataDel(MessageReader reader);
+
+        public delegate void OnRpcDel(MessageReader reader, byte callId);
+
+        private MessageReader data;
+        private bool hasSpawn;
         public uint NetId;
-        public PnoBehaviour PnoBehaviour;
         public OnDataDel OnData;
         public OnRpcDel OnRpc;
-        private MessageReader data;
-        private bool hasSpawn = false;
-        public delegate void OnDataDel(MessageReader reader);
-        public delegate void OnRpcDel(MessageReader reader, byte callId);
+        public PnoBehaviour PnoBehaviour;
 
         public MessageReader GetSpawnData() {
             hasSpawn = false;
             return data;
         }
+
         public void HandleRpc(MessageReader reader, byte callId) {
             OnRpc?.Invoke(reader, callId);
         }
@@ -25,10 +27,13 @@ namespace PolusGG.Net {
             hasSpawn = true;
             data = reader;
         }
+
         public void Data(MessageReader reader) {
             OnData?.Invoke(reader);
         }
 
-        public bool HasSpawnData() => hasSpawn;
+        public bool HasSpawnData() {
+            return hasSpawn;
+        }
     }
 }

@@ -19,10 +19,9 @@ namespace PolusGG {
             };
             do {
                 action2 = resolutionChanged;
-                Action<float> value2 = (Action<float>)Delegate.Combine(action2, value);
+                Action<float> value2 = (Action<float>) Delegate.Combine(action2, value);
                 resolutionChanged = Interlocked.CompareExchange(ref resolutionChanged, value2, action2);
-            }
-            while (resolutionChanged != action2);
+            } while (resolutionChanged != action2);
         }
     }
 }

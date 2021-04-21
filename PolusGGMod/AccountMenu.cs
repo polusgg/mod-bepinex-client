@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using Il2CppSystem.Text;
-using PolusGG.Behaviours;
 using PolusGG.Extensions;
 using TMPro;
 using UnhollowerBaseLib;
@@ -67,7 +65,9 @@ namespace PolusGG {
                         menu2.nameField.AllowEmail = true;
                         menu2.nameField.AllowPaste = true;
                         menu2.password.OnChange.AddListener(new Action(() => {
-                            menu2.password.outputText.text = Enumerable.Repeat("*", menu2.password.text.Length).Join(delimiter: "") + "<color=#FF0000>" + menu2.password.compoText + "</color>";
+                            menu2.password.outputText.text =
+                                Enumerable.Repeat("*", menu2.password.text.Length).Join(delimiter: "") +
+                                "<color=#FF0000>" + menu2.password.compoText + "</color>";
                             menu2.password.outputText.ForceMeshUpdate(true, true);
                         }));
 
@@ -104,9 +104,7 @@ namespace PolusGG {
                     }
                 });
                 CreateButton(create, () => { Application.OpenURL("https://polus.gg/"); });
-            } else {
-                return;
-            }
+            } else { }
         }
 
         private static TextBoxTMP LinkTextBox(GameObject main) {
@@ -148,7 +146,11 @@ namespace PolusGG {
 
         public class TopAccountHolder : MonoBehaviour {
             public AccountMenuHolder menuHolder;
-            static TopAccountHolder() => ClassInjector.RegisterTypeInIl2Cpp<TopAccountHolder>();
+
+            static TopAccountHolder() {
+                ClassInjector.RegisterTypeInIl2Cpp<TopAccountHolder>();
+            }
+
             public TopAccountHolder(IntPtr ptr) : base(ptr) { }
         }
 
@@ -156,7 +158,10 @@ namespace PolusGG {
             public TextBoxTMP nameField;
             public TextBoxTMP password;
 
-            static AccountMenuHolder() => ClassInjector.RegisterTypeInIl2Cpp<AccountMenuHolder>();
+            static AccountMenuHolder() {
+                ClassInjector.RegisterTypeInIl2Cpp<AccountMenuHolder>();
+            }
+
             public AccountMenuHolder(IntPtr ptr) : base(ptr) { }
         }
 

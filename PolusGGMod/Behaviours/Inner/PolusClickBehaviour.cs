@@ -12,22 +12,22 @@ using UnityEngine.UI;
 
 namespace PolusGG.Behaviours.Inner {
     public class PolusClickBehaviour : PnoBehaviour {
-        public PolusClickBehaviour(IntPtr ptr) : base(ptr) { }
+        private static readonly int Percent = Shader.PropertyToID("_Percent");
+        private static readonly int Desat = Shader.PropertyToID("_Desat");
+        private PassiveButton button;
+        private Color32 color;
+        private bool counting;
+        private float currentTimer;
+        private PolusGraphic graphic;
+
+        private float maxTimer;
+        private TMP_Text timerText;
 
         static PolusClickBehaviour() {
             ClassInjector.RegisterTypeInIl2Cpp<PolusClickBehaviour>();
         }
 
-        private float maxTimer;
-        private float currentTimer;
-        private bool counting;
-        private Color32 color;
-        private PassiveButton button;
-        private PolusGraphic graphic;
-        private TMP_Text timerText;
-
-        private static readonly int Percent = Shader.PropertyToID("_Percent");
-        private static readonly int Desat = Shader.PropertyToID("_Desat");
+        public PolusClickBehaviour(IntPtr ptr) : base(ptr) { }
 
         private void Start() {
             pno = PogusPlugin.ObjectManager.LocateNetObject(this);
@@ -89,7 +89,8 @@ namespace PolusGG.Behaviours.Inner {
             graphic.renderer.material.SetFloat(Desat, 0f);
         }
 
-        public void OnClick() =>
+        public void OnClick() {
             AmongUsClient.Instance.SendRpcImmediately(pno.NetId, (byte) PolusRpcCalls.Click);
+        }
     }
 }

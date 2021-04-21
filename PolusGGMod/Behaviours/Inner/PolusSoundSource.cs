@@ -7,14 +7,15 @@ using UnityEngine;
 
 namespace PolusGG.Behaviours.Inner {
     public class PolusSoundSource : PnoBehaviour {
-        private AudioSource source;
         private float falloffMultiplier;
         private float falloffRadius;
-        public PolusSoundSource(IntPtr ptr) : base(ptr) { }
+        private AudioSource source;
 
         static PolusSoundSource() {
             ClassInjector.RegisterTypeInIl2Cpp<PolusSoundSource>();
         }
+
+        public PolusSoundSource(IntPtr ptr) : base(ptr) { }
 
         private void Start() {
             pno = PogusPlugin.ObjectManager.LocateNetObject(this);

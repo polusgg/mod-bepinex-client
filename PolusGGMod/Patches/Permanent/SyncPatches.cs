@@ -11,7 +11,7 @@ namespace PolusGG.Patches.Permanent {
     public class SyncPatches {
         private static ObjectPoolBehavior _globalPool;
         private static StarGen _starGen;
-        private static readonly string[] Scenes = { "MainMenu", "MMOnline", "MatchMaking" };
+        private static readonly string[] Scenes = {"MainMenu", "MMOnline", "MatchMaking"};
 
         public static void OnSceneChanged(Scene scene, LoadSceneMode _) {
             _starGen.gameObject.SetActive(Scenes.Contains(scene.name));

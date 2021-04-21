@@ -3,7 +3,6 @@ using InnerNet;
 
 namespace PolusGG.Patches.Temporary {
     public class GameCodePatches {
-        
         [HarmonyPatch(typeof(GameCode), nameof(GameCode.GameNameToInt))]
         public class GameNameToIntPatch {
             [HarmonyPrefix]
@@ -14,7 +13,7 @@ namespace PolusGG.Patches.Temporary {
                     __result = -1;
                 } else {
                     gameId = gameId.ToUpperInvariant();
-                    __result = gameId[0] | gameId[1] << 8 | gameId[2] << 16 | gameId[3] << 24;
+                    __result = gameId[0] | (gameId[1] << 8) | (gameId[2] << 16) | (gameId[3] << 24);
                 }
 
                 return false;
@@ -25,18 +24,17 @@ namespace PolusGG.Patches.Temporary {
         public class IntToGameNamePatch {
             [HarmonyPrefix]
             public static bool IntToGameName([HarmonyArgument(0)] int gameId, out string __result) {
-                if (gameId < -1) {
+                if (gameId < -1)
                     __result = GameCode.IntToGameNameV2(gameId);
-                } else if (gameId == 32) {
+                else if (gameId == 32)
                     __result = null;
-                } else {
+                else
                     __result = new string(new[] {
                         (char) (gameId & 255),
-                        (char) (gameId >> 8 & 255),
-                        (char) (gameId >> 16 & 255),
-                        (char) (gameId >> 24 & 255)
+                        (char) ((gameId >> 8) & 255),
+                        (char) ((gameId >> 16) & 255),
+                        (char) ((gameId >> 24) & 255)
                     });
-                }
 
                 return false;
             }

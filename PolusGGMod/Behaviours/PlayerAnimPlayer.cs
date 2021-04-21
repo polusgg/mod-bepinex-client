@@ -25,21 +25,21 @@ namespace PolusGG.Behaviours {
             List<PlayerKeyframe> playerKeyframes = new();
             while (reader.Position < reader.Length - 1) {
                 MessageReader message = reader.ReadMessage();
-                playerKeyframes.Add(new PlayerKeyframe (
-                     message.ReadPackedUInt32(),
+                playerKeyframes.Add(new PlayerKeyframe(
+                    message.ReadPackedUInt32(),
                     message.ReadPackedUInt32(),
                     message.ReadSingle(),
-                     message.ReadSingle(),
                     message.ReadSingle(),
-                     message.ReadSingle(),
-                     new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(),
-                         reader.ReadByte()),
-                     new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(),
-                         reader.ReadByte()),
-                     new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(),
+                    message.ReadSingle(),
+                    message.ReadSingle(),
+                    new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(),
+                        reader.ReadByte()),
+                    new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(),
+                        reader.ReadByte()),
+                    new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(),
                         reader.ReadByte()),
                     message.ReadVector2(),
-                     message.ReadVector2(),
+                    message.ReadVector2(),
                     message.ReadSingle()
                 ));
             }
@@ -91,22 +91,24 @@ namespace PolusGG.Behaviours {
         }
 
         public class PlayerKeyframe {
-            private PlayerControl playerControl;
-            public uint Offset;
+            private readonly float angle;
             public uint Duration;
+            private readonly float hatOpacity;
+            private readonly Color32 mainColor;
+            public uint Offset;
+            private readonly float petOpacity;
+            private PlayerControl playerControl;
 
-            private float playerOpacity;
-            private float hatOpacity;
-            private float petOpacity;
-            private float skinOpacity;
-            private Color32 mainColor;
-            private Color32 shadowColor;
-            private Color32 visorColor;
-            private Vector2 scale;
-            private Vector2 position;
-            private float angle;
+            private readonly float playerOpacity;
+            private readonly Vector2 position;
+            private readonly Vector2 scale;
+            private readonly Color32 shadowColor;
+            private readonly float skinOpacity;
+            private readonly Color32 visorColor;
 
-            public PlayerKeyframe(uint offset, uint duration, float playerOpacity, float hatOpacity, float petOpacity, float skinOpacity, Color32 mainColor, Color32 shadowColor, Color32 visorColor, Vector2 scale, Vector2 position, float angle) {
+            public PlayerKeyframe(uint offset, uint duration, float playerOpacity, float hatOpacity, float petOpacity,
+                float skinOpacity, Color32 mainColor, Color32 shadowColor, Color32 visorColor, Vector2 scale,
+                Vector2 position, float angle) {
                 Offset = offset;
                 Duration = duration;
                 this.playerOpacity = playerOpacity;

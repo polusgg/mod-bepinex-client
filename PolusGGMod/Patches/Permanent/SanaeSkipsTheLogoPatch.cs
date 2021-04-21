@@ -1,8 +1,9 @@
 ﻿//#if DEBUG
+
 using HarmonyLib;
 using PolusGG.Mods.Patching;
+using UnityEngine;
 using UnityEngine.SceneManagement;
-using Object = UnityEngine.Object;
 
 namespace PolusGG.Patches.Permanent {
     [HarmonyPatch(typeof(SimpleSoundPlayer), nameof(SimpleSoundPlayer.OnEnable))]
@@ -15,6 +16,7 @@ namespace PolusGG.Patches.Permanent {
                 SceneManager.LoadScene("MainMenu");
                 return false;
             }
+
             return true;
         }
     }

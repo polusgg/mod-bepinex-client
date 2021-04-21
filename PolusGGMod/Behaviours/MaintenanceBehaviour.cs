@@ -9,10 +9,10 @@ using UnityEngine;
 namespace PolusGG.Behaviours {
     public class MaintenanceBehaviour : MonoBehaviour {
         public static MaintenanceBehaviour Instance;
-        private static GameObject disguisedToast;
+        private static readonly GameObject disguisedToast;
         private CoroutineManager coroutineManager;
-        private float duration = 1f;
-        private float distance = 0.4f;
+        private readonly float distance = 0.4f;
+        private readonly float duration = 1f;
 
         static MaintenanceBehaviour() {
             ClassInjector.RegisterTypeInIl2Cpp<MaintenanceBehaviour>();
@@ -47,19 +47,21 @@ namespace PolusGG.Behaviours {
                 AspectPosition.ComputePosition(AspectPosition.EdgeAlignments.Top, new Vector3(0, -distance, 0));
             toastransform.localScale = new Vector3(0.5f, 0.5f, 1f);
             toast.GetComponentInChildren<TMP_Text>().text = text;
-            
-            Vector3 top = AspectPosition.ComputePosition(AspectPosition.EdgeAlignments.Top, new Vector3(0, -distance, -10f));
-            Vector3 vec = AspectPosition.ComputePosition(AspectPosition.EdgeAlignments.Top, new Vector3(0, distance, -10f));
+
+            Vector3 top =
+                AspectPosition.ComputePosition(AspectPosition.EdgeAlignments.Top, new Vector3(0, -distance, -10f));
+            Vector3 vec =
+                AspectPosition.ComputePosition(AspectPosition.EdgeAlignments.Top, new Vector3(0, distance, -10f));
             yield return Effects.Slide2D(toastransform, top, vec, duration);
 
             toastransform.localPosition = vec;
 
             yield return new WaitForSeconds(10f);
-            
+
             top = AspectPosition.ComputePosition(AspectPosition.EdgeAlignments.Top, new Vector3(0, distance, -10f));
             vec = AspectPosition.ComputePosition(AspectPosition.EdgeAlignments.Top, new Vector3(0, -distance, -10f));
             yield return Effects.Slide2D(toastransform, top, vec, duration);
-            
+
             Destroy(toast);
         }
     }

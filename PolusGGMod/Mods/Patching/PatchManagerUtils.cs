@@ -7,14 +7,14 @@ using HarmonyLib;
 namespace PolusGG.Mods.Patching {
     namespace Common.Utilities {
         public static class PatchManagerUtils {
-            private static List<Type> _harmonyBulkPatchTypes = new() {
+            private static readonly List<Type> _harmonyBulkPatchTypes = new() {
                 typeof(HarmonyTargetMethod),
-                typeof(HarmonyTargetMethods),
+                typeof(HarmonyTargetMethods)
             };
 
-            private static HarmonyPatchType[] _harmonyPatchTypes = new[] {
+            private static readonly HarmonyPatchType[] _harmonyPatchTypes = {
                 HarmonyPatchType.Prefix,
-                HarmonyPatchType.Postfix,
+                HarmonyPatchType.Postfix
             };
 
             public static List<PatchDetails>
@@ -39,9 +39,9 @@ namespace PolusGG.Mods.Patching {
                 foreach (MethodInfo method in allAssemblyTypeMethods) {
                     PermanentPatchAttribute permanentPatch = method.GetCustomAttribute<PermanentPatchAttribute>(true);
 
-                    var allCustomAttributes = method.GetCustomAttributes(true);
+                    object[] allCustomAttributes = method.GetCustomAttributes(true);
 
-                    HashSet<string> allHarmonyAttributes = new((method.GetCustomAttributes(true))
+                    HashSet<string> allHarmonyAttributes = new(method.GetCustomAttributes(true)
                         .Select(attr => attr.GetType().FullName)
                         .Where(name => name.StartsWith("Harmony"))
                     );
@@ -49,8 +49,9 @@ namespace PolusGG.Mods.Patching {
                     foreach (HarmonyPatchType patchType in _harmonyPatchTypes) {
                         string name = patchType.ToString();
 
-                        if (name == method.Name || allHarmonyAttributes.Contains($"HarmonyLib.Harmony{name}")) {
-                            // Debug.Log($"Harmony lmoa {permanentPatch is null} {patchPermanently}");
+                        if (name == method.Name ||
+                            allHarmonyAttributes.Contains(
+                                $"HarmonyLib.Harmony{name}")) // Debug.Log($"Harmony lmoa {permanentPatch is null} {patchPermanently}");
                             switch (patchType) {
                                 case HarmonyPatchType.Prefix: {
                                     if ((permanentPatch is not null || !patchPermanently) &&
@@ -65,7 +66,6 @@ namespace PolusGG.Mods.Patching {
                                     break;
                                 }
                             }
-                        }
                     }
                 }
 
@@ -75,10 +75,9 @@ namespace PolusGG.Mods.Patching {
                         method.GetCustomAttributes(true)
                             .Any(attr => attr.GetType().FullName == bulkPatchType.FullName));
 
-                    if (method is null) {
+                    if (method is null)
                         method = assemblyType.GetMethod(bulkPatchType.FullName.Replace("HarmonyLib.Harmony", ""),
                             AccessTools.all);
-                    }
 
                     if (method is not null) {
                         IEnumerable<MethodBase> methodBases = (IEnumerable<MethodBase>) method.Invoke(null, null);
@@ -86,13 +85,11 @@ namespace PolusGG.Mods.Patching {
                     }
                 }
 
-                if (originalMethod is not null) {
+                if (originalMethod is not null)
                     patchDetails.Add(new PatchDetails(originalMethod, prefixPatches, postfixPatches));
-                }
 
-                foreach (MethodBase targetMethod in bulkOriginalMethods) {
+                foreach (MethodBase targetMethod in bulkOriginalMethods)
                     patchDetails.Add(new PatchDetails(targetMethod, prefixPatches, postfixPatches));
-                }
 
                 return patchDetails;
             }

@@ -11,14 +11,14 @@ namespace PolusGG.Behaviours.Inner {
         internal static readonly FloatRange _xRange = new(50f, -50f);
         internal static readonly FloatRange _yRange = new(50f, -50f);
         private AspectPosition _aspectPosition;
-        private Vector2 _target;
         private Vector2 _start;
-
-        public PolusNetworkTransform(IntPtr ptr) : base(ptr) { }
+        private Vector2 _target;
 
         static PolusNetworkTransform() {
             ClassInjector.RegisterTypeInIl2Cpp<PolusNetworkTransform>();
         }
+
+        public PolusNetworkTransform(IntPtr ptr) : base(ptr) { }
 
         public void Start() {
             pno = PogusPlugin.ObjectManager.LocateNetObject(this);
@@ -28,10 +28,6 @@ namespace PolusGG.Behaviours.Inner {
             _aspectPosition.updateAlways = true;
             // _rigidbody2D = GetComponent<Rigidbody2D>();
             // _rigidbody2D.constraints = RigidbodyConstraints2D.FreezeAll;
-        }
-
-        public void HandleRpc(MessageReader reader, byte callId) {
-            if (callId == (int) PolusRpcCalls.SnapTo) transform.position = reader.ReadVector2();
         }
 
         public void FixedUpdate() {
@@ -46,6 +42,10 @@ namespace PolusGG.Behaviours.Inner {
             // }
 
             // transform.position += (Vector3) (p * Time.fixedDeltaTime);
+        }
+
+        public void HandleRpc(MessageReader reader, byte callId) {
+            if (callId == (int) PolusRpcCalls.SnapTo) transform.position = reader.ReadVector2();
         }
 
         public void Deserialize(MessageReader reader) {

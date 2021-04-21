@@ -11,7 +11,6 @@ using PolusGG.Net;
 using PolusGG.Patches.Permanent;
 using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using Debug = System.Diagnostics.Debug;
 
 namespace PolusGG {
@@ -23,11 +22,12 @@ namespace PolusGG {
         public static PggMod PermanentMod = new PermanentPggMod();
         public static PggModManager ModManager;
         public static PggCache Cache = new();
-        
+
         private static AssetBundle _bundle;
         public static IObjectManager ObjectManager;
 
         public static TMP_FontAsset font;
+
         public static AssetBundle Bundle {
             get {
                 if (_bundle == null) {
@@ -47,6 +47,7 @@ namespace PolusGG {
             if (File.Exists(PggConstants.CacheLocation)) {
                 Stream file = null;
             }
+
             try {
                 PermanentMod.LoadPatches("gg.polus.permanent",
                     Assembly.GetExecutingAssembly().GetTypes()
@@ -55,12 +56,12 @@ namespace PolusGG {
                 ObjectManager = new PggObjectManager();
                 ModManager = new PggModManager(Log);
                 ModManager.LoadMods();
-            }
-            catch (Exception e) {
-                Log.LogFatal($"Failed to load!");
+            } catch (Exception e) {
+                Log.LogFatal("Failed to load!");
                 Log.LogFatal(e);
                 throw;
             }
+
             // font = Bundle.LoadAsset("Assets/Fonts/AmongUsButton2-Regular SDF.asset").Cast<TMP_FontAsset>();
             font = Bundle.LoadAsset("Assets/Fonts/ComicSansMs3 SDF.asset").Cast<TMP_FontAsset>();
             FontMwenuwuPatches.Load();

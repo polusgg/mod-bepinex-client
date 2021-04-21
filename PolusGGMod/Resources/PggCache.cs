@@ -12,9 +12,8 @@ using UnityEngine;
 
 namespace PolusGG {
     public class PggCache : ICache {
-        private Dictionary<uint, CacheFile> _cacheFiles = new();
-        private HttpClient _client = new();
-        public Dictionary<uint, CacheFile> CachedFiles => _cacheFiles;
+        private readonly HttpClient _client = new();
+        public Dictionary<uint, CacheFile> CachedFiles { get; private set; } = new();
 
         public CacheFile AddToCache(uint id, string location, byte[] hash, ResourceType type,
             uint parentId = uint.MaxValue) {
@@ -23,9 +22,7 @@ namespace PolusGG {
             if (!IsCachedAndValid(id, hash)) {
                 HttpResponseMessage responseMessage =
                     null;
-                if (type == ResourceType.Asset) {
-                    goto AssetOnly;
-                }
+                if (type == ResourceType.Asset) goto AssetOnly;
 
                 responseMessage =
                     _client.GetAsync(PggConstants.DownloadServer + location,
@@ -77,7 +74,7 @@ namespace PolusGG {
                     }
                 }
 
-                _cacheFiles[id] = cacheFile;
+                CachedFiles[id] = cacheFile;
                 // if (!WaitForFile(PggConstants.CacheLocation)) {
                 //     throw new Exception("Failed to get unlocked cache file!");
                 // }
@@ -90,17 +87,18 @@ namespace PolusGG {
                 return cacheFile;
             }
 
-            CacheFile cached = _cacheFiles[id];
+            CacheFile cached = CachedFiles[id];
             PogusPlugin.Logger.LogInfo($"Using cached file {cached.LocalLocation} ({cached.Location})");
             return cached;
         }
 
-        public bool IsCachedAndValid(uint id, byte[] hash) =>
-            _cacheFiles.ContainsKey(id) && _cacheFiles[id].Hash.SequenceEqual(hash);
+        public bool IsCachedAndValid(uint id, byte[] hash) {
+            return CachedFiles.ContainsKey(id) && CachedFiles[id].Hash.SequenceEqual(hash);
+        }
 
         public void Serialize(BinaryWriter writer) {
-            writer.Write(_cacheFiles.Count);
-            foreach ((uint x, CacheFile y) in _cacheFiles) {
+            writer.Write(CachedFiles.Count);
+            foreach ((uint x, CacheFile y) in CachedFiles) {
                 writer.Write(x);
                 writer.Write((byte) y.Type);
                 writer.Write(y.Hash);
@@ -112,11 +110,9 @@ namespace PolusGG {
                         break;
                     }
                     case ResourceType.AssetBundle: {
-                        var extra = (string[]) y.ExtraData;
+                        string[] extra = (string[]) y.ExtraData;
                         writer.Write(extra.Length);
-                        foreach (string s in extra) {
-                            writer.Write(s);
-                        }
+                        foreach (string s in extra) writer.Write(s);
 
                         break;
                     }
@@ -143,9 +139,7 @@ namespace PolusGG {
                     // If we got this far the file is ready
                     break;
                 } catch (Exception) {
-                    if (numTries > 20) {
-                        return false;
-                    }
+                    if (numTries > 20) return false;
 
                     Thread.Sleep(250);
                 }
@@ -158,18 +152,16 @@ namespace PolusGG {
         public void Deserialize(BinaryReader reader) {
             int length = reader.ReadInt32();
             int i = 0;
-            while (i++ < length) {
-                DeserializeIndexFile(reader);
-            }
+            while (i++ < length) DeserializeIndexFile(reader);
         }
 
         private void DeserializeIndexFile(BinaryReader reader) {
             uint id = reader.ReadUInt32();
-            CacheFile file = _cacheFiles[id] = new CacheFile {
+            CacheFile file = CachedFiles[id] = new CacheFile {
                 Type = (ResourceType) reader.ReadByte(),
                 Hash = reader.ReadBytes(16),
                 LocalLocation = reader.ReadString(),
-                Location = reader.ReadString(),
+                Location = reader.ReadString()
             };
             file.ExtraData = file.Type switch {
                 ResourceType.Assembly => reader.ReadString(),
@@ -182,7 +174,7 @@ namespace PolusGG {
         }
 
         public void Invalidate() {
-            _cacheFiles = new Dictionary<uint, CacheFile>();
+            CachedFiles = new Dictionary<uint, CacheFile>();
         }
     }
 }

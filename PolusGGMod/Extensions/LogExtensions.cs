@@ -1,7 +1,5 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using HarmonyLib;
 using UnhollowerBaseLib;
 
@@ -31,11 +29,12 @@ namespace PolusGG.Extensions {
             return value;
         }
 
-        public static Il2CppStructArray<byte> Log(this Il2CppStructArray<byte> value, int times = 1, string comment = "") {
+        public static Il2CppStructArray<byte> Log(this Il2CppStructArray<byte> value, int times = 1,
+            string comment = "") {
             value.Select(x => x.ToString("X2")).Join(delimiter: "").Log(times, comment);
-            
+
             return value;
-        } 
+        }
 #endif
     }
 }

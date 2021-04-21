@@ -2,7 +2,6 @@
 using InnerNet;
 using PolusGG.Mods.Patching;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace PolusGG.Patches.Permanent {
     [HarmonyPatch(typeof(StatsManager), nameof(StatsManager.AmBanned), MethodType.Getter)]
@@ -14,6 +13,7 @@ namespace PolusGG.Patches.Permanent {
             return false;
         }
     }
+
     [HarmonyPatch(typeof(AuthManager._CoWaitForNonce_d__5), nameof(AuthManager._CoWaitForNonce_d__5.MoveNext))]
     public class DisableStupidNoncesPatch {
         [PermanentPatch]
@@ -23,6 +23,7 @@ namespace PolusGG.Patches.Permanent {
             return false;
         }
     }
+
     [HarmonyPatch(typeof(AuthManager._CoConnect_d__4), nameof(AuthManager._CoConnect_d__4.MoveNext))]
     public class DisableStupidConnectsPatch {
         [PermanentPatch]
@@ -46,13 +47,12 @@ namespace PolusGG.Patches.Permanent {
             rollo.OverColor = Color.green;
         }
     }
+
     [HarmonyPatch(typeof(EOSManager), nameof(EOSManager.InitializePlatformInterface))]
-    public static class EosManagerInitializePlatformInterfacePatch
-    {
+    public static class EosManagerInitializePlatformInterfacePatch {
         [PermanentPatch]
         [HarmonyPrefix]
-        public static bool Prefix(EOSManager __instance)
-        {
+        public static bool Prefix(EOSManager __instance) {
             SaveManager.LoadPlayerPrefs();
             SaveManager.hasLoggedIn = true;
             SaveManager.isGuest = false;
@@ -65,13 +65,12 @@ namespace PolusGG.Patches.Permanent {
             return false;
         }
     }
+
     [HarmonyPatch(typeof(SaveManager), nameof(SaveManager.BirthDateYear), MethodType.Getter)]
-    public static class SaveManagerGetBirthDateYearPatch
-    {
+    public static class SaveManagerGetBirthDateYearPatch {
         [PermanentPatch]
         [HarmonyPrefix]
-        public static bool Prefix(out int __result)
-        {
+        public static bool Prefix(out int __result) {
             __result = 1990;
             return false;
         }

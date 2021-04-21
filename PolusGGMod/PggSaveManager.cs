@@ -7,16 +7,18 @@ namespace PolusGG {
         // public static Dictionary<string, GameOption> GameOptions = new();
         private static bool _initiallyLoaded;
         private static string _fontName = "Arial";
+
+        private static readonly Stack<long> startStack = new();
+
         public static string FontName {
             get {
                 LoadSave();
                 return _fontName;
             }
         }
+
         public static void LoadSave(bool noOverwrite = true) {
-            if (_initiallyLoaded && noOverwrite) {
-                return;
-            }
+            if (_initiallyLoaded && noOverwrite) return;
             string path = Path.Combine(PlatformPaths.persistentDataPath, PggConstants.SaveFileName);
             using FileStream stream = File.OpenRead(path);
             using BinaryReader reader = new(stream);
@@ -56,11 +58,10 @@ namespace PolusGG {
             EndMessage(writer);
         }
 
-        private static Stack<long> startStack = new();
         private static void StartMessage(BinaryWriter writer, SaveValues type) {
             startStack.Push(writer.BaseStream.Position);
-            writer.Write((ushort)0);
-            writer.Write((byte)type);
+            writer.Write((ushort) 0);
+            writer.Write((byte) type);
         }
 
         private static void EndMessage(BinaryWriter writer) {

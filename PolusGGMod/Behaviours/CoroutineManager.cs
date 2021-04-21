@@ -9,28 +9,36 @@ using UnityEngine;
 
 namespace PolusGG.Behaviours {
     public sealed class CoroutineManager : MonoBehaviour {
+        private readonly List<CoroutineTuple> coroutinesStore = new();
+        private readonly List<IEnumerator> nextFrameCoroutines = new();
+
+        private readonly List<IEnumerator> tempList = new();
+        private readonly List<IEnumerator> waitForEndOfFrameCoroutines = new();
+        private readonly List<IEnumerator> waitForFixedUpdateCoroutines = new();
+
         static CoroutineManager() {
             ClassInjector.RegisterTypeInIl2Cpp<CoroutineManager>();
         }
+
         public CoroutineManager(IntPtr intPtr) : base(intPtr) { }
-
-        private struct CoroutineTuple {
-            public object WaitCondition;
-            public IEnumerator Coroutine;
-        }
-
-        private readonly List<CoroutineTuple> coroutinesStore = new();
-        private readonly List<IEnumerator> nextFrameCoroutines = new();
-        private readonly List<IEnumerator> waitForFixedUpdateCoroutines = new();
-        private readonly List<IEnumerator> waitForEndOfFrameCoroutines = new();
-
-        private readonly List<IEnumerator> tempList = new();
 
         [HideFromIl2Cpp]
         // ReSharper disable once Unity.IncorrectMethodSignature
         public IEnumerator Start(IEnumerator routine) {
             ProcessNextOfCoroutine(routine);
             return routine;
+        }
+
+        private void Update() {
+            for (int i = coroutinesStore.Count - 1; i >= 0; i--) {
+                CoroutineTuple tuple = coroutinesStore[i];
+                if (!(tuple.WaitCondition is WaitForSeconds waitForSeconds)) continue;
+                if ((waitForSeconds.m_Seconds -= Time.deltaTime) > 0) continue;
+                coroutinesStore.RemoveAt(i);
+                ProcessNextOfCoroutine(tuple.Coroutine);
+            }
+
+            ProcessCoroutineList(nextFrameCoroutines);
         }
 
         [HideFromIl2Cpp]
@@ -42,9 +50,7 @@ namespace PolusGG.Behaviours {
                 int coroutineTupleIndex = coroutinesStore.FindIndex(c => c.Coroutine == enumerator);
                 if (coroutineTupleIndex == -1) return;
                 object waitCondition = coroutinesStore[coroutineTupleIndex].WaitCondition;
-                if (waitCondition is IEnumerator waitEnumerator) {
-                    Stop(waitEnumerator);
-                }
+                if (waitCondition is IEnumerator waitEnumerator) Stop(waitEnumerator);
 
                 coroutinesStore.RemoveAt(coroutineTupleIndex);
             }
@@ -62,21 +68,13 @@ namespace PolusGG.Behaviours {
             tempList.Clear();
         }
 
-        private void Update() {
-            for (int i = coroutinesStore.Count - 1; i >= 0; i--) {
-                CoroutineTuple tuple = coroutinesStore[i];
-                if (!(tuple.WaitCondition is WaitForSeconds waitForSeconds)) continue;
-                if ((waitForSeconds.m_Seconds -= Time.deltaTime) > 0) continue;
-                coroutinesStore.RemoveAt(i);
-                ProcessNextOfCoroutine(tuple.Coroutine);
-            }
-
-            ProcessCoroutineList(nextFrameCoroutines);
+        internal void ProcessWaitForFixedUpdate() {
+            ProcessCoroutineList(waitForFixedUpdateCoroutines);
         }
 
-        internal void ProcessWaitForFixedUpdate() => ProcessCoroutineList(waitForFixedUpdateCoroutines);
-
-        internal void ProcessWaitForEndOfFrame() => ProcessCoroutineList(waitForEndOfFrameCoroutines);
+        internal void ProcessWaitForEndOfFrame() {
+            ProcessCoroutineList(waitForEndOfFrameCoroutines);
+        }
 
         [HideFromIl2Cpp]
         private void ProcessNextOfCoroutine(IEnumerator enumerator) {
@@ -141,14 +139,26 @@ namespace PolusGG.Behaviours {
             return index == -1 ? enumerator : FindOriginalCoroutine(coroutinesStore[index].Coroutine);
         }
 
+        private struct CoroutineTuple {
+            public object WaitCondition;
+            public IEnumerator Coroutine;
+        }
+
         private class Il2CppEnumeratorWrapper : IEnumerator {
             private readonly Il2CppSystem.Collections.IEnumerator _il2CPPEnumerator;
 
-            public Il2CppEnumeratorWrapper(Il2CppSystem.Collections.IEnumerator il2CppEnumerator) =>
+            public Il2CppEnumeratorWrapper(Il2CppSystem.Collections.IEnumerator il2CppEnumerator) {
                 _il2CPPEnumerator = il2CppEnumerator;
+            }
 
-            public bool MoveNext() => _il2CPPEnumerator.MoveNext();
-            public void Reset() => _il2CPPEnumerator.Reset();
+            public bool MoveNext() {
+                return _il2CPPEnumerator.MoveNext();
+            }
+
+            public void Reset() {
+                _il2CPPEnumerator.Reset();
+            }
+
             public object Current => _il2CPPEnumerator.Current;
         }
     }

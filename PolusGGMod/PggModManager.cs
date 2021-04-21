@@ -12,12 +12,12 @@ using UnityEngine.SceneManagement;
 
 namespace PolusGG {
     public class PggModManager {
-        public HashSet<(PggMod, Mod)> TemporaryMods = new();
+        private static readonly string[] OnlineScenes = {"EndGame", "OnlineGame"};
         public bool AllPatched;
         public ManualLogSource Logger;
         public bool PostLoad;
+        public HashSet<(PggMod, Mod)> TemporaryMods = new();
         private bool wasOnline;
-        private static readonly string[] OnlineScenes = { "EndGame", "OnlineGame" };
 
         public PggModManager(ManualLogSource logger) {
             Logger = logger;
@@ -33,30 +33,26 @@ namespace PolusGG {
                 }
 
                 if (!AllPatched) return;
-                if (scene.name != "OnlineGame") {
-                    PogusPlugin.ObjectManager.EndedGame();
-                }
+                if (scene.name != "OnlineGame") PogusPlugin.ObjectManager.EndedGame();
                 if (OnlineScenes.Contains(scene.name) != wasOnline) {
                     Logger.LogInfo(scene.name);
                     wasOnline = OnlineScenes.Contains(scene.name);
                     foreach ((_, Mod mod) in TemporaryMods)
                         if (wasOnline) mod.LobbyJoined();
-                        else {
+                        else
                             mod.LobbyLeft();
-                        }
                 }
             }));
         }
 
         public void LoadMods() {
             if (PostLoad) return;
-            
-            if (!Directory.Exists(PggConstants.DownloadFolder)) {
-                Directory.CreateDirectory(PggConstants.DownloadFolder);
-                // Directory.Delete(PggConstants.DownloadFolder, true);
-            }
 
-            IEnumerable<Type> enumerable = Assembly.GetExecutingAssembly().GetTypes().Where(x => x.IsSubclassOf(typeof(Mod)));
+            if (!Directory.Exists(PggConstants.DownloadFolder)) Directory.CreateDirectory(PggConstants.DownloadFolder);
+            // Directory.Delete(PggConstants.DownloadFolder, true);
+
+            IEnumerable<Type> enumerable =
+                Assembly.GetExecutingAssembly().GetTypes().Where(x => x.IsSubclassOf(typeof(Mod)));
             foreach (Type type in enumerable) {
                 Mod mod;
                 mod = (Mod) Activator.CreateInstance(type);
@@ -84,14 +80,14 @@ namespace PolusGG {
                 pggMod.Patch();
             }
 
-            
+
             AllPatched = true;
         }
 
         public void StartMods() {
-            foreach ((_, Mod mod) in TemporaryMods) {
-                if (PostLoad) mod.Start(PogusPlugin.ObjectManager, PogusPlugin.Cache);
-            }
+            foreach ((_, Mod mod) in TemporaryMods)
+                if (PostLoad)
+                    mod.Start(PogusPlugin.ObjectManager, PogusPlugin.Cache);
         }
 
         public void UnpatchMods() {
@@ -101,16 +97,18 @@ namespace PolusGG {
             }
 
             ((PggObjectManager) PogusPlugin.ObjectManager).UnregisterAll();
-            
+
             AllPatched = false;
         }
 
         public class EventHandlerBehaviour : MonoBehaviour {
             public PggModManager ModManager;
+
             static EventHandlerBehaviour() {
                 ClassInjector.RegisterTypeInIl2Cpp<EventHandlerBehaviour>();
             }
-            public EventHandlerBehaviour(IntPtr ptr) : base(ptr) {}
+
+            public EventHandlerBehaviour(IntPtr ptr) : base(ptr) { }
 
             private void FixedUpdate() {
                 foreach ((PggMod _, Mod mod) in ModManager.TemporaryMods) mod.FixedUpdate();

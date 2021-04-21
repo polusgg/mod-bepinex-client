@@ -12,27 +12,32 @@ using PolusGG.Mods;
 using PolusGG.Net;
 using PolusGG.Patches.Temporary;
 using PolusGG.Resources;
-using TMPro;
 using UnityEngine;
-using Exception = System.Exception;
 using Object = UnityEngine.Object;
-using StringComparison = System.StringComparison;
 
 namespace PolusGG {
     [Mod(Id, "1.0.0", "Sanae6")]
     public class PolusMod : Mod {
         private const string Id = "PolusMain";
-        private bool loaded;
-        private ICache Cache;
-        private bool optionsDirty;
         public static RoleData RoleData = new();
+        public static ManualLogSource _loggee;
+        private static readonly int OutlineColor = Shader.PropertyToID("_OutlineColor");
+        private static readonly int Outline = Shader.PropertyToID("_Outline");
+        private ICache Cache;
+        private bool loaded;
+        private bool optionsDirty;
+
+        public override string Name => "PolusMod";
+
+        public override ManualLogSource Logger {
+            get => _loggee;
+            set => _loggee = value;
+        }
 
         public override void Start(IObjectManager objectManager, ICache cache) {
             // DiscordManager.Instance.OnDestroy();
             // new GameObject("PolusDiscordManager").DontDestroy().AddComponent<PolusDiscordManager>();
-            if (loaded) {
-                return;
-            }
+            if (loaded) return;
 
             loaded = true;
 
@@ -59,7 +64,7 @@ namespace PolusGG {
             PlayerControl playerControl;
             switch ((PolusRpcCalls) callId) {
                 case PolusRpcCalls.ChatVisibility: {
-                    var lol = reader.ReadByte() > 0;
+                    bool lol = reader.ReadByte() > 0;
                     if (HudManager.Instance.Chat.gameObject.active != lol)
                         HudManager.Instance.Chat.SetVisible(lol);
                     break;
@@ -78,16 +83,14 @@ namespace PolusGG {
                             playerControl.SetKillTimer(PlayerControl.GameOptions.KillCooldown);
                         }
 
-                        if (PlayerControl.LocalPlayer.Data.IsImpostor) {
+                        if (PlayerControl.LocalPlayer.Data.IsImpostor)
                             playerControl.Data.Object.nameText.color = Palette.ImpostorRed;
-                        }
                     } else {
                         if (playerControl == PlayerControl.LocalPlayer) {
                             playerControl.SetKillTimer(21f);
                             HudManager.Instance.KillButton.gameObject.SetActive(false);
-                            foreach (GameData.PlayerInfo player in GameData.Instance.AllPlayers) {
+                            foreach (GameData.PlayerInfo player in GameData.Instance.AllPlayers)
                                 player.Object.nameText.color = Palette.White;
-                            }
                         }
 
                         playerControl.Data.Object.nameText.color = Palette.White;
@@ -114,7 +117,7 @@ namespace PolusGG {
                 }
                 case PolusRpcCalls.SetOpacity: {
                     PlayerControl control = netObject.Cast<PlayerControl>();
-                    var color = control.myRend.color;
+                    Color color = control.myRend.color;
                     color = new Color(color.r, color.g, color.b, reader.ReadByte() / 255f);
                     control.myRend.color = color;
                     control.HatRenderer.color = color;
@@ -132,10 +135,8 @@ namespace PolusGG {
                     IEnumerable<int> enumerable =
                         Enumerable.Range(0, reader.ReadByte()).Select(_ => (int) reader.ReadByte());
                     IEnumerable<Vent> vents = Object.FindObjectsOfType<Vent>()
-                        .Where(v => enumerable.Contains<int>(v.Id));
-                    foreach (Vent vent in vents) {
-                        Object.Destroy(vent);
-                    }
+                        .Where(v => enumerable.Contains(v.Id));
+                    foreach (Vent vent in vents) Object.Destroy(vent);
 
                     break;
                 }
@@ -179,11 +180,10 @@ namespace PolusGG {
                         Logger.LogError($"Failed to cache {resource} ({location})");
                         Logger.LogError(e);
                         writer = StartSendResourceResponse(resource, ResponseType.DownloadFailed);
-                        if (e is CacheRequestException exception) {
+                        if (e is CacheRequestException exception)
                             writer.WritePacked((uint) exception.Code);
-                        } else {
+                        else
                             writer.WritePacked(0x69420);
-                        }
 
                         EndSend(writer);
                     }
@@ -265,9 +265,7 @@ namespace PolusGG {
                     hat.ChipOffset = reader.ReadVector2();
                     hat.NoBounce = !reader.ReadBoolean();
                     // ReSharper disable once AssignmentInConditionalExpression (resharper can whine and cry at my superior intellect
-                    if (hat.InFront = !reader.ReadBoolean()) {
-                        Cache.CachedFiles[back].Get<Sprite>();
-                    }
+                    if (hat.InFront = !reader.ReadBoolean()) Cache.CachedFiles[back].Get<Sprite>();
 
                     if (reader.ReadBoolean()) {
                         hat.NotInStore = true;
@@ -282,12 +280,19 @@ namespace PolusGG {
                     break;
                 }
                 case PolusRootPackets.SetGameOption: {
-                    var name = reader.ReadString();
-                    var optionType = (OptionType) reader.ReadByte();
+                    // return;
+                    string cat = reader.ReadString();
+                    string name = reader.ReadString();
+                    OptionType optionType = (OptionType) reader.ReadByte();
 
                     optionsDirty = true;
-                    if (GameOptionsPatches.Options.TryGetValue(name, out GameOption option)) {
-                        option.Value = optionType switch {
+
+                    if (!GameOptionsPatches.Categories.ContainsKey(cat))
+                        GameOptionsPatches.Categories.Add(cat, new List<GameOption>());
+                    List<GameOption> category = GameOptionsPatches.Categories[cat];
+                    
+                    if (category.Any(x => x.Title == name)) {
+                        category.Find(x => x.Title == name).Value = optionType switch {
                             OptionType.Boolean => new BooleanValue(reader.ReadBoolean()),
                             OptionType.Number => new FloatValue(reader.ReadSingle(), reader.ReadSingle(),
                                 reader.ReadSingle(), reader.ReadSingle(), reader.ReadBoolean(), reader.ReadString()),
@@ -295,7 +300,8 @@ namespace PolusGG {
                             _ => throw new ArgumentOutOfRangeException()
                         };
                     } else {
-                        GameOptionsPatches.Options.Add(name, new GameOption {
+                        GameOption option = new GameOption {
+                            Title = name,
                             Type = optionType,
                             Value = optionType switch {
                                 OptionType.Boolean => new BooleanValue(reader.ReadBoolean()),
@@ -305,14 +311,20 @@ namespace PolusGG {
                                 OptionType.Enum => EnumValue.ConstructEnumValue(reader),
                                 _ => throw new ArgumentOutOfRangeException()
                             }
-                        });
+                        };
+                        GameOptionsPatches.OptionMap[name] = option;
+                        category.Add(option);
                     }
 
                     break;
                 }
                 case PolusRootPackets.DeleteGameOption: {
                     optionsDirty = true;
-                    GameOptionsPatches.Options.Remove(reader.ReadString());
+                    string name = reader.ReadString();
+                    List<GameOption> category = GameOptionsPatches.Categories.First(x => x.Value.Any(x => x.Title == name)).Value;
+                    category.RemoveAll(x => x.Title == name);
+                    GameOptionsPatches.OptionMap.Remove(name);
+                    if (category.Count == 0) GameOptionsPatches.Categories.Remove(GameOptionsPatches.Categories.First(y => y.Value == category).Key);
                     break;
                 }
                 case PolusRootPackets.LoadHat: {
@@ -333,6 +345,7 @@ namespace PolusGG {
                 if (menu) menu.OnEnable();
                 if (LobbyBehaviour.Instance)
                     GameOptionsPatches.UpdateHudString();
+                optionsDirty = false;
             }
         }
 
@@ -361,33 +374,22 @@ namespace PolusGG {
             writer.Recycle();
         }
 
-        public override string Name => "PolusMod";
-        public static ManualLogSource _loggee;
-        private static readonly int OutlineColor = Shader.PropertyToID("_OutlineColor");
-        private static readonly int Outline = Shader.PropertyToID("_Outline");
-
-        public override ManualLogSource Logger {
-            get => _loggee;
-            set => _loggee = value;
-        }
-
         public void SetPlayerAppearance(PlayerControl player, PlayerControl corpse) {
-            if (player.name.Contains("Ludwig", StringComparison.InvariantCultureIgnoreCase)) {
+            if (player.name.Contains("Ludwig", StringComparison.InvariantCultureIgnoreCase))
                 corpse.SetThickAssAndBigDumpy(true, true);
-            }
         }
     }
 
     public class RoleData {
-        public string IntroName = "Poobscoob";
-        public string IntroDesc = "you failed to set this on time";
         public Color IntroColor = Color.magenta;
+        public string IntroDesc = "you failed to set this on time";
+        public string IntroName = "Poobscoob";
         public List<byte> IntroPlayers = new();
-        public string OutroName = "Error!";
-        public string OutroDesc = "Failed to set ending correctly!";
         public Color OutroColor = Color.green;
+        public string OutroDesc = "Failed to set ending correctly!";
+        public string OutroName = "Error!";
         public List<WinningPlayerData> OutroPlayers = new();
-        public bool ShowPlayAgain = false;
+        public bool ShowPlayAgain;
         public bool ShowQuit = true;
     }
 

@@ -6,15 +6,12 @@ namespace PolusGG.Patches.Temporary {
         [HarmonyPrefix]
         public static void SetImpostor(PlayerControl __instance, ref bool __state) {
             __state = !__instance.Data.IsImpostor;
-            if (__state) {
-                __instance.Data.IsImpostor = true;
-            }
+            if (__state) __instance.Data.IsImpostor = true;
         }
+
         [HarmonyPostfix]
         public static void UnsetImpostor(PlayerControl __instance, ref bool __state) {
-            if (__state) {
-                __instance.Data.IsImpostor = false;
-            }
+            if (__state) __instance.Data.IsImpostor = false;
         }
     }
 }
