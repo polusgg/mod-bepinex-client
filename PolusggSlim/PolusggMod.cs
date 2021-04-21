@@ -71,6 +71,18 @@ namespace PolusggSlim
             PggLog.Message($"Polusgg Server at {Configuration.Server.IpAddress}");
 
             AccountLoginBehaviour.Load();
+            
+            var context = PluginSingleton<PolusggMod>.Instance.AuthContext;
+            var result = context.ApiClient
+                .LogIn("saghetti@polus.gg", "SDPRYpxr2vhz8xf")
+                .GetAwaiter().GetResult();
+            if (result != null)
+            {
+                context.ParseClientIdAsUuid(result.Data.ClientId);
+                context.ClientToken = result.Data.ClientToken;
+                context.DisplayName = result.Data.DisplayName;
+                context.Perks = result.Data.Perks;
+            }
 
             Harmony.PatchAll();
         }
