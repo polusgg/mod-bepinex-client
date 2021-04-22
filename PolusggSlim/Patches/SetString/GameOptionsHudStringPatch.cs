@@ -6,7 +6,7 @@ namespace PolusggSlim.Patches.SetString
     {
         public static string GameOptionsString { get; set; } = "__unset";
 
-        [HarmonyPatch(typeof(LobbyBehaviour), nameof(LobbyBehaviour.FixedUpdate))]
+        // [HarmonyPatch(typeof(LobbyBehaviour), nameof(LobbyBehaviour.FixedUpdate))]
         public static class LobbyBehaviour_FixedUpdate
         {
             public static void Postfix()

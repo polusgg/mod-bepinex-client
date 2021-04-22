@@ -14,6 +14,8 @@ namespace PolusggSlim.Auth
 
         public string[] Perks { get; set; } = { };
 
+        public bool LoggedIn => string.IsNullOrEmpty(DisplayName);
+
         public ApiClient ApiClient { get; } = new();
 
         public void Dispose()

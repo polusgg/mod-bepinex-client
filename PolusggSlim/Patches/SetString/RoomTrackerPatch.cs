@@ -6,7 +6,7 @@ namespace PolusggSlim.Patches.SetString
     {
         public static string RoomString { get; set; } = "__unset";
 
-        [HarmonyPatch(typeof(RoomTracker), nameof(RoomTracker.FixedUpdate))]
+        // [HarmonyPatch(typeof(RoomTracker), nameof(RoomTracker.FixedUpdate))]
         public class RoomTrackerTextPatch
         {
             public static void Postfix(RoomTracker __instance)

@@ -12,7 +12,7 @@ namespace PolusggSlim.Patches.RootGamePacket
 {
     public static class PacketHandler
     {
-        [HarmonyPatch(typeof(InnerNetClient), nameof(InnerNetClient.HandleMessage))]
+        // [HarmonyPatch(typeof(InnerNetClient), nameof(InnerNetClient.HandleMessage))]
         public static class HandleMessage
         {
             public static void Prefix(InnerNetClient __instance, [HarmonyArgument(0)] MessageReader reader,
@@ -22,7 +22,7 @@ namespace PolusggSlim.Patches.RootGamePacket
                     return;
 
                 var tag = (RootPacketTypes) reader.Tag;
-                PggLog.Message($"Received RootGamePacket {reader.Tag} - {tag.ToString()}");
+                //TODO: PggLog.Message($"Received RootGamePacket {reader.Tag} - {tag.ToString()}");
 
                 switch (tag)
                 {

@@ -6,7 +6,7 @@ namespace PolusggSlim.Patches.SetString
     {
         public static string GamePlayerCount { get; set; } = "__unset";
 
-        [HarmonyPatch(typeof(GameStartManager), nameof(GameStartManager.Update))]
+        // [HarmonyPatch(typeof(GameStartManager), nameof(GameStartManager.Update))]
         public static class GameStartManager_Update
         {
             public static void Postfix(GameStartManager __instance)

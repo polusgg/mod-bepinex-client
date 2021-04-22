@@ -44,7 +44,7 @@ namespace PolusggSlim
                 // Domain-Specific patches
                 RegisterInIl2CppAttribute.Register();
                 PermanentPatches.PatchAll(PermanentHarmony);
-                SkipIntroSplash.Load();
+                //TODO: SkipIntroSplash.Load();
 
                 LocalLoad();
             }
@@ -58,7 +58,7 @@ namespace PolusggSlim
         {
             LocalUnload();
 
-            SkipIntroSplash.Unload();
+            //TODO: SkipIntroSplash.Unload();
             PermanentHarmony.UnpatchSelf();
             AuthContext.Dispose();
 

@@ -1,12 +1,14 @@
 using System;
 using System.Linq;
 using Il2CppSystem.Text;
+using PolusggSlim.Auth;
 using PolusggSlim.Utils;
 using PolusggSlim.Utils.Attributes;
 using PolusggSlim.Utils.Extensions;
 using TMPro;
 using UnhollowerBaseLib;
 using UnityEngine;
+using UnityEngine.PlayerLoop;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -23,19 +25,22 @@ namespace PolusggSlim.Behaviours
         {
             if (scene.name == LOGIN_SCENE)
             {
-                PggLog.Message("Loading AccountLoginBehaviour");
                 _normalMenu = GameObject.Find("NormalMenu");
                 _normalMenu?.AddComponent<AccountLoginBehaviour>();
             }
         };
 
-        private GameObject _createAccountButton;
+        
 
         private SpriteRenderer _glyphRenderer;
-        private GameObject _openLogInModalButton;
 
-
+        private GameObject _nameTextBar;
         private GameObject _topButtonBar;
+
+        private GameObject _openLogInModalButton;
+        private GameObject _createAccountButton;
+        
+        private AuthContext _authContext => PluginSingleton<PolusggMod>.Instance.AuthContext;
 
         public AccountLoginBehaviour(IntPtr ptr) : base(ptr)
         {
@@ -43,6 +48,7 @@ namespace PolusggSlim.Behaviours
 
         public static void Load()
         {
+            PggLog.Message("Loading AccountLoginBehaviour");
             ShowAccountMenuHook.Invoke(SceneManager.GetActiveScene(), LoadSceneMode.Single);
             SceneManager.add_sceneLoaded(ShowAccountMenuHook);
         }
@@ -58,16 +64,20 @@ namespace PolusggSlim.Behaviours
             if (_normalMenu is null)
                 return;
 
-            var bundle = ResourceManager.GetAssetBundle("bepinexresources");
+            var bundle = ResourceManager.GetAssetBundle("bepinexresourcess");
 
             var topButtonBarPrefab = bundle.LoadAsset("Assets/Mods/LoginMenu/TopAccount.prefab").Cast<GameObject>();
             _glyphRenderer = new GameObject("GlyphRendererFix").AddComponent<SpriteRenderer>();
 
 
-            var nameTextBar = _normalMenu.FindRecursive(go => go.name.Contains("NameText"));
-            nameTextBar.active = false;
+            _nameTextBar = _normalMenu.FindRecursive(go => go.name.Contains("NameText"));
+            var nameTextButton = _nameTextBar.GetComponent<PassiveButton>();
+            
+            nameTextButton.OnClick.RemoveAllListeners();
+            nameTextButton.OnClick.AddListener(new Action(LogOut));
+
             _topButtonBar = Instantiate(topButtonBarPrefab);
-            _topButtonBar.transform.position = nameTextBar.transform.position;
+            _topButtonBar.transform.position = _nameTextBar.transform.position;
 
             _openLogInModalButton = _topButtonBar.FindRecursive(go => go.name.Contains("Login"));
             _createAccountButton = _topButtonBar.FindRecursive(go => go.name.Contains("Create"));
@@ -78,7 +88,6 @@ namespace PolusggSlim.Behaviours
                 {
                     var menuObj = Instantiate(bundle
                         .LoadAsset("Assets/Mods/LoginMenu/PolusggAccountMenu.prefab")).Cast<GameObject>();
-                    var accountMenuHolder = menuObj.AddComponent<AccountMenuHolder>();
                     menuObj.transform.localPosition = new Vector3(0, 0, -500f);
 
                     var nameObj = menuObj.FindRecursive(x => x.name.Contains("EmailTextBox"));
@@ -88,8 +97,8 @@ namespace PolusggSlim.Behaviours
                     var background = menuObj.FindRecursive(x => x.name.Contains("Background"));
                     var close = menuObj.FindRecursive(x => x.name.Contains("closeButton"));
 
-                    var nameField = accountMenuHolder.nameField = CreateTextBoxTMP(nameObj);
-                    var password = accountMenuHolder.password = CreateTextBoxTMP(passwordObj);
+                    var nameField = CreateTextBoxTMP(nameObj);
+                    var password = CreateTextBoxTMP(passwordObj);
 
                     nameField.AllowEmail = true;
                     nameField.AllowPaste = true;
@@ -114,7 +123,6 @@ namespace PolusggSlim.Behaviours
 
                     close.MakePassiveButton(() => Destroy(menuObj));
 
-                    PggLog.Message("Entered before transition open add function");
                     menuObj.AddComponent<TransitionOpen>().duration = 0.2f;
                 }
                 catch (Exception e)
@@ -123,23 +131,51 @@ namespace PolusggSlim.Behaviours
                 }
             });
             _createAccountButton.MakePassiveButton(() => { Application.OpenURL("https://account.polus.gg"); });
+
+            
+            _nameTextBar.active = _authContext.LoggedIn;
+            _topButtonBar.active = !_authContext.LoggedIn;
         }
 
         private bool Login(string email, string password)
         {
-            var context = PluginSingleton<PolusggMod>.Instance.AuthContext;
-            var result = context.ApiClient
+            var result = _authContext.ApiClient
                 .LogIn(email, password)
                 .GetAwaiter().GetResult();
             if (result != null)
             {
-                context.ParseClientIdAsUuid(result.Data.ClientId);
-                context.ClientToken = result.Data.ClientToken;
-                context.DisplayName = result.Data.DisplayName;
-                context.Perks = result.Data.Perks;
+                _authContext.ParseClientIdAsUuid(result.Data.ClientId);
+                _authContext.ClientToken = result.Data.ClientToken;
+                _authContext.DisplayName = result.Data.DisplayName;
+                _authContext.Perks = result.Data.Perks;
+
+                _nameTextBar.active = true;
+                _topButtonBar.active = false;
+
+                UpdateGameSettingsWithName(result.Data.DisplayName);
             }
 
             return result != null;
+        }
+        
+        private void LogOut()
+        {
+            UpdateGameSettingsWithName("Guest");
+            
+            _nameTextBar.active = false;
+            _topButtonBar.active = true;
+        }
+
+        private void UpdateGameSettingsWithName(string displayName)
+        {
+            // Class-specific behaviour
+            SaveManager.PlayerName = displayName;
+            SaveManager.lastPlayerName = displayName;
+            
+            var tmp = _nameTextBar.GetComponentInChildren<TextMeshPro>();
+            tmp.m_text = displayName;
+
+            // TODO: AccountManager.Instance.accountTab.UpdateNameDisplay();
         }
 
 
@@ -161,18 +197,6 @@ namespace PolusggSlim.Behaviours
             box.tempTxt = new StringBuilder();
             main.MakePassiveButton(box.GiveFocus);
             return box;
-        }
-
-
-        [RegisterInIl2Cpp]
-        public class AccountMenuHolder : MonoBehaviour
-        {
-            public TextBoxTMP nameField;
-            public TextBoxTMP password;
-
-            public AccountMenuHolder(IntPtr ptr) : base(ptr)
-            {
-            }
         }
     }
 }

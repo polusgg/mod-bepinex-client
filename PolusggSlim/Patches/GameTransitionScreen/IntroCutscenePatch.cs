@@ -28,7 +28,7 @@ namespace PolusggSlim.Patches.GameTransitionScreen
             __instance.BackgroundBar.material.color = Data.BackgroundColor;
         }
 
-        [HarmonyPatch(typeof(IntroCutscene), nameof(IntroCutscene.BeginCrewmate))]
+        // [HarmonyPatch(typeof(IntroCutscene), nameof(IntroCutscene.BeginCrewmate))]
         public static class IntroCutscene_BeginCrewmate
         {
             public static void Prefix([HarmonyArgument(0)] ref Il2CppReferenceArray<PlayerControl> yourTeam)
@@ -42,7 +42,7 @@ namespace PolusggSlim.Patches.GameTransitionScreen
             }
         }
 
-        [HarmonyPatch(typeof(IntroCutscene), nameof(IntroCutscene.BeginImpostor))]
+        // [HarmonyPatch(typeof(IntroCutscene), nameof(IntroCutscene.BeginImpostor))]
         public static class IntroCutscene_BeginImpostor
         {
             public static void Prefix([HarmonyArgument(0)] ref Il2CppReferenceArray<PlayerControl> yourTeam)
