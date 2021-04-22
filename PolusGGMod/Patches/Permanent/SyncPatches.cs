@@ -60,18 +60,5 @@ namespace PolusGG.Patches.Permanent {
                 return true;
             }
         }
-
-        // [HarmonyPatch(typeof(StarGen), nameof(StarGen.Update))]
-        // public class StarSyncUpdate {
-        //     [PermanentPatch]
-        //     [HarmonyPrefix]
-        //     public static bool Update(StarGen __instance) {
-        //         if (Math.Abs(__instance.Direction.x - 1f) < 0.001f) {
-        //             
-        //         } 
-        //
-        //         return true;
-        //     }
-        // }
     }
 }

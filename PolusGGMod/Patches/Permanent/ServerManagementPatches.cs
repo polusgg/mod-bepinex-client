@@ -24,7 +24,7 @@ namespace PolusGG.Patches.Permanent {
             // };
             ServerManager.DefaultRegions =
                 ServerManager.DefaultRegions.Prepend(PggConstants.Region).ToArray();
-            // __instance.CurrentRegion = PggConstants.Region.Duplicate();
+            __instance.CurrentRegion = PggConstants.Region.Duplicate();
             // __instance.CurrentServer = (from s in __instance.AvailableServers
             // orderby s.ConnectionFailures, s.Players
             // select s).First();
@@ -46,11 +46,11 @@ namespace PolusGG.Patches.Permanent {
         [PermanentPatch]
         [HarmonyPrefix]
         public static void Postfix(AnnouncementPopUp._Init_d__12 __instance) {
-            if (ServerManager.Instance.OnlineNetAddress.Equals(PggConstants.Region.PingServer) &&
-                !PogusPlugin.ModManager.AllPatched) {
-                PogusPlugin.ModManager.LoadMods();
-                PogusPlugin.ModManager.PatchMods();
-            }
+            // if (ServerManager.Instance.OnlineNetAddress.Equals(PggConstants.Region.PingServer) &&
+                // !PogusPlugin.ModManager.AllPatched) {
+                // PogusPlugin.ModManager.LoadMods();
+                // PogusPlugin.ModManager.PatchMods();
+            // }
         }
     }
 }

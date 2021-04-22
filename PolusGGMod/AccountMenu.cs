@@ -104,7 +104,9 @@ namespace PolusGG {
                     }
                 });
                 CreateButton(create, () => { Application.OpenURL("https://polus.gg/"); });
-            } else { }
+            } else {
+                
+            }
         }
 
         private static TextBoxTMP LinkTextBox(GameObject main) {
