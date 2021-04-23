@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using HarmonyLib;
 using Il2CppSystem.Text;
 using PolusggSlim.Auth;
 using PolusggSlim.Utils;
@@ -74,6 +75,7 @@ namespace PolusggSlim.Behaviours
 
             _nameTextBar = _normalMenu.FindRecursive(go => go.name.Contains("NameText"));
             var nameTextButton = _nameTextBar.GetComponent<PassiveButton>();
+            _nameTextBar.transform.localPosition = new Vector3(0, 2.32f, 0);
             
             nameTextButton.OnClick.RemoveAllListeners();
             nameTextButton.OnClick.AddListener(new Action(LogOut));
@@ -137,6 +139,8 @@ namespace PolusggSlim.Behaviours
             
             _nameTextBar.active = _authContext.LoggedIn;
             _topButtonBar.active = !_authContext.LoggedIn;
+            if (_authContext.LoggedIn)
+                UpdateGameSettingsWithName(_authContext.DisplayName);
         }
 
         [HideFromIl2Cpp]
@@ -176,7 +180,10 @@ namespace PolusggSlim.Behaviours
             SaveManager.lastPlayerName = displayName;
             
             var tmp = _nameTextBar.GetComponentInChildren<TextMeshPro>();
-            tmp.m_text = displayName;
+            tmp.m_text = $"Logged in as: {displayName}";
+            
+            var background = _nameTextBar.FindRecursive(x => x.name.Equals("Background"));
+            background.active = false;
 
             // TODO: AccountManager.Instance.accountTab.UpdateNameDisplay();
         }
@@ -200,6 +207,19 @@ namespace PolusggSlim.Behaviours
             box.tempTxt = new StringBuilder();
             main.MakePassiveButton(box.GiveFocus);
             return box;
+        }
+    }
+
+    [HarmonyPatch(typeof(SetNameText), nameof(SetNameText.Start))]
+    public static class SetNameText_Start
+    {
+        public static bool Prefix(SetNameText __instance)
+        {
+            var context = PluginSingleton<PolusggMod>.Instance.AuthContext;
+            if (context.LoggedIn)
+                __instance.nameText.m_text = $"Logged in as: {context.DisplayName}";
+
+            return false;
         }
     }
 }

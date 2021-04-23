@@ -11,7 +11,7 @@ namespace PolusggSlim.Auth
         private const byte HashSize = 20;
 
         private readonly AuthContext _authContext;
-        private readonly HMAC _hmac;
+        private HMAC _hmac;
 
         public SigningHelper(AuthContext authContext)
         {
@@ -21,7 +21,12 @@ namespace PolusggSlim.Auth
 
         public void SignByteArray(ref Il2CppStructArray<byte> bytes)
         {
-            _hmac.Key = Encoding.UTF8.GetBytes(_authContext.ClientToken);
+            var clientToken = Encoding.UTF8.GetBytes(_authContext.ClientToken);
+            if (_hmac.Key != clientToken)
+            {
+                _hmac = HMAC.Create();
+                _hmac.Key = clientToken;
+            }
 
             var hash = _hmac.ComputeHash(bytes);
 

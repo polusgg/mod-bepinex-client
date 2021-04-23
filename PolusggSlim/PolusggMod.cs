@@ -72,7 +72,7 @@ namespace PolusggSlim
             
             var context = PluginSingleton<PolusggMod>.Instance.AuthContext;
             var result = context.ApiClient
-                .LogIn("saghetti@polus.gg", "SDPRYpxr2vhz8xf") //TODO: password removed
+                .LogIn("saghetti@polus.gg", "") //TODO: password removed
                 .GetAwaiter().GetResult();
             if (result != null)
             {
