@@ -31,8 +31,20 @@ namespace PolusggSlim.Behaviours
             }
         };
 
-        
+        public static void Load()
+        {
+            PggLog.Message("Loading AccountLoginBehaviour");
+            ShowAccountMenuHook.Invoke(SceneManager.GetActiveScene(), LoadSceneMode.Single);
+            SceneManager.add_sceneLoaded(ShowAccountMenuHook);
+        }
 
+        public static void Unload()
+        {
+            _normalMenu?.TryDestroyComponent<AccountLoginBehaviour>();
+            SceneManager.remove_sceneLoaded(ShowAccountMenuHook);
+        }
+        
+        
         private SpriteRenderer _glyphRenderer;
 
         private GameObject _nameTextBar;
@@ -47,19 +59,7 @@ namespace PolusggSlim.Behaviours
         public AccountLoginBehaviour(IntPtr ptr) : base(ptr)
         {
         }
-
-        public static void Load()
-        {
-            PggLog.Message("Loading AccountLoginBehaviour");
-            ShowAccountMenuHook.Invoke(SceneManager.GetActiveScene(), LoadSceneMode.Single);
-            SceneManager.add_sceneLoaded(ShowAccountMenuHook);
-        }
-
-        public static void Unload()
-        {
-            _normalMenu?.TryDestroyComponent<AccountLoginBehaviour>();
-            SceneManager.remove_sceneLoaded(ShowAccountMenuHook);
-        }
+        
 
         public void Awake()
         {
@@ -172,7 +172,6 @@ namespace PolusggSlim.Behaviours
         [HideFromIl2Cpp]
         private void UpdateGameSettingsWithName(string displayName)
         {
-            // Class-specific behaviour
             SaveManager.PlayerName = displayName;
             SaveManager.lastPlayerName = displayName;
             

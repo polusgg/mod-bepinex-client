@@ -30,7 +30,7 @@ namespace PolusggSlim
             try
             {
                 // Harmony
-                PermanentHarmony = new Harmony(Id);
+                PermanentHarmony = new Harmony(Id + ".permanent");
                 Harmony = new Harmony(Id);
 
                 // Configuration
@@ -72,7 +72,7 @@ namespace PolusggSlim
             
             var context = PluginSingleton<PolusggMod>.Instance.AuthContext;
             var result = context.ApiClient
-                .LogIn("saghetti@polus.gg", "SDPRYpxr2vhz8xf")
+                .LogIn("saghetti@polus.gg", "") //TODO: password removed
                 .GetAwaiter().GetResult();
             if (result != null)
             {
