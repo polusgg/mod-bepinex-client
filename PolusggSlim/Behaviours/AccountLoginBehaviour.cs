@@ -7,6 +7,7 @@ using PolusggSlim.Utils.Attributes;
 using PolusggSlim.Utils.Extensions;
 using TMPro;
 using UnhollowerBaseLib;
+using UnhollowerBaseLib.Attributes;
 using UnityEngine;
 using UnityEngine.PlayerLoop;
 using UnityEngine.SceneManagement;
@@ -40,6 +41,7 @@ namespace PolusggSlim.Behaviours
         private GameObject _openLogInModalButton;
         private GameObject _createAccountButton;
         
+        [HideFromIl2Cpp]
         private AuthContext _authContext => PluginSingleton<PolusggMod>.Instance.AuthContext;
 
         public AccountLoginBehaviour(IntPtr ptr) : base(ptr)
@@ -64,7 +66,7 @@ namespace PolusggSlim.Behaviours
             if (_normalMenu is null)
                 return;
 
-            var bundle = ResourceManager.GetAssetBundle("bepinexresourcess");
+            var bundle = ResourceManager.GetAssetBundle("accountsmenu");
 
             var topButtonBarPrefab = bundle.LoadAsset("Assets/Mods/LoginMenu/TopAccount.prefab").Cast<GameObject>();
             _glyphRenderer = new GameObject("GlyphRendererFix").AddComponent<SpriteRenderer>();
@@ -137,6 +139,7 @@ namespace PolusggSlim.Behaviours
             _topButtonBar.active = !_authContext.LoggedIn;
         }
 
+        [HideFromIl2Cpp]
         private bool Login(string email, string password)
         {
             var result = _authContext.ApiClient
@@ -166,6 +169,7 @@ namespace PolusggSlim.Behaviours
             _topButtonBar.active = true;
         }
 
+        [HideFromIl2Cpp]
         private void UpdateGameSettingsWithName(string displayName)
         {
             // Class-specific behaviour

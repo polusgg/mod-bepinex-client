@@ -7,7 +7,7 @@ namespace PolusggSlim.Patches.Misc
     {
         private static bool Enabled;
 
-        [HarmonyPatch(typeof(SurveillanceMinigame), nameof(SurveillanceMinigame.Begin))]
+        // [HarmonyPatch(typeof(SurveillanceMinigame), nameof(SurveillanceMinigame.Begin))]
         public static class SurveillanceMinigame_Begin
         {
             public static void Prefix()
@@ -21,9 +21,9 @@ namespace PolusggSlim.Patches.Misc
             }
         }
 
-        [HarmonyPatch(typeof(RenderTexture),
-            nameof(RenderTexture.GetTemporary),
-            typeof(int), typeof(int), typeof(int), typeof(RenderTextureFormat))]
+        // [HarmonyPatch(typeof(RenderTexture),
+        //     nameof(RenderTexture.GetTemporary),
+        //     typeof(int), typeof(int), typeof(int), typeof(RenderTextureFormat))]
         public static class RenderTexture_GetTemporary
         {
             public static void Prefix([HarmonyArgument(0)] ref int width, [HarmonyArgument(1)] ref int height)

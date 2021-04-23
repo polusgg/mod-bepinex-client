@@ -6,7 +6,7 @@ namespace PolusggSlim.Patches.Misc
 {
     public static class FancyShadows
     {
-        [HarmonyPatch(typeof(ShadowCamera), nameof(ShadowCamera.OnEnable))]
+        // [HarmonyPatch(typeof(ShadowCamera), nameof(ShadowCamera.OnEnable))]
         public static class ShadowCamera_OnEnable
         {
             public static void Postfix(ShadowCamera __instance)

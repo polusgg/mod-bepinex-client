@@ -69,8 +69,6 @@ namespace PolusggSlim
         {
             PggLog.Message("Loading Polusgg mod");
             PggLog.Message($"Polusgg Server at {Configuration.Server.IpAddress}");
-
-            AccountLoginBehaviour.Load();
             
             var context = PluginSingleton<PolusggMod>.Instance.AuthContext;
             var result = context.ApiClient
@@ -84,6 +82,8 @@ namespace PolusggSlim
                 context.Perks = result.Data.Perks;
             }
 
+            AccountLoginBehaviour.Load();
+            
             Harmony.PatchAll();
         }
 

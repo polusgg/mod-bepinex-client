@@ -13,8 +13,12 @@ namespace PolusggSlim.Patches.Authentication
             public static void Prefix([HarmonyArgument(0)] ref Il2CppStructArray<byte> bytes,
                 [HarmonyArgument(1)] ref int length)
             {
-                PluginSingleton<PolusggMod>.Instance.SigningHelper.SignByteArray(ref bytes);
-                length = bytes.Length;
+                if (ServerManager.Instance.CurrentRegion.PingServer ==
+                    PluginSingleton<PolusggMod>.Instance.Configuration.Server.IpAddress)
+                {
+                    PluginSingleton<PolusggMod>.Instance.SigningHelper.SignByteArray(ref bytes);
+                    length = bytes.Length;
+                }
             }
         }
     }
