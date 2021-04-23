@@ -6,7 +6,7 @@ namespace PolusggSlim.Patches.Misc
 {
     public static class RemoveAuthentication
     {
-        [HarmonyPatch(typeof(StatsManager), nameof(StatsManager.AmBanned), MethodType.Getter)]
+        // [HarmonyPatch(typeof(StatsManager), nameof(StatsManager.AmBanned), MethodType.Getter)]
         public static class StatsManager_getAmBanned
         {
             public static bool Prefix(ref bool __result)
@@ -15,7 +15,7 @@ namespace PolusggSlim.Patches.Misc
             }
         }
 
-        [HarmonyPatch(typeof(AuthManager._CoConnect_d__4), nameof(AuthManager._CoConnect_d__4.MoveNext))]
+        // [HarmonyPatch(typeof(AuthManager._CoConnect_d__4), nameof(AuthManager._CoConnect_d__4.MoveNext))]
         public static class AuthManager_CoConnect
         {
             public static bool Prefix(ref bool __result)
@@ -24,7 +24,7 @@ namespace PolusggSlim.Patches.Misc
             }
         }
 
-        [HarmonyPatch(typeof(AuthManager._CoWaitForNonce_d__5), nameof(AuthManager._CoWaitForNonce_d__5.MoveNext))]
+        // [HarmonyPatch(typeof(AuthManager._CoWaitForNonce_d__5), nameof(AuthManager._CoWaitForNonce_d__5.MoveNext))]
         public static class AuthManager_CoWaitForNonce
         {
             public static bool Prefix(ref bool __result)
@@ -33,7 +33,7 @@ namespace PolusggSlim.Patches.Misc
             }
         }
 
-        [HarmonyPatch(typeof(MainMenuManager), nameof(MainMenuManager.Start))]
+        // [HarmonyPatch(typeof(MainMenuManager), nameof(MainMenuManager.Start))]
         public static class MainMenuManager_Start
         {
             public static void Postfix()
@@ -47,7 +47,7 @@ namespace PolusggSlim.Patches.Misc
             }
         }
 
-        [HarmonyPatch(typeof(EOSManager), nameof(EOSManager.InitializePlatformInterface))]
+        // [HarmonyPatch(typeof(EOSManager), nameof(EOSManager.InitializePlatformInterface))]
         public static class EOSManager_InitializePlatformInterfacePatch
         {
             public static bool Prefix(EOSManager __instance)
@@ -65,7 +65,7 @@ namespace PolusggSlim.Patches.Misc
             }
         }
 
-        [HarmonyPatch(typeof(SaveManager), nameof(SaveManager.BirthDateYear), MethodType.Getter)]
+        // [HarmonyPatch(typeof(SaveManager), nameof(SaveManager.BirthDateYear), MethodType.Getter)]
         public static class SaveManagerGetBirthDateYearPatch
         {
             public static bool Prefix(out int __result)

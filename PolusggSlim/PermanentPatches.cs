@@ -9,10 +9,10 @@ namespace PolusggSlim
     {
         public static void PatchAll(Harmony harmony)
         {
-            harmony.Patch(
-                typeof(ServerManager).GetMethod(nameof(ServerManager.LoadServers)),
-                new HarmonyMethod(ServerManager_LoadServers.PrefixMethod)
-            );
+            // harmony.Patch(
+            //     typeof(ServerManager).GetMethod(nameof(ServerManager.LoadServers)),
+            //     new HarmonyMethod(ServerManager_LoadServers.PrefixMethod)
+            // );
 
             // harmony.Patch(
             //     typeof(ServerManager).GetMethod(nameof(ServerManager.SetRegion)),
