@@ -15,6 +15,7 @@ using Object = UnityEngine.Object;
 namespace PolusGG.Patches.Temporary {
     public static class GameOptionsPatches {
         public static Dictionary<string, List<GameOption>> Categories = new();
+        public static List<GameOption> NoCategory = new();
         public static Dictionary<string, GameOption> OptionMap = new();
         private static object lockable = new();
 
@@ -25,7 +26,8 @@ namespace PolusGG.Patches.Temporary {
 
         public static void UpdateHudString() {
             "L".Log(3);
-            CatchHelper.TryCatch(() => HudManager.Instance.GameSettings.text = PlayerControl.GameOptions.ToHudString(69));
+            CatchHelper.TryCatch(
+                () => HudManager.Instance.GameSettings.text = PlayerControl.GameOptions.ToHudString(69));
         }
 
         [HarmonyPatch(typeof(GameSettingMenu), nameof(GameSettingMenu.OnEnable))]
@@ -39,6 +41,7 @@ namespace PolusGG.Patches.Temporary {
                             .DontDestroy();
                         groupTitle.gameObject.active = false;
                         groupTitle.name = "CategoryTitlePrefab";
+                        groupTitle.transform.localPosition = new Vector3( -1.254f, 0);
                     }
 
                     if (enumOption == null) {
@@ -46,13 +49,15 @@ namespace PolusGG.Patches.Temporary {
                             .GetComponent<KeyValueOption>().DontDestroy();
                         enumOption.gameObject.active = false;
                         enumOption.name = "EnumOptionPrefab";
+                        enumOption.transform.localPosition = new Vector3( 0, 0);
                     }
 
                     if (numbOption == null) {
                         numbOption = Object.Instantiate(__instance.AllItems[2].gameObject)
                             .GetComponent<NumberOption>().DontDestroy();
                         numbOption.gameObject.active = false;
-                        numbOption.name = "NumberOptionPrefab";
+                        numbOption.name = "NumberOptionPrefab";//todo fix this semicolon and also x pos on game options :(
+                        numbOption.transform.localPosition = new Vector3( 0, 0);
                     }
 
                     if (boolOption == null) {
@@ -60,71 +65,77 @@ namespace PolusGG.Patches.Temporary {
                             .GetComponent<ToggleOption>().DontDestroy();
                         boolOption.gameObject.active = false;
                         boolOption.name = "BooleanOptionPrefab";
+                        boolOption.transform.localPosition = new Vector3(0, 0);
                     }
 
                     List<Transform> options = new();
-                    foreach ((string categoryTitle, List<GameOption> gameOptions) in Categories) {
-                        if (categoryTitle != "") {
-                            TextMeshPro newTitle =
-                                Object.Instantiate(groupTitle, new Vector3(0, 0, -10), new Quaternion());
-                            newTitle.text = categoryTitle;
-                            options.Add(newTitle.transform);
+
+                    void GenerateGameOption(GameOption gameOption) {
+                        switch (gameOption.Type) {
+                            case OptionType.Number: {
+                                FloatValue value = (FloatValue) gameOption.Value;
+                                NumberOption option =
+                                    Object.Instantiate(numbOption);
+                                option.name = gameOption.Title;
+                                option.Increment = value.Step;
+                                option.ValidRange = new FloatRange(value.Lower, value.Upper);
+                                option.Value = value.Value;
+                                option.TitleText.text = gameOption.Title;
+                                option.FormatString = value.FormatString;
+                                option.ZeroIsInfinity = value.IsInfinity;
+                                if (!AmongUsClient.Instance.AmHost) option.SetAsPlayer();
+                                options.Add(option.transform);
+                                break;
+                            }
+                            case OptionType.Boolean: {
+                                BooleanValue value = (BooleanValue) gameOption.Value;
+                                ToggleOption option =
+                                    Object.Instantiate(boolOption);
+                                option.name = gameOption.Title;
+                                option.CheckMark.enabled = value.Value;
+                                option.TitleText.text = gameOption.Title;
+                                if (!AmongUsClient.Instance.AmHost) option.SetAsPlayer();
+                                options.Add(option.transform);
+                                break;
+                            }
+                            case OptionType.Enum: {
+                                EnumValue value = (EnumValue) gameOption.Value;
+                                KeyValueOption option =
+                                    Object.Instantiate(enumOption);
+                                option.name = gameOption.Title;
+                                option.Values =
+                                    new Il2CppSystem.Collections.Generic.List<
+                                        Il2CppSystem.Collections.Generic.KeyValuePair<string, int>>();
+                                for (int i = 0; i < value.Values.Length; i++)
+                                    option.Values.Add(new Il2CppSystem.Collections.Generic.KeyValuePair<string, int> {
+                                        key = value.Values[i],
+                                        value = i
+                                    });
+
+                                option.Selected = (int) value.OptionIndex;
+                                option.ValueText.text = value.Values[value.OptionIndex];
+                                option.TitleText.text = gameOption.Title;
+                                if (!AmongUsClient.Instance.AmHost) option.SetAsPlayer();
+                                options.Add(option.transform);
+                                break;
+                            }
+                            default:
+                                throw new ArgumentOutOfRangeException();
                         }
+                    }
+                    
+                    foreach (GameOption gameOption in NoCategory) {
+                        GenerateGameOption(gameOption);
+                    }
+
+                    foreach ((string categoryTitle, List<GameOption> gameOptions) in Categories) {
+                        TextMeshPro newTitle =
+                            Object.Instantiate(groupTitle);
+                        newTitle.text = categoryTitle;
+                        options.Add(newTitle.transform);
 
                         foreach (GameOption gameOption in gameOptions) {
-                            switch (gameOption.Type) {
-                                case OptionType.Number: {
-                                    FloatValue value = (FloatValue) gameOption.Value;
-                                    NumberOption option =
-                                        Object.Instantiate(numbOption, new Vector3(0, 0, -10), new Quaternion());
-                                    option.name = gameOption.Title;
-                                    option.Increment = value.Step;
-                                    option.ValidRange = new FloatRange(value.Lower, value.Upper);
-                                    option.Value = value.Value;
-                                    option.TitleText.text = gameOption.Title;
-                                    option.FormatString = value.FormatString;
-                                    option.ZeroIsInfinity = value.IsInfinity;
-                                    option.OnValueChanged = new Action<OptionBehaviour>(HandleNumberChanged);
-                                    options.Add(option.transform);
-                                    break;
-                                }
-                                case OptionType.Boolean: {
-                                    BooleanValue value = (BooleanValue) gameOption.Value;
-                                    ToggleOption option =
-                                        Object.Instantiate(boolOption, new Vector3(0, 0, -10), new Quaternion());
-                                    option.name = gameOption.Title;
-                                    option.CheckMark.enabled = value.Value;
-                                    option.TitleText.text = gameOption.Title;
-                                    option.OnValueChanged = new Action<OptionBehaviour>(HandleToggleChanged);
-                                    options.Add(option.transform);
-                                    break;
-                                }
-                                case OptionType.Enum: {
-                                    EnumValue value = (EnumValue) gameOption.Value;
-                                    KeyValueOption option =
-                                        Object.Instantiate(enumOption, new Vector3(0, 0, -10), new Quaternion());
-                                    option.name = gameOption.Title;
-                                    option.Values =
-                                        new Il2CppSystem.Collections.Generic.List<
-                                            Il2CppSystem.Collections.Generic.KeyValuePair<string, int>>();
-                                    for (int i = 0; i < value.Values.Length; i++)
-                                        option.Values.Add(new Il2CppSystem.Collections.Generic.KeyValuePair<string, int> {
-                                            key = value.Values[i],
-                                            value = i
-                                        });
-
-                                    option.Selected = (int) value.OptionIndex;
-                                    option.ValueText.text = value.Values[value.OptionIndex];
-                                    option.TitleText.text = gameOption.Title;
-                                    $"Adding {gameOption.Title}".Log();
-                                    option.OnValueChanged = new Action<OptionBehaviour>(HandleStringChanged);
-                                    $"Added {gameOption.Title}".Log();
-                                    options.Add(option.transform);
-                                    break;
-                                }
-                                default:
-                                    throw new ArgumentOutOfRangeException();
-                            }
+                            GenerateGameOption(gameOption);
                         }
                     }
 
@@ -137,8 +148,9 @@ namespace PolusGG.Patches.Temporary {
                     Scroller scroller = __instance.GetComponent<Scroller>();
                     int index = 0;
                     foreach (Transform transforms in __instance.AllItems) {
+                        float lx = transforms.localPosition.x;
                         transforms.SetParent(scroller.Inner);
-                        transforms.localPosition = new Vector3(0, __instance.YStart - index++ * __instance.YOffset, -1);
+                        transforms.localPosition = new Vector3(lx, __instance.YStart - index++ * __instance.YOffset, -1);
                         transforms.gameObject.SetActive(true);
                     }
 
@@ -159,7 +171,7 @@ namespace PolusGG.Patches.Temporary {
                 MessageWriter writer = MessageWriter.Get(SendOption.Reliable);
                 writer.StartMessage((byte) PolusRootPackets.SetGameOption);
                 // TODO do this when serverside sequence id handling
-                writer.Write((ushort)0);
+                writer.Write((ushort) 0);
                 writer.Write(gameOption.CategoryName);
                 writer.Write(toggle.TitleText.text);
                 writer.Write((byte) 1);
@@ -176,7 +188,7 @@ namespace PolusGG.Patches.Temporary {
                 value.Value = (uint) toggle.Value;
                 MessageWriter writer = MessageWriter.Get(SendOption.Reliable);
                 writer.StartMessage((byte) PolusRootPackets.SetGameOption);
-                writer.Write((ushort)0);
+                writer.Write((ushort) 0);
                 writer.Write(gameOption.CategoryName);
                 writer.Write(toggle.TitleText.text);
                 writer.Write((byte) 0);
@@ -199,7 +211,7 @@ namespace PolusGG.Patches.Temporary {
                 value.OptionIndex = (uint) toggle.Selected;
                 MessageWriter writer = MessageWriter.Get(SendOption.Reliable);
                 writer.StartMessage((byte) PolusRootPackets.SetGameOption);
-                writer.Write((ushort)0);
+                writer.Write((ushort) 0);
                 writer.Write(gameOption.CategoryName);
                 writer.Write(toggle.TitleText.text);
                 writer.Write((byte) OptionType.Enum);
@@ -225,10 +237,12 @@ namespace PolusGG.Patches.Temporary {
 
             public static void ReceivedGameOptionPacket(GameOptionPacket packet) {
                 ushort sequenceId = packet.SequenceId;
-                if (sequenceId != _nextSequenceReceived && NetHelpers.SidGreaterThan(sequenceId, _nextSequenceReceived) && !_hasStarted) {
-                    $"Got {sequenceId}, waiting for ${_nextSequenceReceived}, {_packetQueue.Count} in queue right now".Log();
+                if (sequenceId != _nextSequenceReceived &&
+                    NetHelpers.SidGreaterThan(sequenceId, _nextSequenceReceived) && !_hasStarted) {
+                    $"Got {sequenceId}, waiting for ${_nextSequenceReceived}, {_packetQueue.Count} in queue right now"
+                        .Log();
                     _packetQueue.Add(sequenceId, packet);
-                } else {
+                } else lock (_packetQueue){
                     ushort lastId = sequenceId;
                     CatchHelper.TryCatch(() => HandlePacket(packet));
                     if (!_hasStarted) {
@@ -236,7 +250,8 @@ namespace PolusGG.Patches.Temporary {
                         _hasStarted = true;
                         return;
                     }
-                    lock(_packetQueue) while (_packetQueue.Count != 0) {
+
+                    while (_packetQueue.Count != 0) {
                         GameOptionPacket packet2 = _packetQueue.Values[0];
                         CatchHelper.TryCatch(() => HandlePacket(packet2));
                         _packetQueue.RemoveAt(0);
@@ -249,15 +264,17 @@ namespace PolusGG.Patches.Temporary {
             }
 
             private static void HandlePacket(GameOptionPacket packet) {
-                lock (lockable) {       
+                lock (lockable) {
                     MessageReader reader = packet.Reader;
                     switch (packet.Type) {
                         case OptionPacketType.DeleteOption: {
                             string name = reader.ReadString();
-                            List<GameOption> category = Categories.First(x => x.Value.Any(x => x.Title == name)).Value;
+                            (string categoryName, List<GameOption> category) =
+                                Categories.First(x => x.Value.Any(x => x.Title == name));
                             category.RemoveAll(x => x.Title == name);
                             OptionMap.Remove(name);
-                            if (category.Count == 0) Categories.Remove(Categories.First(y => y.Value == category).Key);
+                            if (category.Count == 0 && categoryName != "")
+                                Categories.Remove(Categories.First(y => y.Value == category).Key);
 
                             PolusMod.Instance.DirtyOptions();
                             break;
@@ -269,9 +286,14 @@ namespace PolusGG.Patches.Temporary {
 
                             PolusMod.Instance.DirtyOptions();
 
-                            if (!Categories.ContainsKey(cat))
-                                Categories.Add(cat, new List<GameOption>());
-                            List<GameOption> category = Categories[cat];
+                            List<GameOption> category;
+                            if (cat != "") {
+                                if (!Categories.ContainsKey(cat))
+                                    Categories.Add(cat, new List<GameOption>());
+                                category = Categories[cat];
+                            } else {
+                                category = NoCategory;
+                            }
 
                             if (category.Any(x => x.Title == name)) {
                                 category.Find(x => x.Title == name).Value = optionType switch {
@@ -355,7 +377,7 @@ namespace PolusGG.Patches.Temporary {
         public class S4 {
             [HarmonyPrefix]
             public static bool RpcSyncSettings(NumberOption __instance) {
-                __instance.Value = __instance.ValidRange.Clamp(__instance.Value + __instance.Increment);
+                __instance.Value = __instance.ValidRange.Clamp(__instance.Value - __instance.Increment);
                 OnEnablePatch.HandleNumberChanged(__instance);
                 return false;
             }
@@ -366,7 +388,7 @@ namespace PolusGG.Patches.Temporary {
             [HarmonyPrefix]
             public static bool RpcSyncSettings(ToggleOption __instance) {
                 __instance.CheckMark.enabled = !__instance.CheckMark.enabled;
-                OnEnablePatch.HandleNumberChanged(__instance);
+                OnEnablePatch.HandleToggleChanged(__instance);
                 return false;
             }
         }
@@ -500,12 +522,12 @@ namespace PolusGG.Patches.Temporary {
 
             string oute = "";
 
-            foreach ((string categoryTitle, List<GameOption> options) in GameOptionsPatches.Categories) {
+            void GenerateHud(string categoryTitle, List<GameOption> options) {
                 CatchHelper.TryCatch(() => {
                     string output = "";
-                    if (categoryTitle != "") output += $"{categoryTitle}\n";
+                    if (categoryTitle != null) output += $"\n{categoryTitle}\n";
                     foreach (GameOption option in options) {
-                        if (categoryTitle != "") output += "  ";
+                        if (categoryTitle != null) output += "  ";
                         output += $"{option.Title}: ";
                         output += option.Type switch {
                             OptionType.Number => string.Format(((FloatValue) option.Value).FormatString,
@@ -520,6 +542,12 @@ namespace PolusGG.Patches.Temporary {
 
                     oute += output;
                 });
+            }
+            
+            GenerateHud(null, GameOptionsPatches.NoCategory);
+
+            foreach ((string categoryTitle, List<GameOption> options) in GameOptionsPatches.Categories) {
+                GenerateHud(categoryTitle, options);
             }
 
             __result = oute;
