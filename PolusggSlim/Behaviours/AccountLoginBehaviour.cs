@@ -77,9 +77,9 @@ namespace PolusggSlim.Behaviours
 
 
             _nameTextBar = _normalMenu.FindRecursive(go => go.name.Contains("NameText"));
-            var nameTextButton = _nameTextBar.GetComponent<PassiveButton>();
             _nameTextBar.transform.localPosition = new Vector3(0, 2.32f, 0);
             
+            var nameTextButton = _nameTextBar.GetComponent<PassiveButton>();
             nameTextButton.OnClick.RemoveAllListeners();
             nameTextButton.OnClick.AddListener(new Action(LogOut));
 
@@ -184,10 +184,20 @@ namespace PolusggSlim.Behaviours
         
         private void LogOut()
         {
+            _authContext.ClientId = new byte[0];
+            _authContext.ClientToken = "";
+            _authContext.DisplayName = "";
+            _authContext.Perks = new string[0];
+            
             UpdateGameSettingsWithName("Guest");
             
             _nameTextBar.active = false;
             _topButtonBar.active = true;
+            
+            //TODO: Reorganize Code
+            var filePath = Path.Combine(Paths.GameRootPath, "api.txt");
+            if (File.Exists(filePath))
+                File.Delete(filePath);
         }
 
         [HideFromIl2Cpp]
@@ -233,7 +243,7 @@ namespace PolusggSlim.Behaviours
         public static bool Prefix(SetNameText __instance)
         {
             var context = PluginSingleton<PolusggMod>.Instance.AuthContext;
-            if (context.LoggedIn)
+            if (context.LoggedIn && SceneManager.GetActiveScene().name == "MMOnline")
                 __instance.nameText.m_text = $"Logged in as: {context.DisplayName}";
 
             return false;
