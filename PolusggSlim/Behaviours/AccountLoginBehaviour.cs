@@ -1,7 +1,10 @@
 using System;
+using System.IO;
 using System.Linq;
+using BepInEx;
 using HarmonyLib;
 using Il2CppSystem.Text;
+using Newtonsoft.Json;
 using PolusggSlim.Auth;
 using PolusggSlim.Utils;
 using PolusggSlim.Utils.Attributes;
@@ -160,6 +163,16 @@ namespace PolusggSlim.Behaviours
                 _topButtonBar.active = false;
 
                 UpdateGameSettingsWithName(result.Data.DisplayName);
+                
+                // TODO: Reorganize code
+                var filePath = Path.Combine(Paths.GameRootPath, "api.txt");
+                File.WriteAllText(filePath, JsonConvert.SerializeObject(new SavedAuthModel
+                {
+                    ClientId = _authContext.ClientId,
+                    ClientToken = _authContext.ClientToken,
+                    DisplayName = _authContext.DisplayName,
+                    Perks = _authContext.Perks
+                }));
             }
 
             return result != null;

@@ -1,7 +1,10 @@
 using System;
+using System.IO;
 using BepInEx;
 using BepInEx.IL2CPP;
 using HarmonyLib;
+using Newtonsoft.Json;
+using PolusggSlim.Api;
 using PolusggSlim.Auth;
 using PolusggSlim.Behaviours;
 using PolusggSlim.Patches.Misc;
@@ -70,9 +73,10 @@ namespace PolusggSlim
             PggLog.Message("Loading Polusgg mod");
             PggLog.Message($"Polusgg Server at {Configuration.Server.IpAddress}");
             
+#if DEBUG
             var context = PluginSingleton<PolusggMod>.Instance.AuthContext;
             var result = context.ApiClient
-                .LogIn("saghetti@polus.gg", "") //TODO: password removed
+                .LogIn("saghetti@polus.gg", "")
                 .GetAwaiter().GetResult();
             if (result != null)
             {
@@ -81,11 +85,25 @@ namespace PolusggSlim
                 context.DisplayName = result.Data.DisplayName;
                 context.Perks = result.Data.Perks;
             }
-
+#elif RELEASE
+            var filePath = Path.Combine(Paths.GameRootPath, "api.txt");
+            if (File.Exists(filePath))
+            {
+                var authModel = JsonConvert.DeserializeObject<SavedAuthModel>(File.ReadAllText(filePath));
+                if (authModel is not null)
+                {
+                    AuthContext.ClientId = authModel.ClientId;
+                    AuthContext.ClientToken = authModel.ClientToken;
+                    AuthContext.DisplayName = authModel.DisplayName;
+                    AuthContext.Perks = authModel.Perks;
+                }
+            }
+#endif
             AccountLoginBehaviour.Load();
             
             Harmony.PatchAll();
         }
+
 
         internal void LocalUnload()
         {
