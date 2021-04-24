@@ -13,9 +13,9 @@ using TMPro;
 using UnhollowerBaseLib;
 using UnhollowerBaseLib.Attributes;
 using UnityEngine;
-using UnityEngine.PlayerLoop;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using Encoding = System.Text.Encoding;
 
 namespace PolusggSlim.Behaviours
 {
@@ -166,13 +166,17 @@ namespace PolusggSlim.Behaviours
                 
                 // TODO: Reorganize code
                 var filePath = Path.Combine(Paths.GameRootPath, "api.txt");
-                File.WriteAllText(filePath, JsonConvert.SerializeObject(new SavedAuthModel
-                {
-                    ClientId = _authContext.ClientId,
-                    ClientToken = _authContext.ClientToken,
-                    DisplayName = _authContext.DisplayName,
-                    Perks = _authContext.Perks
-                }));
+                File.WriteAllText(filePath, 
+                    Convert.ToBase64String(Encoding.UTF8.GetBytes(
+                        JsonConvert.SerializeObject(new SavedAuthModel
+                        {
+                            ClientId = _authContext.ClientId,
+                            ClientToken = _authContext.ClientToken,
+                            DisplayName = _authContext.DisplayName,
+                            Perks = _authContext.Perks
+                        })
+                    ))
+                );
             }
 
             return result != null;

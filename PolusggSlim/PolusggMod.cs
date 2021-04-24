@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Text;
 using BepInEx;
 using BepInEx.IL2CPP;
 using HarmonyLib;
@@ -89,7 +90,9 @@ namespace PolusggSlim
             var filePath = Path.Combine(Paths.GameRootPath, "api.txt");
             if (File.Exists(filePath))
             {
-                var authModel = JsonConvert.DeserializeObject<SavedAuthModel>(File.ReadAllText(filePath));
+                var authModel = JsonConvert.DeserializeObject<SavedAuthModel>(
+                    Encoding.UTF8.GetString(Convert.FromBase64String(File.ReadAllText(filePath)))
+                );
                 if (authModel is not null)
                 {
                     AuthContext.ClientId = authModel.ClientId;
