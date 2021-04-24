@@ -28,7 +28,7 @@ namespace PolusGG {
 
             SceneManager.add_sceneLoaded(new Action<Scene, LoadSceneMode>((scene, mode) => {
                 try {
-                    if (scene.name == "MMOnline") AccountMenu.InitializeAccountMenu(scene);
+                    // if (scene.name == "MMOnline") AccountMenu.InitializeAccountMenu(scene);
                 } catch {
                     // ignored
                 }

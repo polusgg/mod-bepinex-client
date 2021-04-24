@@ -7,8 +7,8 @@ using UnityEngine;
 
 namespace PolusGG.Behaviours.Inner {
     public class PolusSoundSource : PnoBehaviour {
-        private float falloffMultiplier;
-        private float falloffRadius;
+        // private float falloffMultiplier;
+        // private float falloffRadius;
         private AudioSource source;
 
         static PolusSoundSource() {
@@ -28,8 +28,8 @@ namespace PolusGG.Behaviours.Inner {
 
             if (PlayerControl.LocalPlayer) {
                 source.rolloffMode = AudioRolloffMode.Linear;
-                source.rolloffFactor = falloffMultiplier;
-                source.maxDistance = falloffRadius;
+                // source.rolloffFactor = falloffMultiplier;
+                // source.maxDistance = falloffRadius;
             }
         }
 

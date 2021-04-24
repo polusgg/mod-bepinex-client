@@ -9,6 +9,9 @@ using UnityEngine;
 namespace PolusGG.Behaviours {
     public class PlayerAnimPlayer : MonoBehaviour {
         public PlayerControl Player;
+        private static readonly int BackColor = Shader.PropertyToID("_BackColor");
+        private static readonly int BodyColor = Shader.PropertyToID("_BodyColor");
+        private static readonly int VisorColor = Shader.PropertyToID("_VisorColor");
 
         static PlayerAnimPlayer() {
             ClassInjector.RegisterTypeInIl2Cpp<PlayerAnimPlayer>();
@@ -40,7 +43,8 @@ namespace PolusGG.Behaviours {
                         reader.ReadByte()),
                     message.ReadVector2(),
                     message.ReadVector2(),
-                    message.ReadSingle()
+                    message.ReadSingle(),
+                    Player
                 ));
             }
 
@@ -87,84 +91,99 @@ namespace PolusGG.Behaviours {
         }
 
         private PlayerKeyframe SerializeCurrentState() {
-            throw new NotImplementedException();
+            return new(
+                0,
+                0,
+                Player.myRend.color.a,
+                Player.myRend.color.a,
+                Player.myRend.color.a,
+                Player.myRend.color.a,
+                Player.myRend.material.GetColor(BackColor),
+                Player.myRend.material.GetColor(BodyColor),
+                Player.myRend.material.GetColor(VisorColor),
+                Player.transform.localScale,
+                Player.transform.position,
+                Player.transform.rotation.eulerAngles.y,
+                Player
+            );
         }
 
         public class PlayerKeyframe {
-            private readonly float angle;
+            private readonly float _angle;
             public uint Duration;
-            private readonly float hatOpacity;
-            private readonly Color32 mainColor;
+            private readonly float _hatOpacity;
+            private readonly Color32 _mainColor;
             public uint Offset;
-            private readonly float petOpacity;
-            private PlayerControl playerControl;
+            private readonly float _petOpacity;
+            private readonly PlayerControl _playerControl;
 
-            private readonly float playerOpacity;
-            private readonly Vector2 position;
-            private readonly Vector2 scale;
-            private readonly Color32 shadowColor;
-            private readonly float skinOpacity;
-            private readonly Color32 visorColor;
+            private readonly float _playerOpacity;
+            private readonly Vector2 _position;
+            private readonly Vector2 _scale;
+            private readonly Color32 _shadowColor;
+            private readonly float _skinOpacity;
+            private readonly Color32 _visorColor;
 
             public PlayerKeyframe(uint offset, uint duration, float playerOpacity, float hatOpacity, float petOpacity,
                 float skinOpacity, Color32 mainColor, Color32 shadowColor, Color32 visorColor, Vector2 scale,
-                Vector2 position, float angle) {
+                Vector2 position, float angle, PlayerControl playerControl) {
                 Offset = offset;
                 Duration = duration;
-                this.playerOpacity = playerOpacity;
-                this.hatOpacity = hatOpacity;
-                this.petOpacity = petOpacity;
-                this.skinOpacity = skinOpacity;
-                this.mainColor = mainColor;
-                this.shadowColor = shadowColor;
-                this.visorColor = visorColor;
-                this.scale = scale;
-                this.position = position;
-                this.angle = angle;
+                _playerOpacity = playerOpacity;
+                _hatOpacity = hatOpacity;
+                _petOpacity = petOpacity;
+                _skinOpacity = skinOpacity;
+                _mainColor = mainColor;
+                _shadowColor = shadowColor;
+                _visorColor = visorColor;
+                _scale = scale;
+                _position = position;
+                _angle = angle;
+                _playerControl = playerControl;
             }
 
             public float PlayerOpacity {
-                get => playerOpacity;
-                set => playerControl.myRend.color = new Color(1f, 1f, 1f, value);
+                get => _playerOpacity;
+                set => _playerControl.myRend.color = new Color(1f, 1f, 1f, value);
             }
 
             public float HatOpacity {
-                get => hatOpacity;
-                set => playerControl.HatRenderer.color = new Color(1f, 1f, 1f, value);
+                get => _hatOpacity;
+                set => _playerControl.HatRenderer.color = new Color(1f, 1f, 1f, value);
             }
 
             public float PetOpacity {
-                get => petOpacity;
-                set => playerControl.CurrentPet.rend.color = new Color(1f, 1f, 1f, value);
+                get => _petOpacity;
+                set => _playerControl.CurrentPet.rend.color = new Color(1f, 1f, 1f, value);
             }
 
             public float SkinOpacity {
-                get => skinOpacity;
-                set => playerControl.MyPhysics.Skin.layer.color = new Color(1f, 1f, 1f, value);
+                get => _skinOpacity;
+                set => _playerControl.MyPhysics.Skin.layer.color = new Color(1f, 1f, 1f, value);
             }
 
-            public Color MainColor => mainColor;
-            public Color ShadowColor => shadowColor;
-            public Color VisorColor => visorColor;
+            public Color MainColor => _mainColor;
+            public Color ShadowColor => _shadowColor;
+            public Color VisorColor => _visorColor;
 
             public Vector2 Scale {
-                get => scale;
+                get => _scale;
                 set {
-                    Transform transform1 = playerControl.transform;
+                    Transform transform1 = _playerControl.transform;
                     Vector3 ea = value;
                     transform1.eulerAngles = ea;
                 }
             }
 
             public Vector2 Position {
-                get => position;
-                set => playerControl.transform.localPosition = value;
+                get => _position;
+                set => _playerControl.transform.localPosition = value;
             }
 
             public float Angle {
-                get => angle;
+                get => _angle;
                 set {
-                    Transform transform1 = playerControl.transform;
+                    Transform transform1 = _playerControl.transform;
                     Vector3 ea = transform1.eulerAngles;
                     ea.y = value;
                     transform1.eulerAngles = ea;
@@ -172,9 +191,9 @@ namespace PolusGG.Behaviours {
             }
 
             public void SetPlayerColors(Color playerColor, Color shadowColor, Color visorColor) {
-                playerControl.myRend.material.SetColor("_BackColor", playerColor);
-                playerControl.myRend.material.SetColor("_BodyColor", shadowColor);
-                playerControl.myRend.material.SetColor("_VisorColor", visorColor);
+                _playerControl.myRend.material.SetColor("_BackColor", playerColor);
+                _playerControl.myRend.material.SetColor("_BodyColor", shadowColor);
+                _playerControl.myRend.material.SetColor("_VisorColor", visorColor);
             }
         }
     }

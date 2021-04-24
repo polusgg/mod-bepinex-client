@@ -9,6 +9,7 @@ using HarmonyLib;
 using PolusGG.Extensions;
 using PolusGG.Net;
 using PolusGG.Patches.Permanent;
+using PolusGG.Utils;
 using TMPro;
 using UnityEngine;
 using Debug = System.Diagnostics.Debug;
@@ -44,9 +45,6 @@ namespace PolusGG {
 
         public override void Load() {
             Logger = Log;
-            if (File.Exists(PggConstants.CacheLocation)) {
-                Stream file = null;
-            }
 
             try {
                 PermanentMod.LoadPatches("gg.polus.permanent",
@@ -65,7 +63,8 @@ namespace PolusGG {
             // font = Bundle.LoadAsset("Assets/Fonts/AmongUsButton2-Regular SDF.asset").Cast<TMP_FontAsset>();
             font = Bundle.LoadAsset("Assets/Fonts/ComicSansMs3 SDF.asset").Cast<TMP_FontAsset>();
             // font = Bundle.LoadAsset("Assets/Fonts/Inter-SemiBold SDF.asset").Cast<TMP_FontAsset>();
-            FontMwenuwuPatches.Load();
+            // FontMwenuwuPatches.Load();
+            CatchHelper.TryCatch(CreditsMainMenuPatches.Load);
             ModManager.PostLoad = true;
         }
 

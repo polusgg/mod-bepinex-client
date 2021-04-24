@@ -3,8 +3,10 @@ using HarmonyLib;
 using Hazel;
 using Il2CppSystem.Collections.Generic;
 using InnerNet;
+using PolusGG.Extensions;
 using PolusGG.Mods;
 using PolusGG.Net;
+using PolusGG.Utils;
 using UnityEngine;
 
 namespace PolusGG.Patches.Temporary {
@@ -36,7 +38,7 @@ namespace PolusGG.Patches.Temporary {
                 if (reader.Tag >= 0x80) {
                     foreach ((_, Mod mod) in PogusPlugin.ModManager.TemporaryMods) {
                         PogusPlugin.Logger.LogInfo($"Handling packet {reader.Tag:X2} for {mod.Name}");
-                        mod.RootPacketReceived(reader);
+                        CatchHelper.TryCatch(() => mod.RootPacketReceived(reader), true);
                     }
 
                     return false;
@@ -51,18 +53,17 @@ namespace PolusGG.Patches.Temporary {
         public class GameDataTempClass {
             [HarmonyPrefix]
             public static bool HandleGameDataInner(InnerNetClient._HandleGameDataInner_d__42 __instance) {
+                if (__instance.__state != 0) return true;
                 PlayerControl.LocalPlayer.SetThickAssAndBigDumpy(true, true);
-                if (__instance.__state == 0) { }
 
                 InnerNetClient instance = __instance.__this;
                 MessageReader reader = __instance.reader;
                 int msgCnt = __instance.msgNum;
                 int pos = reader.Position;
 
-                switch (reader.Tag) {
+                switch (reader.Tag.Log(comment: "HandleGameDataInner")) {
                     case 1: {
                         uint netId = reader.ReadPackedUInt32();
-                        //todo transfer all object management code to iobjectmanager
                         if (PogusPlugin.ObjectManager.HasObject(netId, out PolusNetObject polusNetObject)) {
                             // polusNetObject.NetId.Log(1, "for dataPOg");
                             polusNetObject.Data(reader);
@@ -71,7 +72,7 @@ namespace PolusGG.Patches.Temporary {
 
                         if (!instance.allObjectsFast.ContainsKey(netId) && !instance.DestroyedObjects.Contains(netId) &&
                             !PogusPlugin.ObjectManager
-                                .IsDestroyed(netId)) // DeferMessage(cnt, reader, "Stored data for " + netId);
+                                .IsDestroyed(netId))
                             return false;
 
                         reader.Position = pos;
@@ -105,11 +106,13 @@ namespace PolusGG.Patches.Temporary {
                     case 4: {
                         uint num3 = reader.ReadPackedUInt32();
 
-                        // num3.Log(6, "SpNwan iDdd");
+                        num3.Log(3, "spawn id");
                         if (num3 >= 0x80) {
-                            PogusPlugin.ObjectManager.HandleSpawn(num3, reader);
+                            CatchHelper.TryCatch(() => PogusPlugin.ObjectManager.HandleSpawn(num3, reader));
                             return false;
                         }
+
+                        reader.ReadPackedInt32().Log(3, "owner id?");
 
                         reader.Position = pos;
                         return true;

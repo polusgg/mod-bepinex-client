@@ -52,16 +52,17 @@ namespace PolusGG.Behaviours.Inner {
             _aspectPosition.Alignment = (AspectPosition.EdgeAlignments) reader.ReadByte();
 
             Vector3 pos = reader.ReadVector2();
+            float z = reader.ReadSingle();
             if (_aspectPosition.Alignment != 0) {
                 transform.parent = HudManager.Instance.gameObject.transform;
                 _aspectPosition.enabled = true;
-                _aspectPosition.DistanceFromEdge = new Vector3(0, 0, -9) - pos;
+                _aspectPosition.DistanceFromEdge = new Vector3(0, 0, z) - pos;
                 _aspectPosition.AdjustPosition();
             } else {
                 _aspectPosition.enabled = false;
                 int parent = reader.ReadPackedInt32();
                 transform.parent = parent < 0 ? null : PogusPlugin.ObjectManager.GetNetObject((uint) parent);
-                _target = pos;
+                transform.position = new Vector3(pos.x, pos.y, z);
             }
         }
     }

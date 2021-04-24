@@ -26,6 +26,7 @@ namespace PolusGG {
         private ICache Cache;
         private bool loaded;
         private bool optionsDirty;
+        public static PolusMod Instance;
 
         public override string Name => "PolusMod";
 
@@ -35,6 +36,7 @@ namespace PolusGG {
         }
 
         public override void Start(IObjectManager objectManager, ICache cache) {
+            Instance = this;
             // DiscordManager.Instance.OnDestroy();
             // new GameObject("PolusDiscordManager").DontDestroy().AddComponent<PolusDiscordManager>();
             if (loaded) return;
@@ -141,13 +143,10 @@ namespace PolusGG {
                     break;
                 }
                 case PolusRpcCalls.BeginAnimationPlayer:
-                    playerControl = netObject.Cast<PlayerControl>();
-                    PlayerAnimPlayer anim = playerControl.gameObject.EnsureComponent<PlayerAnimPlayer>();
-                    anim.HandleMessage(reader);
+                    netObject.gameObject.EnsureComponent<PlayerAnimPlayer>().HandleMessage(reader);
                     break;
-                default: {
+                default:
                     throw new ArgumentOutOfRangeException();
-                }
             }
         }
 
@@ -280,51 +279,22 @@ namespace PolusGG {
                     break;
                 }
                 case PolusRootPackets.SetGameOption: {
-                    // return;
-                    string cat = reader.ReadString();
-                    string name = reader.ReadString();
-                    OptionType optionType = (OptionType) reader.ReadByte();
-
-                    optionsDirty = true;
-
-                    if (!GameOptionsPatches.Categories.ContainsKey(cat))
-                        GameOptionsPatches.Categories.Add(cat, new List<GameOption>());
-                    List<GameOption> category = GameOptionsPatches.Categories[cat];
-                    
-                    if (category.Any(x => x.Title == name)) {
-                        category.Find(x => x.Title == name).Value = optionType switch {
-                            OptionType.Boolean => new BooleanValue(reader.ReadBoolean()),
-                            OptionType.Number => new FloatValue(reader.ReadSingle(), reader.ReadSingle(),
-                                reader.ReadSingle(), reader.ReadSingle(), reader.ReadBoolean(), reader.ReadString()),
-                            OptionType.Enum => EnumValue.ConstructEnumValue(reader),
-                            _ => throw new ArgumentOutOfRangeException()
-                        };
-                    } else {
-                        GameOption option = new GameOption {
-                            Title = name,
-                            Type = optionType,
-                            Value = optionType switch {
-                                OptionType.Boolean => new BooleanValue(reader.ReadBoolean()),
-                                OptionType.Number => new FloatValue(reader.ReadSingle(), reader.ReadSingle(),
-                                    reader.ReadSingle(), reader.ReadSingle(), reader.ReadBoolean(),
-                                    reader.ReadString()),
-                                OptionType.Enum => EnumValue.ConstructEnumValue(reader),
-                                _ => throw new ArgumentOutOfRangeException()
-                            }
-                        };
-                        GameOptionsPatches.OptionMap[name] = option;
-                        category.Add(option);
-                    }
+                    ushort sequenceId = reader.ReadUInt16();
+                    GameOptionsPatches.OnEnablePatch.ReceivedGameOptionPacket(new GameOptionsPatches.GameOptionPacket {
+                        Type = OptionPacketType.SetOption,
+                        Reader = reader,
+                        SequenceId = sequenceId
+                    });
 
                     break;
                 }
                 case PolusRootPackets.DeleteGameOption: {
-                    optionsDirty = true;
-                    string name = reader.ReadString();
-                    List<GameOption> category = GameOptionsPatches.Categories.First(x => x.Value.Any(x => x.Title == name)).Value;
-                    category.RemoveAll(x => x.Title == name);
-                    GameOptionsPatches.OptionMap.Remove(name);
-                    if (category.Count == 0) GameOptionsPatches.Categories.Remove(GameOptionsPatches.Categories.First(y => y.Value == category).Key);
+                    ushort sequenceId = reader.ReadUInt16();
+                    GameOptionsPatches.OnEnablePatch.ReceivedGameOptionPacket(new GameOptionsPatches.GameOptionPacket {
+                        Type = OptionPacketType.DeleteOption,
+                        Reader = reader,
+                        SequenceId = sequenceId
+                    });
                     break;
                 }
                 case PolusRootPackets.LoadHat: {
@@ -337,6 +307,10 @@ namespace PolusGG {
                     break;
                 }
             }
+        }
+
+        public void DirtyOptions() {
+            optionsDirty = true;
         }
 
         public override void FixedUpdate() {
@@ -357,6 +331,7 @@ namespace PolusGG {
         public override void LobbyLeft() {
             PingTrackerTextPatch.PingText = null;
             RoomTrackerTextPatch.RoomText = null;
+            GameOptionsPatches.OnEnablePatch.Reset();
         }
 
         private MessageWriter StartSendResourceResponse(uint resource, ResponseType type) {

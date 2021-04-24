@@ -23,13 +23,13 @@ namespace PolusGG.Patches.Permanent {
             //     new ServerInfo(PggConstants.Region.Name, PggConstants.Region.PingServer, PggConstants.Region.Port)
             // };
             ServerManager.DefaultRegions =
-                ServerManager.DefaultRegions.Prepend(PggConstants.Region).ToArray();
-            __instance.CurrentRegion = PggConstants.Region.Duplicate();
+            ServerManager.DefaultRegions.Prepend(PggConstants.Region).ToArray();
+            __instance.SetRegion(PggConstants.Region.Duplicate());
             // __instance.CurrentServer = (from s in __instance.AvailableServers
             // orderby s.ConnectionFailures, s.Players
             // select s).First();
             // Debug.Log(string.Format("Selected server: {0}", __instance.CurrentServer));
-            __instance.state = (ServerManager.UpdateState) 2;
+            // __instance.state = (ServerManager.UpdateState) 2;
             // __instance.SaveServers();
             // IRegionInfo currentRegion = PggConstants.Region.Duplicate();
             // ServerManager.DefaultRegions = ServerManager.DefaultRegions.Append(currentRegion).ToArray();
@@ -37,7 +37,11 @@ namespace PolusGG.Patches.Permanent {
             // __instance.CurrentServer = currentRegion.Servers[0];
             // Debug.Log(string.Format("Selected server: {0}", __instance.CurrentServer));
             // __instance.Field_6 = ServerManager.UpdateState.Success;
-            return true;
+            if (!PogusPlugin.ModManager.AllPatched) {
+                PogusPlugin.ModManager.LoadMods();
+                PogusPlugin.ModManager.PatchMods();
+            }
+            return false;
         }
     }
 
@@ -47,9 +51,7 @@ namespace PolusGG.Patches.Permanent {
         [HarmonyPrefix]
         public static void Postfix(AnnouncementPopUp._Init_d__12 __instance) {
             // if (ServerManager.Instance.OnlineNetAddress.Equals(PggConstants.Region.PingServer) &&
-                // !PogusPlugin.ModManager.AllPatched) {
-                // PogusPlugin.ModManager.LoadMods();
-                // PogusPlugin.ModManager.PatchMods();
+            // !PogusPlugin.ModManager.AllPatched) {
             // }
         }
     }

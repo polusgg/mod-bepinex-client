@@ -40,7 +40,7 @@ namespace PolusGG.Behaviours {
 
             try {
                 presence.RunCallbacks();
-            } catch (Il2CppException e) {
+            } catch (Il2CppException) {
                 presence.Dispose();
                 presence = null;
             }

@@ -16,7 +16,7 @@ namespace PolusGG.Behaviours {
 
         static MaintenanceBehaviour() {
             ClassInjector.RegisterTypeInIl2Cpp<MaintenanceBehaviour>();
-            disguisedToast = PogusPlugin.Bundle.LoadAsset("Assets/Mods/LoginMenu/Toast.prefab").Cast<GameObject>()
+            disguisedToast = PogusPlugin.Bundle.LoadAsset("Assets/Mods/Generic UI/Toast.prefab").Cast<GameObject>()
                 .DontDestroy();
             disguisedToast.SetActive(false);
             disguisedToast.layer = LayerMask.NameToLayer("UI");
