@@ -32,23 +32,23 @@ namespace PolusGG.Behaviours.Inner {
         }
 
         private void HandleRpc(MessageReader reader, byte callid) {
-            if (callid == (int) PolusRpcCalls.BeginAnimationCamera) {
-                List<CameraKeyframe> keyframe = new();
-                while (reader.Position < reader.Length - 1) {
-                    MessageReader message = reader.ReadMessage();
-                    new CameraKeyframe(
-                        message.ReadPackedUInt32(),
-                        message.ReadPackedUInt32(),
-                        message.ReadVector2(),
-                        message.ReadSingle(),
-                        new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte()),
-                        follower,
-                        camera
-                    );
-                }
-
-                this.StartCoroutine(CoPlayAnimation(keyframe.ToArray(), reader.ReadBoolean()));
+            callid.Log(20, "camera fucking camera");
+            if (callid != (int) PolusRpcCalls.BeginAnimationCamera) return;
+            List<CameraKeyframe> keyframe = new();
+            while (reader.Position < reader.Length - 1) {
+                MessageReader message = reader.ReadMessage();
+                keyframe.Add(new CameraKeyframe(
+                    message.ReadPackedUInt32(),
+                    message.ReadPackedUInt32(),
+                    message.ReadVector2(),
+                    message.ReadSingle(),
+                    new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte()),
+                    follower,
+                    camera
+                ));
             }
+
+            this.StartCoroutine(CoPlayAnimation(keyframe.ToArray(), reader.ReadBoolean()));
         }
 
         private CameraKeyframe SerializeCurrentState() {

@@ -35,14 +35,8 @@ namespace PolusGG {
                 return;
             }
 
-            /*int num4 = */
+            //owner id
             reader.ReadPackedInt32();
-            // todo is that readpackedint32 the owner id and does it matter at all
-            // ClientData clientData = PolusNetClient.FindClientById(num4);
-            // if (num4 > 0 && clientData == null) {
-            // 	AmongUsClient.Instance.DeferMessage(cnt, reader, "Delay spawn for unowned " + netId);
-            // 	return;
-
 
             PnoBehaviour pnoBehaviour =
                 Object.Instantiate(_spawnObjects[spawnType]);

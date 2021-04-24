@@ -94,7 +94,8 @@ namespace PolusGG.Patches.Temporary {
                                 option.name = gameOption.Title;
                                 option.CheckMark.enabled = value.Value;
                                 option.TitleText.text = gameOption.Title;
-                                if (!AmongUsClient.Instance.AmHost) option.SetAsPlayer();
+                                if (!AmongUsClient.Instance.AmHost)
+                                    option.GetComponent<PassiveButton>().enabled = false;
                                 options.Add(option.transform);
                                 break;
                             }
@@ -337,6 +338,22 @@ namespace PolusGG.Patches.Temporary {
 
         [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.RpcSyncSettings))]
         public class ScrewYouRpcSyncSettings {
+            [HarmonyPrefix]
+            public static bool RpcSyncSettings() {
+                return false;
+            }
+        }
+
+        [HarmonyPatch(typeof(GameOptionsMenu), nameof(GameOptionsMenu.Start))]
+        public class GetOutOfMyWay {
+            [HarmonyPrefix]
+            public static bool RpcSyncSettings() {
+                return false;
+            }
+        }
+
+        [HarmonyPatch(typeof(GameOptionsMenu), nameof(GameOptionsMenu.RefreshChildren))]
+        public class GetOutOfMyHead {
             [HarmonyPrefix]
             public static bool RpcSyncSettings() {
                 return false;

@@ -357,8 +357,8 @@ namespace PolusGG {
 
     public class RoleData {
         public Color IntroColor = Color.magenta;
-        public string IntroDesc = "you failed to set this on time";
-        public string IntroName = "Poobscoob";
+        public string IntroDesc = "Something went horribly wrong\nwhile displaying this intro!";
+        public string IntroName = "uh oh";
         public List<byte> IntroPlayers = new();
         public Color OutroColor = Color.green;
         public string OutroDesc = "Failed to set ending correctly!";
