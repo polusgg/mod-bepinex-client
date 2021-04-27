@@ -23,9 +23,9 @@ namespace PolusGG.Patches.Permanent {
             transitionOpen.OnClose = new Button.ButtonClickedEvent();
             transitionOpen.OnClose.AddListener(new Action(() => _creditsMenu.gameObject.SetActive(false)));
 
-            _crunchuSprite = PogusPlugin.Bundle
+            _crunchuSprite = Object.Instantiate(PogusPlugin.Bundle
                 .LoadAsset("Assets/Mods/CreditsMenu/crunchu.png")
-                .Cast<Sprite>()
+                .Cast<Sprite>())
                 .DontDestroy();
         }
 
@@ -45,10 +45,10 @@ namespace PolusGG.Patches.Permanent {
 
             private void SceneLoaded(Scene scene, LoadSceneMode _) {
                 if (scene.name != "MainMenu") return;
-                GameObject gameObject = new GameObject("PolusCreditsButton");
-                gameObject.AddComponent<SpriteRenderer>().sprite = _crunchuSprite;
-                gameObject.AddComponent<CircleCollider2D>().radius = 0.5f;
-                PassiveButton button = UIMethods.CreateButton(gameObject, () => { this.gameObject.SetActive(true); });
+                GameObject main = new("PolusCreditsButton");
+                main.AddComponent<SpriteRenderer>().sprite = _crunchuSprite;
+                main.AddComponent<CircleCollider2D>().radius = 0.5f;
+                PassiveButton button = UIMethods.CreateButton(main, () => { this.gameObject.SetActive(true); });
                 DotAligner da = FindObjectOfType<DotAligner>();
                 button.transform.parent = da.transform;
                 DownloadJesters();

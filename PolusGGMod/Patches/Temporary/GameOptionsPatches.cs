@@ -271,7 +271,7 @@ namespace PolusGG.Patches.Temporary {
                         case OptionPacketType.DeleteOption: {
                             string name = reader.ReadString();
                             (string categoryName, List<GameOption> category) =
-                                Categories.First(x => x.Value.Any(x => x.Title == name));
+                                Categories.Concat(new []{ new KeyValuePair<string, List<GameOption>>("", NoCategory) }).First(x => x.Value.Any(x => x.Title == name));
                             category.RemoveAll(x => x.Title == name);
                             OptionMap.Remove(name);
                             if (category.Count == 0 && categoryName != "")

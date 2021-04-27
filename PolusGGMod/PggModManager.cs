@@ -17,8 +17,9 @@ namespace PolusGG {
         public bool AllPatched;
         public ManualLogSource Logger;
         public bool PostLoad;
-        public HashSet<(PggMod, Mod)> TemporaryMods = new();
-        private bool wasOnline;
+        public readonly HashSet<(PggMod, Mod)> TemporaryMods = new();
+        private bool _wasOnline;
+        private string _previousSceneName;
 
         public PggModManager(ManualLogSource logger) {
             Logger = logger;
@@ -34,15 +35,21 @@ namespace PolusGG {
                 }
 
                 if (!AllPatched) return;
-                if (scene.name != "OnlineGame") PogusPlugin.ObjectManager.EndedGame();
-                if (OnlineScenes.Contains(scene.name) != wasOnline) {
+                if (scene.name != "OnlineGame") new PggObjectManager().EndedGame();
+                if (OnlineScenes.Contains(scene.name) != _wasOnline) {
                     Logger.LogInfo(scene.name);
-                    wasOnline = OnlineScenes.Contains(scene.name);
+                    _wasOnline = OnlineScenes.Contains(scene.name);
                     foreach ((_, Mod mod) in TemporaryMods)
-                        if (wasOnline) mod.LobbyJoined();
+                        if (_wasOnline) mod.LobbyJoined();
                         else
                             mod.LobbyLeft();
                 }
+                
+                if (_previousSceneName == "OnlineGame" && scene.name == "EndGame") 
+                    foreach ((_, Mod mod) in TemporaryMods)
+                        mod.GameEnded();
+
+                _previousSceneName = scene.name;
             }));
         }
 
@@ -77,7 +84,7 @@ namespace PolusGG {
             Logger.LogInfo(TemporaryMods.Count);
             foreach ((PggMod pggMod, Mod mod) in TemporaryMods) {
                 mod.Logger = Logger;
-                mod.Start(PogusPlugin.ObjectManager, PogusPlugin.Cache);
+                mod.Start();
                 pggMod.Patch();
             }
 
@@ -88,7 +95,7 @@ namespace PolusGG {
         public void StartMods() {
             foreach ((_, Mod mod) in TemporaryMods)
                 if (PostLoad)
-                    mod.Start(PogusPlugin.ObjectManager, PogusPlugin.Cache);
+                    mod.Start();
         }
 
         public void UnpatchMods() {
@@ -97,7 +104,7 @@ namespace PolusGG {
                 mod.Stop();
             }
 
-            ((PggObjectManager) PogusPlugin.ObjectManager).UnregisterAll();
+            ((PggObjectManager) new PggObjectManager()).UnregisterAll();
 
             AllPatched = false;
         }
@@ -110,6 +117,10 @@ namespace PolusGG {
             }
 
             public EventHandlerBehaviour(IntPtr ptr) : base(ptr) { }
+
+            private void Update() {
+                foreach ((PggMod _, Mod mod) in ModManager.TemporaryMods) mod.Update();
+            }
 
             private void FixedUpdate() {
                 foreach ((PggMod _, Mod mod) in ModManager.TemporaryMods) mod.FixedUpdate();

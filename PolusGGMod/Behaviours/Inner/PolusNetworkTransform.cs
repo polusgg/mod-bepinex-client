@@ -21,7 +21,7 @@ namespace PolusGG.Behaviours.Inner {
         public PolusNetworkTransform(IntPtr ptr) : base(ptr) { }
 
         public void Start() {
-            pno = PogusPlugin.ObjectManager.LocateNetObject(this);
+            pno = new PggObjectManager().LocateNetObject(this);
             pno.OnRpc = HandleRpc;
             pno.OnData = Deserialize;
             _aspectPosition = gameObject.AddComponent<AspectPosition>();
@@ -61,7 +61,7 @@ namespace PolusGG.Behaviours.Inner {
             } else {
                 _aspectPosition.enabled = false;
                 int parent = reader.ReadPackedInt32();
-                transform.parent = parent < 0 ? null : PogusPlugin.ObjectManager.GetNetObject((uint) parent);
+                transform.parent = parent < 0 ? null : new PggObjectManager().GetNetObject((uint) parent);
                 transform.position = new Vector3(pos.x, pos.y, z);
             }
         }

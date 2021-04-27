@@ -35,13 +35,15 @@ namespace PolusGG {
             set => _loggee = value;
         }
 
-        public override void Start(IObjectManager objectManager, ICache cache) {
+        public override void Start() {
             Instance = this;
             // DiscordManager.Instance.OnDestroy();
             // new GameObject("PolusDiscordManager").DontDestroy().AddComponent<PolusDiscordManager>();
             if (loaded) return;
 
             loaded = true;
+
+            PggObjectManager objectManager = (PggObjectManager) new PggObjectManager();
 
             objectManager.InnerRpcReceived += OnInnerRpcReceived;
             objectManager.Register(0x80, RegisterPnos.CreateImage());
@@ -54,7 +56,7 @@ namespace PolusGG {
             // objectManager.Register(0x89, RegisterPnos.CreatePrefabHandle());
 
             ResolutionManagerPlus.Resolution();
-            Cache = cache;
+            Cache = PogusPlugin.Cache;
         }
 
         public override void Stop() {
@@ -314,6 +316,10 @@ namespace PolusGG {
         }
 
         public override void FixedUpdate() {
+            
+        }
+
+        public override void Update() {
             if (optionsDirty) {
                 GameSettingMenu menu = Object.FindObjectOfType<GameSettingMenu>();
                 if (menu) menu.OnEnable();
@@ -332,6 +338,18 @@ namespace PolusGG {
             PingTrackerTextPatch.PingText = null;
             RoomTrackerTextPatch.RoomText = null;
             GameOptionsPatches.OnEnablePatch.Reset();
+        }
+
+        public override void PlayerSpawned(PlayerControl player) {
+            
+        }
+
+        public override void PlayerDestroyed(PlayerControl player) {
+            
+        }
+
+        public override void GameEnded() {
+            
         }
 
         private MessageWriter StartSendResourceResponse(uint resource, ResponseType type) {

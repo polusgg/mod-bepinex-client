@@ -13,7 +13,7 @@ namespace PolusGG.Behaviours.Inner {
         public PolusConsole(IntPtr ptr) : base(ptr) { }
 
         private void Start() {
-            pno = PogusPlugin.ObjectManager.LocateNetObject(this);
+            pno = new PggObjectManager().LocateNetObject(this);
             pno.OnData = Deserialize;
         }
 

@@ -30,7 +30,7 @@ namespace PolusGG.Behaviours.Inner {
         public PolusClickBehaviour(IntPtr ptr) : base(ptr) { }
 
         private void Start() {
-            pno = PogusPlugin.ObjectManager.LocateNetObject(this);
+            pno = new PggObjectManager().LocateNetObject(this);
             pno.OnData = Deserialize;
             button = GetComponent<PassiveButton>();
             button.OnClick = new Button.ButtonClickedEvent();

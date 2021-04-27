@@ -25,7 +25,6 @@ namespace PolusGG {
         public static PggCache Cache = new();
 
         private static AssetBundle _bundle;
-        public static IObjectManager ObjectManager;
 
         public static TMP_FontAsset font;
 
@@ -51,7 +50,6 @@ namespace PolusGG {
                     Assembly.GetExecutingAssembly().GetTypes()
                         .Where(x => x.GetCustomAttribute(typeof(HarmonyPatch)) != null).ToArray());
                 PermanentMod.Patch();
-                ObjectManager = new PggObjectManager();
                 ModManager = new PggModManager(Log);
                 ModManager.LoadMods();
             } catch (Exception e) {

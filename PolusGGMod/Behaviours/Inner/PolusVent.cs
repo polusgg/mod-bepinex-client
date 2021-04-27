@@ -15,7 +15,7 @@ namespace PolusGG.Behaviours.Inner {
 
         private void Start() {
             vent = GetComponent<Vent>();
-            pno = PogusPlugin.ObjectManager.LocateNetObject(this);
+            pno = new PggObjectManager().LocateNetObject(this);
             pno.OnData = Deserialize;
         }
 

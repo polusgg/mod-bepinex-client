@@ -22,7 +22,7 @@ namespace PolusGG.Behaviours.Inner {
         private void Start() {
             follower = HudManager.Instance.PlayerCam;
             camera = follower.GetComponent<Camera>();
-            pno = PogusPlugin.ObjectManager.LocateNetObject(this);
+            pno = new PggObjectManager().LocateNetObject(this);
             pno.OnData = Deserialize;
             pno.OnRpc = HandleRpc;
         }
