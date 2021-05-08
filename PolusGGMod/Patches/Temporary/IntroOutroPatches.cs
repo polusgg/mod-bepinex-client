@@ -2,6 +2,8 @@
 using System.Linq;
 using HarmonyLib;
 using Il2CppSystem.Collections.Generic;
+using PolusGG.Extensions;
+using TMPro;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -44,18 +46,22 @@ namespace PolusGG.Patches.Temporary {
     }
 
     public class OutroPatches {
-        private static TextRenderer _winDescText;
+        private static TextMeshPro _winDescText;
         private static Color _descColor = UnityEngine.Color.white;
         private static readonly int Color = Shader.PropertyToID("_Color");
 
         [HarmonyPatch(typeof(EndGameManager), nameof(EndGameManager.SetEverythingUp))]
         public class SetYoMamaUp {
             [HarmonyPrefix]
-            public static void Prefix() {
-                if (TempData.EndReason != (GameOverReason) 7) return;
+            public static bool Prefix() {
+                if (TempData.EndReason != (GameOverReason) 7) return true;
                 TempData.winners.Clear();
                 foreach (WinningPlayerData winningPlayerData in PolusMod.RoleData.OutroPlayers)
                     TempData.winners.Add(winningPlayerData);
+                TempData.winners.Count.Log(2, "player count for outro");
+                if (TempData.winners.Count != 0) return true;
+                StatsManager.Instance.GamesFinished++;
+                return false;
             }
 
             [HarmonyPostfix]
@@ -65,10 +71,11 @@ namespace PolusGG.Patches.Temporary {
                 __instance.WinText.text = PolusMod.RoleData.OutroName;
                 __instance.BackgroundBar.material.SetColor(Color, PolusMod.RoleData.OutroColor);
                 __instance.gameObject.AddComponent<SetYoMamaUpTheIncredibleQuadrilogy>();
-                _winDescText = Object.Instantiate(__instance.WinText.gameObject).GetComponent<TextRenderer>();
-                _winDescText.transform.position = new Vector3(0, 0.75f, -14f);
-                _winDescText.scale = 0.6f;
-                _winDescText.Text = PolusMod.RoleData.OutroDesc;
+                _winDescText = Object.Instantiate(__instance.WinText.gameObject).GetComponent<TextMeshPro>();
+                _winDescText.transform.position = new Vector3(0, 1.4f, -14f);
+                _winDescText.fontSizeMax = 4f;
+                _winDescText.fontSize = 4f;
+                _winDescText.text = PolusMod.RoleData.OutroDesc;
             }
         }
 
@@ -79,7 +86,7 @@ namespace PolusGG.Patches.Temporary {
                 if (TempData.EndReason != (GameOverReason) 7) return;
                 float num = Mathf.Min(1f, __instance._timer_5__5 / 3f);
                 _descColor.a = Mathf.Lerp(0f, PolusMod.RoleData.OutroColor.a, (num - 0.3f) * 3f);
-                _winDescText.Color = _descColor;
+                _winDescText.color = _descColor;
             }
         }
 

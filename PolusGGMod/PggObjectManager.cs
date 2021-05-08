@@ -15,7 +15,7 @@ namespace PolusGG {
         private Dictionary<uint, PnoBehaviour> _spawnObjects = new();
 
         public void Register(uint index, PnoBehaviour netObject) {
-            PogusPlugin.Logger.LogInfo($"Registered {netObject.GetType().Name} at index {index}");
+            PogusPlugin.Logger.LogInfo($"Registered {netObject.GetType().Name} at index {index} with {_spawnObjects.Count}");
             _spawnObjects[index] = netObject;
         }
 
@@ -30,6 +30,11 @@ namespace PolusGG {
         }
 
         public void HandleSpawn(uint spawnType, MessageReader reader) {
+            _spawnObjects.Count.Log(comment: "spawn object list");
+            foreach ((uint key, PnoBehaviour value) in _spawnObjects) {
+                key.Log();
+                value.name.Log();
+            }
             if (!_spawnObjects.ContainsKey(spawnType)) {
                 Debug.LogError("Couldn't find polus spawnable prefab: " + spawnType);
                 return;

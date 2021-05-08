@@ -22,6 +22,7 @@ namespace PolusGG {
 
         public static PggMod PermanentMod = new PermanentPggMod();
         public static PggModManager ModManager;
+        public static PggObjectManager ObjectManager;
         public static PggCache Cache = new();
 
         private static AssetBundle _bundle;
@@ -44,6 +45,7 @@ namespace PolusGG {
 
         public override void Load() {
             Logger = Log;
+            ObjectManager = new PggObjectManager();
 
             try {
                 PermanentMod.LoadPatches("gg.polus.permanent",

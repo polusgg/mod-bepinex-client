@@ -16,7 +16,7 @@ namespace PolusGG.Patches.Permanent {
 
     [HarmonyPatch(typeof(AuthManager._CoWaitForNonce_d__5), nameof(AuthManager._CoWaitForNonce_d__5.MoveNext))]
     public class DisableStupidNoncesPatch {
-        [PermanentPatch]
+        // [PermanentPatch]
         [HarmonyPrefix]
         private static bool StupidNonce(AuthManager._CoWaitForNonce_d__5 __instance, out bool __result) {
             __result = false;
@@ -26,7 +26,7 @@ namespace PolusGG.Patches.Permanent {
 
     [HarmonyPatch(typeof(AuthManager._CoConnect_d__4), nameof(AuthManager._CoConnect_d__4.MoveNext))]
     public class DisableStupidConnectsPatch {
-        [PermanentPatch]
+        // [PermanentPatch]
         [HarmonyPrefix]
         private static bool StupidConnects(out bool __result) {
             __result = false;
@@ -68,7 +68,7 @@ namespace PolusGG.Patches.Permanent {
 
     [HarmonyPatch(typeof(SaveManager), nameof(SaveManager.BirthDateYear), MethodType.Getter)]
     public static class SaveManagerGetBirthDateYearPatch {
-        [PermanentPatch]
+        // [PermanentPatch]
         [HarmonyPrefix]
         public static bool Prefix(out int __result) {
             __result = 1990;

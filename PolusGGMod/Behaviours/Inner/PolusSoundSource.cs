@@ -18,7 +18,7 @@ namespace PolusGG.Behaviours.Inner {
         public PolusSoundSource(IntPtr ptr) : base(ptr) { }
 
         private void Start() {
-            pno = new PggObjectManager().LocateNetObject(this);
+            pno = PogusPlugin.ObjectManager.LocateNetObject(this);
             pno.OnData = Deserialize;
             source = GetComponent<AudioSource>();
         }

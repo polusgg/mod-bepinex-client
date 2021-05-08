@@ -12,6 +12,7 @@ using PolusGG.Mods;
 using PolusGG.Net;
 using PolusGG.Patches.Temporary;
 using PolusGG.Resources;
+using TMPro;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -37,23 +38,18 @@ namespace PolusGG {
 
         public override void Start() {
             Instance = this;
-            // DiscordManager.Instance.OnDestroy();
-            // new GameObject("PolusDiscordManager").DontDestroy().AddComponent<PolusDiscordManager>();
             if (loaded) return;
 
             loaded = true;
 
-            PggObjectManager objectManager = (PggObjectManager) new PggObjectManager();
-
-            objectManager.InnerRpcReceived += OnInnerRpcReceived;
-            objectManager.Register(0x80, RegisterPnos.CreateImage());
-            objectManager.Register(0x81, RegisterPnos.CreateButton());
-            objectManager.Register(0x83, RegisterPnos.CreateDeadBodyPrefab());
-            objectManager.Register(0x85, RegisterPnos.CreateSoundSource());
-            objectManager.Register(0x87, RegisterPnos.CreatePoi());
-            objectManager.Register(0x88, RegisterPnos.CreateCameraController());
-            objectManager.Register(0x89, RegisterPnos.CreatePrefabHandle());
-            // objectManager.Register(0x89, RegisterPnos.CreatePrefabHandle());
+            PogusPlugin.ObjectManager.InnerRpcReceived += OnInnerRpcReceived;
+            PogusPlugin.ObjectManager.Register(0x80, RegisterPnos.CreateImage());
+            PogusPlugin.ObjectManager.Register(0x81, RegisterPnos.CreateButton());
+            PogusPlugin.ObjectManager.Register(0x83, RegisterPnos.CreateDeadBodyPrefab());
+            PogusPlugin.ObjectManager.Register(0x85, RegisterPnos.CreateSoundSource());
+            PogusPlugin.ObjectManager.Register(0x87, RegisterPnos.CreatePoi());
+            PogusPlugin.ObjectManager.Register(0x88, RegisterPnos.CreateCameraController());
+            PogusPlugin.ObjectManager.Register(0x89, RegisterPnos.CreatePrefabHandle());
 
             ResolutionManagerPlus.Resolution();
             Cache = PogusPlugin.Cache;
@@ -121,8 +117,8 @@ namespace PolusGG {
                 }
                 case PolusRpcCalls.SetOpacity: {
                     PlayerControl control = netObject.Cast<PlayerControl>();
-                    Color color = control.myRend.color;
-                    color = new Color(color.r, color.g, color.b, reader.ReadByte() / 255f);
+                    Color32 color = control.myRend.color;
+                    color.a = reader.ReadByte();
                     control.myRend.color = color;
                     control.HatRenderer.color = color;
                     control.MyPhysics.Skin.layer.color = color;
@@ -153,7 +149,7 @@ namespace PolusGG {
         }
 
         public override void RootPacketReceived(MessageReader reader) {
-            Logger.LogInfo($"LOL {reader.Tag}");
+            // Logger.LogInfo($"LOL {reader.Tag}");
             switch ((PolusRootPackets) reader.Tag) {
                 case PolusRootPackets.FetchResource: {
                     uint resource = reader.ReadPackedUInt32();
@@ -209,6 +205,9 @@ namespace PolusGG {
                     RoleData.OutroPlayers = Enumerable.Repeat(15, reader.Length - reader.Position - 2)
                         .Select(_ => new WinningPlayerData(GameData.Instance.GetPlayerById(reader.ReadByte())))
                         .ToList();
+                    if (RoleData.OutroPlayers.Count == 1) {
+                        RoleData.OutroPlayers[0].IsYou = true;
+                    }
                     RoleData.ShowQuit = reader.ReadBoolean();
                     RoleData.ShowPlayAgain = reader.ReadBoolean();
 
@@ -237,7 +236,7 @@ namespace PolusGG {
                             break;
                         }
                         case StringLocations.TaskCompletion: {
-                            HudManager.Instance.TaskCompleteOverlay.GetComponent<TextRenderer>().Text = text;
+                            HudManager.Instance.TaskCompleteOverlay.GetComponent<TextMeshPro>().text = text;
                             break;
                         }
                         case StringLocations.TaskText: {
@@ -284,7 +283,7 @@ namespace PolusGG {
                     ushort sequenceId = reader.ReadUInt16();
                     GameOptionsPatches.OnEnablePatch.ReceivedGameOptionPacket(new GameOptionsPatches.GameOptionPacket {
                         Type = OptionPacketType.SetOption,
-                        Reader = reader,
+                        Reader = reader.ReadBytes(reader.BytesRemaining),
                         SequenceId = sequenceId
                     });
 
@@ -294,7 +293,7 @@ namespace PolusGG {
                     ushort sequenceId = reader.ReadUInt16();
                     GameOptionsPatches.OnEnablePatch.ReceivedGameOptionPacket(new GameOptionsPatches.GameOptionPacket {
                         Type = OptionPacketType.DeleteOption,
-                        Reader = reader,
+                        Reader = reader.ReadBytes(reader.BytesRemaining),
                         SequenceId = sequenceId
                     });
                     break;

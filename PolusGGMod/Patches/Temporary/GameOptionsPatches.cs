@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using BepInEx.Logging;
 using HarmonyLib;
 using Hazel;
 using PolusGG.Enums;
@@ -17,7 +19,7 @@ namespace PolusGG.Patches.Temporary {
         public static Dictionary<string, List<GameOption>> Categories = new();
         public static List<GameOption> NoCategory = new();
         public static Dictionary<string, GameOption> OptionMap = new();
-        private static object lockable = new();
+        internal static object lockable = new();
 
         private static TextMeshPro groupTitle;
         private static KeyValueOption enumOption;
@@ -25,7 +27,6 @@ namespace PolusGG.Patches.Temporary {
         private static ToggleOption boolOption;
 
         public static void UpdateHudString() {
-            "L".Log(3);
             CatchHelper.TryCatch(
                 () => HudManager.Instance.GameSettings.text = PlayerControl.GameOptions.ToHudString(69));
         }
@@ -41,7 +42,7 @@ namespace PolusGG.Patches.Temporary {
                             .DontDestroy();
                         groupTitle.gameObject.active = false;
                         groupTitle.name = "CategoryTitlePrefab";
-                        groupTitle.transform.localPosition = new Vector3( -1.254f, 0);
+                        groupTitle.transform.localPosition = new Vector3(-1.254f, 0);
                     }
 
                     if (enumOption == null) {
@@ -49,15 +50,16 @@ namespace PolusGG.Patches.Temporary {
                             .GetComponent<KeyValueOption>().DontDestroy();
                         enumOption.gameObject.active = false;
                         enumOption.name = "EnumOptionPrefab";
-                        enumOption.transform.localPosition = new Vector3( 0, 0);
+                        enumOption.transform.localPosition = new Vector3(0, 0);
                     }
 
                     if (numbOption == null) {
                         numbOption = Object.Instantiate(__instance.AllItems[2].gameObject)
                             .GetComponent<NumberOption>().DontDestroy();
                         numbOption.gameObject.active = false;
-                        numbOption.name = "NumberOptionPrefab";//todo fix this semicolon and also x pos on game options :(
-                        numbOption.transform.localPosition = new Vector3( 0, 0);
+                        numbOption.name =
+                            "NumberOptionPrefab"; //todo fix this semicolon and also x pos on game options :(
+                        numbOption.transform.localPosition = new Vector3(0, 0);
                     }
 
                     if (boolOption == null) {
@@ -124,18 +126,18 @@ namespace PolusGG.Patches.Temporary {
                                 throw new ArgumentOutOfRangeException();
                         }
                     }
-                    
+
                     foreach (GameOption gameOption in NoCategory) {
                         GenerateGameOption(gameOption);
                     }
 
-                    foreach ((string categoryTitle, List<GameOption> gameOptions) in Categories) {
+                    foreach ((string name, List<GameOption> opts) in Categories.OrderBy(pair => pair.Value.Min(x => x.Priority)).ThenBy(x => x.Key)) {
                         TextMeshPro newTitle =
                             Object.Instantiate(groupTitle);
-                        newTitle.text = categoryTitle;
+                        newTitle.text = name;
                         options.Add(newTitle.transform);
 
-                        foreach (GameOption gameOption in gameOptions) {
+                        foreach (GameOption gameOption in opts.OrderBy(x => x.Priority).ThenBy(x => x.Title)) {
                             GenerateGameOption(gameOption);
                         }
                     }
@@ -151,7 +153,8 @@ namespace PolusGG.Patches.Temporary {
                     foreach (Transform transforms in __instance.AllItems) {
                         float lx = transforms.localPosition.x;
                         transforms.SetParent(scroller.Inner);
-                        transforms.localPosition = new Vector3(lx, __instance.YStart - index++ * __instance.YOffset, -1);
+                        transforms.localPosition =
+                            new Vector3(lx, __instance.YStart - index++ * __instance.YOffset, -1);
                         transforms.gameObject.SetActive(true);
                     }
 
@@ -163,7 +166,6 @@ namespace PolusGG.Patches.Temporary {
             }
 
             public static void HandleToggleChanged(OptionBehaviour toggleBehaviour) {
-                "LLLLLL".Log(4);
                 UpdateHudString();
                 ToggleOption toggle = toggleBehaviour.Cast<ToggleOption>();
                 GameOption gameOption = OptionMap[toggle.TitleText.text];
@@ -174,6 +176,7 @@ namespace PolusGG.Patches.Temporary {
                 // TODO do this when serverside sequence id handling
                 writer.Write((ushort) 0);
                 writer.Write(gameOption.CategoryName);
+                writer.Write(gameOption.Priority);
                 writer.Write(toggle.TitleText.text);
                 writer.Write((byte) 1);
                 writer.Write(toggle.CheckMark.enabled);
@@ -181,7 +184,6 @@ namespace PolusGG.Patches.Temporary {
             }
 
             public static void HandleNumberChanged(OptionBehaviour toggleBehaviour) {
-                "LLLLLLL2".Log(4);
                 UpdateHudString();
                 NumberOption toggle = toggleBehaviour.Cast<NumberOption>();
                 GameOption gameOption = OptionMap[toggle.TitleText.text];
@@ -191,6 +193,7 @@ namespace PolusGG.Patches.Temporary {
                 writer.StartMessage((byte) PolusRootPackets.SetGameOption);
                 writer.Write((ushort) 0);
                 writer.Write(gameOption.CategoryName);
+                writer.Write(gameOption.Priority);
                 writer.Write(toggle.TitleText.text);
                 writer.Write((byte) 0);
                 writer.Write(toggle.Value);
@@ -204,7 +207,6 @@ namespace PolusGG.Patches.Temporary {
             }
 
             public static void HandleStringChanged(OptionBehaviour toggleBehaviour) {
-                "LLLLLL3".Log(4);
                 UpdateHudString();
                 KeyValueOption toggle = toggleBehaviour.Cast<KeyValueOption>();
                 GameOption gameOption = OptionMap[toggle.TitleText.text];
@@ -214,6 +216,7 @@ namespace PolusGG.Patches.Temporary {
                 writer.StartMessage((byte) PolusRootPackets.SetGameOption);
                 writer.Write((ushort) 0);
                 writer.Write(gameOption.CategoryName);
+                writer.Write(gameOption.Priority);
                 writer.Write(toggle.TitleText.text);
                 writer.Write((byte) OptionType.Enum);
                 writer.WritePacked(toggle.Selected);
@@ -224,54 +227,58 @@ namespace PolusGG.Patches.Temporary {
                 PolusMod.EndSend(writer);
             }
 
-            private static bool _hasStarted;
-            private static ushort _nextSequenceReceived;
-            private static SortedList<ushort, GameOptionPacket> _packetQueue = new();
+            // private static bool _gotVeryFirst;
+            // private static ushort _nextSequenceReceived;
+            // private static Dictionary<ushort, GameOptionPacket> _packetQueue = new();
 
             public static void Reset() {
-                _packetQueue = new SortedList<ushort, GameOptionPacket>();
-                _hasStarted = false;
-                _nextSequenceReceived = 0;
+                // _packetQueue = new Dictionary<ushort, GameOptionPacket>();
+                // _gotVeryFirst = false;
+                // _nextSequenceReceived = 0;
                 Categories = new Dictionary<string, List<GameOption>>();
                 OptionMap = new Dictionary<string, GameOption>();
             }
 
             public static void ReceivedGameOptionPacket(GameOptionPacket packet) {
                 ushort sequenceId = packet.SequenceId;
-                if (sequenceId != _nextSequenceReceived &&
-                    NetHelpers.SidGreaterThan(sequenceId, _nextSequenceReceived) && !_hasStarted) {
-                    $"Got {sequenceId}, waiting for ${_nextSequenceReceived}, {_packetQueue.Count} in queue right now"
-                        .Log();
-                    _packetQueue.Add(sequenceId, packet);
-                } else lock (_packetQueue){
-                    ushort lastId = sequenceId;
-                    CatchHelper.TryCatch(() => HandlePacket(packet));
-                    if (!_hasStarted) {
-                        _nextSequenceReceived = (ushort) (sequenceId + 1);
-                        _hasStarted = true;
-                        return;
-                    }
+                // if (sequenceId != _nextSequenceReceived &&
+                    // NetHelpers.SidGreaterThan(sequenceId, _nextSequenceReceived)) {
+                    // $"Got {sequenceId}, waiting for ${_nextSequenceReceived}, {_packetQueue.Count} in queue right now".Log();
+                    // lock (_packetQueue) _packetQueue.Add(sequenceId, packet);
+                // } else
+                    lock (lockable) {
+                        ushort lastId = sequenceId;
+                        CatchHelper.TryCatch(() => HandlePacket(packet, sequenceId, true));
 
-                    while (_packetQueue.Count != 0) {
-                        GameOptionPacket packet2 = _packetQueue.Values[0];
-                        CatchHelper.TryCatch(() => HandlePacket(packet2));
-                        _packetQueue.RemoveAt(0);
-                        if (_packetQueue.Count == 0) lastId = packet2.SequenceId;
-                    }
+                        IEnumerator<KeyValuePair<ushort, GameOptionPacket>> pkt =
+                            _packetQueue.OrderBy(x => ushort.MaxValue - x.Key).GetEnumerator();
 
-                    _nextSequenceReceived = (ushort) (lastId + 1);
-                    $"Handled all packets up to seqid {_nextSequenceReceived}".Log();
-                }
+                        // while (pkt.MoveNext()) {
+                            // lastId = pkt.Current.Key;
+                            // CatchHelper.TryCatch(() => HandlePacket(pkt.Current.Value, pkt.Current.Key, false));
+                        // }
+
+                        // _packetQueue.Clear();
+
+                        // _nextSequenceReceived = (ushort) (lastId + 1);
+                        // $"Handled all packets up to seqid {_nextSequenceReceived}".Log();
+                    }
             }
 
-            private static void HandlePacket(GameOptionPacket packet) {
+            private static void HandlePacket(GameOptionPacket packet, int d, bool isFirst) {
                 lock (lockable) {
-                    MessageReader reader = packet.Reader;
+                    MessageReader reader = MessageReader.GetSized(packet.Reader.Length);
+                    reader.Buffer = packet.Reader;
+                    reader.Length = packet.Reader.Length;
+                    reader.Tag = 0;
                     switch (packet.Type) {
                         case OptionPacketType.DeleteOption: {
                             string name = reader.ReadString();
+                            // (string categoryName, List<GameOption> category) = NoCategory.Any(x => x.Title == name) ? ("", NoCategory) : ;
                             (string categoryName, List<GameOption> category) =
-                                Categories.Concat(new []{ new KeyValuePair<string, List<GameOption>>("", NoCategory) }).First(x => x.Value.Any(x => x.Title == name));
+                                NoCategory.Any(x => x.Title == name)
+                                    ? new KeyValuePair<string, List<GameOption>>("", NoCategory)
+                                    : Categories.First(x => x.Value.Any(option => option.Title == name));
                             category.RemoveAll(x => x.Title == name);
                             OptionMap.Remove(name);
                             if (category.Count == 0 && categoryName != "")
@@ -282,6 +289,7 @@ namespace PolusGG.Patches.Temporary {
                         }
                         case OptionPacketType.SetOption: {
                             string cat = reader.ReadString();
+                            ushort priority = reader.ReadUInt16();
                             string name = reader.ReadString();
                             OptionType optionType = (OptionType) reader.ReadByte();
 
@@ -289,11 +297,19 @@ namespace PolusGG.Patches.Temporary {
 
                             List<GameOption> category;
                             if (cat != "") {
-                                if (!Categories.ContainsKey(cat))
+                                if (Categories.All(x => x.Key != cat)) {
                                     Categories.Add(cat, new List<GameOption>());
+                                }
+
                                 category = Categories[cat];
                             } else {
                                 category = NoCategory;
+                            }
+
+                            // $"{name} ({d}) added to {cat}".Log(level: LogLevel.Error);
+                            int i = 0;
+                            foreach (string catName in Categories.Keys.Cast<string>()) {
+                                // $"\t{i++} - {catName}".Log();
                             }
 
                             if (category.Any(x => x.Title == name)) {
@@ -309,6 +325,7 @@ namespace PolusGG.Patches.Temporary {
                                 GameOption option = new() {
                                     Title = name,
                                     Type = optionType,
+                                    Priority = priority,
                                     Value = optionType switch {
                                         OptionType.Boolean => new BooleanValue(reader.ReadBoolean()),
                                         OptionType.Number => new FloatValue(reader.ReadSingle(), reader.ReadSingle(),
@@ -333,11 +350,11 @@ namespace PolusGG.Patches.Temporary {
         public class GameOptionPacket {
             public ushort SequenceId;
             public OptionPacketType Type;
-            public MessageReader Reader;
+            public byte[] Reader;
         }
 
         [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.RpcSyncSettings))]
-        public class ScrewYouRpcSyncSettings {
+        public class DisableRpcSyncSettings {
             [HarmonyPrefix]
             public static bool RpcSyncSettings() {
                 return false;
@@ -345,25 +362,25 @@ namespace PolusGG.Patches.Temporary {
         }
 
         [HarmonyPatch(typeof(GameOptionsMenu), nameof(GameOptionsMenu.Start))]
-        public class GetOutOfMyWay {
+        public class MenuDisableStart {
             [HarmonyPrefix]
-            public static bool RpcSyncSettings() {
+            public static bool Start() {
                 return false;
             }
         }
 
         [HarmonyPatch(typeof(GameOptionsMenu), nameof(GameOptionsMenu.RefreshChildren))]
-        public class GetOutOfMyHead {
+        public class DisableRefresh {
             [HarmonyPrefix]
-            public static bool RpcSyncSettings() {
+            public static bool RefreshChildren() {
                 return false;
             }
         }
 
         [HarmonyPatch(typeof(KeyValueOption), nameof(KeyValueOption.Increase))]
-        public class S {
+        public class KVIncrease {
             [HarmonyPrefix]
-            public static bool RpcSyncSettings(KeyValueOption __instance) {
+            public static bool Increase(KeyValueOption __instance) {
                 __instance.Selected = Mathf.Clamp(__instance.Selected + 1, 0, __instance.Values.Count - 1);
                 OnEnablePatch.HandleStringChanged(__instance);
                 return false;
@@ -371,9 +388,9 @@ namespace PolusGG.Patches.Temporary {
         }
 
         [HarmonyPatch(typeof(KeyValueOption), nameof(KeyValueOption.Decrease))]
-        public class S2 {
+        public class KVDecrease {
             [HarmonyPrefix]
-            public static bool RpcSyncSettings(KeyValueOption __instance) {
+            public static bool Decrease(KeyValueOption __instance) {
                 __instance.Selected = Mathf.Clamp(__instance.Selected - 1, 0, __instance.Values.Count - 1);
                 OnEnablePatch.HandleStringChanged(__instance);
                 return false;
@@ -381,9 +398,9 @@ namespace PolusGG.Patches.Temporary {
         }
 
         [HarmonyPatch(typeof(NumberOption), nameof(NumberOption.Increase))]
-        public class AmazonS3 {
+        public class NumberIncreasePatch {
             [HarmonyPrefix]
-            public static bool RpcSyncSettings(NumberOption __instance) {
+            public static bool Increase(NumberOption __instance) {
                 __instance.Value = __instance.ValidRange.Clamp(__instance.Value + __instance.Increment);
                 OnEnablePatch.HandleNumberChanged(__instance);
                 return false;
@@ -391,9 +408,9 @@ namespace PolusGG.Patches.Temporary {
         }
 
         [HarmonyPatch(typeof(NumberOption), nameof(NumberOption.Decrease))]
-        public class S4 {
+        public class NumberDecreasePatch {
             [HarmonyPrefix]
-            public static bool RpcSyncSettings(NumberOption __instance) {
+            public static bool Decrease(NumberOption __instance) {
                 __instance.Value = __instance.ValidRange.Clamp(__instance.Value - __instance.Increment);
                 OnEnablePatch.HandleNumberChanged(__instance);
                 return false;
@@ -401,9 +418,9 @@ namespace PolusGG.Patches.Temporary {
         }
 
         [HarmonyPatch(typeof(ToggleOption), nameof(ToggleOption.Toggle))]
-        public class S5 {
+        public class TogglePatch {
             [HarmonyPrefix]
-            public static bool RpcSyncSettings(ToggleOption __instance) {
+            public static bool Toggle(ToggleOption __instance) {
                 __instance.CheckMark.enabled = !__instance.CheckMark.enabled;
                 OnEnablePatch.HandleToggleChanged(__instance);
                 return false;
@@ -413,7 +430,7 @@ namespace PolusGG.Patches.Temporary {
         [HarmonyPatch(typeof(ToggleOption), nameof(ToggleOption.OnEnable))]
         public class ToggleButtonDisableStartPatch {
             [HarmonyPrefix]
-            public static bool Prefix() {
+            public static bool OnEnable() {
                 return false;
             }
         }
@@ -421,7 +438,7 @@ namespace PolusGG.Patches.Temporary {
         [HarmonyPatch(typeof(NumberOption), nameof(NumberOption.OnEnable))]
         public class NumberButtonDisableStartPatch {
             [HarmonyPrefix]
-            public static bool Prefix() {
+            public static bool OnEnable() {
                 return false;
             }
         }
@@ -429,7 +446,7 @@ namespace PolusGG.Patches.Temporary {
         [HarmonyPatch(typeof(NumberOption), nameof(NumberOption.FixedUpdate))]
         public class NumberButtonFixedUpdatePatch {
             [HarmonyPrefix]
-            public static bool Prefix(NumberOption __instance) {
+            public static bool OnEnable(NumberOption __instance) {
                 if (Math.Abs(__instance.oldValue - __instance.Value) > 0.001f) {
                     __instance.oldValue = __instance.Value;
                     __instance.ValueText.text = string.Format(__instance.FormatString, __instance.Value);
@@ -470,106 +487,109 @@ namespace PolusGG.Patches.Temporary {
                 return false;
             }
         }
-    }
 
-    public class GameOption {
-        public string Title { get; set; }
-        public OptionType Type { get; set; }
-        public IGameOptionValue Value { get; set; }
-        public string CategoryName { get; set; }
-    }
-
-    public interface IGameOptionValue { }
-
-    public class BooleanValue : IGameOptionValue {
-        public bool Value;
-
-        public BooleanValue(bool value) {
-            Value = value;
-        }
-    }
-
-    public class EnumValue : IGameOptionValue {
-        public uint OptionIndex;
-        public string[] Values;
-
-        public EnumValue(uint optionIndex, string[] values) {
-            OptionIndex = optionIndex;
-            Values = values;
+        public class GameOption {
+            public string Title { get; set; }
+            public OptionType Type { get; set; }
+            public IGameOptionValue Value { get; set; }
+            public string CategoryName { get; set; }
+            public ushort Priority { get; set; }
         }
 
-        public static EnumValue ConstructEnumValue(MessageReader reader) {
-            List<string> strings = new();
-            uint current = reader.ReadPackedUInt32();
-            while (reader.Position < reader.Length) strings.Add(reader.ReadString());
+        public interface IGameOptionValue { }
 
-            return new EnumValue(current, strings.ToArray());
+        public class BooleanValue : IGameOptionValue {
+            public bool Value;
+
+            public BooleanValue(bool value) {
+                Value = value;
+            }
         }
-    }
 
-    public class FloatValue : IGameOptionValue {
-        public string FormatString;
-        public bool IsInfinity;
-        public float Lower;
-        public float Step;
-        public float Upper;
+        public class EnumValue : IGameOptionValue {
+            public uint OptionIndex;
+            public string[] Values;
 
-        public float Value;
+            public EnumValue(uint optionIndex, string[] values) {
+                OptionIndex = optionIndex;
+                Values = values;
+            }
 
-        public FloatValue(float value, float step, float lower, float upper, bool isInfinity, string formatString) {
-            Value = value;
-            Step = step;
-            Lower = lower;
-            Upper = upper;
-            IsInfinity = isInfinity;
-            FormatString = formatString;
+            public static EnumValue ConstructEnumValue(MessageReader reader) {
+                List<string> strings = new();
+                uint current = reader.ReadPackedUInt32();
+                while (reader.Position < reader.Length) strings.Add(reader.ReadString());
+
+                return new EnumValue(current, strings.ToArray());
+            }
         }
-    }
 
-    public class TitleOption : MonoBehaviour {
-        public TextMeshPro Title;
-        public TitleOption(IntPtr ptr) : base(ptr) { }
-    }
+        public class FloatValue : IGameOptionValue {
+            public string FormatString;
+            public bool IsInfinity;
+            public float Lower;
+            public float Step;
+            public float Upper;
 
-    [HarmonyPatch(typeof(GameOptionsData), nameof(GameOptionsData.ToHudString))]
-    public class HudStringPatch {
-        [HarmonyPrefix]
-        public static bool ToHudString(out string __result) {
-            __result = "Game Settings:\n";
+            public float Value;
 
-            string oute = "";
+            public FloatValue(float value, float step, float lower, float upper, bool isInfinity, string formatString) {
+                Value = value;
+                Step = step;
+                Lower = lower;
+                Upper = upper;
+                IsInfinity = isInfinity;
+                FormatString = formatString;
+            }
+        }
 
-            void GenerateHud(string categoryTitle, List<GameOption> options) {
-                CatchHelper.TryCatch(() => {
-                    string output = "";
-                    if (categoryTitle != null) output += $"\n{categoryTitle}\n";
-                    foreach (GameOption option in options) {
-                        if (categoryTitle != null) output += "  ";
-                        output += $"{option.Title}: ";
-                        output += option.Type switch {
-                            OptionType.Number => string.Format(((FloatValue) option.Value).FormatString,
-                                ((FloatValue) option.Value).Value),
-                            OptionType.Boolean => ((BooleanValue) option.Value).Value ? "On" : "Off",
-                            OptionType.Enum => ((EnumValue) option.Value).Values
-                                [((EnumValue) option.Value).OptionIndex],
-                            _ => throw new ArgumentOutOfRangeException()
-                        };
-                        output += '\n';
+        public class TitleOption : MonoBehaviour {
+            public TextMeshPro Title;
+            public TitleOption(IntPtr ptr) : base(ptr) { }
+        }
+
+        [HarmonyPatch(typeof(GameOptionsData), nameof(GameOptionsData.ToHudString))]
+        public class HudStringPatch {
+            [HarmonyPrefix]
+            public static bool ToHudString(out string __result) {
+                __result = "Game Settings:\n";
+
+                string oute = "";
+
+                void GenerateHud(string categoryTitle, List<GameOption> options) {
+                    CatchHelper.TryCatch(() => {
+                        string output = "";
+                        if (categoryTitle != null) output += $"\n{categoryTitle}\n";
+                        foreach (GameOption option in options.OrderBy(x => x.Priority).ThenBy(x => x.Title)) {
+                            if (categoryTitle != null) output += "  ";
+                            output += $"{option.Title}: ";
+                            output += option.Type switch {
+                                OptionType.Number => string.Format(((FloatValue) option.Value).FormatString,
+                                    ((FloatValue) option.Value).Value),
+                                OptionType.Boolean => ((BooleanValue) option.Value).Value ? "On" : "Off",
+                                OptionType.Enum => ((EnumValue) option.Value).Values
+                                    [((EnumValue) option.Value).OptionIndex],
+                                _ => throw new ArgumentOutOfRangeException()
+                            };
+                            output += '\n';
+                        }
+
+                        oute += output;
+                    });
+                }
+
+                lock (lockable) {
+                    GenerateHud(null, NoCategory);
+
+                    foreach ((string key, List<GameOption> value) in Categories.OrderBy(pair => pair.Value.Min(x => x.Priority)).ThenBy(x => x.Key)) {
+                        GenerateHud(key, value);
                     }
 
-                    oute += output;
-                });
+                    __result = oute;
+                }
+
+                return false;
             }
-            
-            GenerateHud(null, GameOptionsPatches.NoCategory);
-
-            foreach ((string categoryTitle, List<GameOption> options) in GameOptionsPatches.Categories) {
-                GenerateHud(categoryTitle, options);
-            }
-
-            __result = oute;
-
-            return false;
         }
     }
 }

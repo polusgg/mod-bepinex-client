@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Hazel;
 using PolusGG.Extensions;
 using UnhollowerRuntimeLib;
@@ -35,12 +36,12 @@ namespace PolusGG.Behaviours {
                     message.ReadSingle(),
                     message.ReadSingle(),
                     message.ReadSingle(),
-                    new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(),
-                        reader.ReadByte()),
-                    new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(),
-                        reader.ReadByte()),
-                    new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(),
-                        reader.ReadByte()),
+                    new Color32(message.ReadByte(), message.ReadByte(), message.ReadByte(),
+                        message.ReadByte()),
+                    new Color32(message.ReadByte(), message.ReadByte(), message.ReadByte(),
+                        message.ReadByte()),
+                    new Color32(message.ReadByte(), message.ReadByte(), message.ReadByte(),
+                        message.ReadByte()),
                     message.ReadVector2(),
                     message.ReadVector2(),
                     message.ReadSingle(),
@@ -51,13 +52,12 @@ namespace PolusGG.Behaviours {
             this.StartCoroutine(CoPlayAnimation(playerKeyframes.ToArray(), reader.ReadBoolean()));
         }
 
+        [SuppressMessage("ReSharper", "AccessToModifiedClosure")]
         public IEnumerator CoPlayAnimation(PlayerKeyframe[] frames, bool reset) {
             PlayerKeyframe resetTo = SerializeCurrentState();
             PlayerKeyframe previous = resetTo;
-            PlayerKeyframe current;
 
-            for (int i = 0; i < frames.Length; i++) {
-                current = frames[i];
+            foreach (PlayerKeyframe current in frames) {
 
                 yield return new WaitForSeconds(current.Offset / 1000f);
                 yield return Effects.Lerp(current.Duration / 1000f, new Action<float>(dt => {

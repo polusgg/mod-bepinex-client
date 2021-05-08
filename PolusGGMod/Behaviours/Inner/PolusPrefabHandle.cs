@@ -11,7 +11,8 @@ namespace PolusGG.Behaviours.Inner {
 
         public PolusPrefabHandle(IntPtr ptr) : base(ptr) { }
 
-        private void FixedUpdate() {
+        private void Start() {
+            pno = PogusPlugin.ObjectManager.LocateNetObject(this);
             if (pno.HasSpawnData())
                 Instantiate(PogusPlugin.Cache.CachedFiles[pno.GetSpawnData().ReadPackedUInt32()].Get<GameObject>(),
                     transform);

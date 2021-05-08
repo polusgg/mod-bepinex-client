@@ -26,7 +26,7 @@ namespace PolusGG.Behaviours.Inner {
         public PolusDeadBody(IntPtr ptr) : base(ptr) { }
 
         private void Start() {
-            pno = new PggObjectManager().LocateNetObject(this);
+            pno = PogusPlugin.ObjectManager.LocateNetObject(this);
             pno.OnData = Deserialize;
             rend = GetComponent<SpriteRenderer>();
             anim = GetComponent<SpriteAnim>();

@@ -24,16 +24,17 @@ namespace PolusGG.Patches.Temporary {
             #if DEBUG
             if (GameData.Instance)
                 if (_counter-- <= 0) {
-                    PingText = "";
+                    string textText = "\n";
                     foreach (GameData.PlayerInfo player in GameData.Instance.AllPlayers) {
-                        Append(ref PingText,
+                        Append(ref textText,
                             $"<color=#{Palette.PlayerColors[player.ColorId].ToHexColor()}>{player.PlayerName}", false);
-                        Append(ref PingText,
+                        Append(ref textText,
                             TranslationController.Instance.GetString(Palette.ColorNames[player.ColorId],
                                 new Il2CppReferenceArray<Object>(0)), false);
-                        Append(ref PingText, $"id:{player.PlayerId}", false);
-                        Append(ref PingText, $"idx:{GameData.Instance.AllPlayers.IndexOf(player)}</color>");
+                        Append(ref textText, $"id:{player.PlayerId}", false);
+                        Append(ref textText, $"idx:{GameData.Instance.AllPlayers.IndexOf(player)}</color>");
                     }
+                    __instance.text.text += textText;
                 }
             #endif
 

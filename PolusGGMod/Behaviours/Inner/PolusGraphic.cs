@@ -16,7 +16,7 @@ namespace PolusGG.Behaviours.Inner {
         public PolusGraphic(IntPtr ptr) : base(ptr) { }
 
         private void Start() {
-            pno = new PggObjectManager().LocateNetObject(this);
+            pno = PogusPlugin.ObjectManager.LocateNetObject(this);
             pno.OnData = Deserialize;
             renderer = gameObject.EnsureComponent<SpriteRenderer>();
         }

@@ -37,7 +37,7 @@ namespace PolusGG.Patches.Temporary {
                 PlayerControl.LocalPlayer.SetThickAssAndBigDumpy(true, true);
                 if (reader.Tag >= 0x80) {
                     foreach ((_, Mod mod) in PogusPlugin.ModManager.TemporaryMods) {
-                        PogusPlugin.Logger.LogInfo($"Handling packet {reader.Tag:X2} for {mod.Name}");
+                        // PogusPlugin.Logger.LogInfo($"Handling packet {reader.Tag:X2} for {mod.Name}");
                         CatchHelper.TryCatch(() => mod.RootPacketReceived(reader), true);
                     }
 
@@ -58,10 +58,9 @@ namespace PolusGG.Patches.Temporary {
 
                 InnerNetClient instance = __instance.__this;
                 MessageReader reader = __instance.reader;
-                int msgCnt = __instance.msgNum;
                 int pos = reader.Position;
 
-                PggObjectManager objectManager = new();
+                PggObjectManager objectManager = PogusPlugin.ObjectManager;
                 switch (reader.Tag.Log(comment: "HandleGameDataInner")) {
                     case 1: {
                         uint netId = reader.ReadPackedUInt32();
@@ -107,13 +106,13 @@ namespace PolusGG.Patches.Temporary {
                     case 4: {
                         uint num3 = reader.ReadPackedUInt32();
 
-                        num3.Log(3, "spawn id");
+                        // num3.Log(3, "spawn id");
                         if (num3 >= 0x80) {
                             CatchHelper.TryCatch(() => objectManager.HandleSpawn(num3, reader));
                             return false;
                         }
 
-                        reader.ReadPackedInt32().Log(3, "owner id?");
+                        reader.ReadPackedInt32();//.Log(3, "owner id?");
 
                         reader.Position = pos;
                         return true;
@@ -133,7 +132,6 @@ namespace PolusGG.Patches.Temporary {
                     }
                     case 205:
                     case 206:
-                    case 7:
                     case 6: {
                         PlayerControl.LocalPlayer.SetThickAssAndBigDumpy(true, true);
                         reader.Position = pos;

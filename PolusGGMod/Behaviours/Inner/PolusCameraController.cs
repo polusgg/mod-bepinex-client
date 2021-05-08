@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
+using System.Text;
 using Hazel;
 using PolusGG.Enums;
 using PolusGG.Extensions;
@@ -22,7 +24,7 @@ namespace PolusGG.Behaviours.Inner {
         private void Start() {
             follower = HudManager.Instance.PlayerCam;
             camera = follower.GetComponent<Camera>();
-            pno = new PggObjectManager().LocateNetObject(this);
+            pno = PogusPlugin.ObjectManager.LocateNetObject(this);
             pno.OnData = Deserialize;
             pno.OnRpc = HandleRpc;
         }
@@ -32,9 +34,9 @@ namespace PolusGG.Behaviours.Inner {
         }
 
         private void HandleRpc(MessageReader reader, byte callid) {
-            callid.Log(20, "camera fucking camera");
             if (callid != (int) PolusRpcCalls.BeginAnimationCamera) return;
             List<CameraKeyframe> keyframe = new();
+            int i = 0;
             while (reader.Position < reader.Length - 1) {
                 MessageReader message = reader.ReadMessage();
                 keyframe.Add(new CameraKeyframe(
@@ -42,7 +44,7 @@ namespace PolusGG.Behaviours.Inner {
                     message.ReadPackedUInt32(),
                     message.ReadVector2(),
                     message.ReadSingle(),
-                    new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte()),
+                    new Color32(message.ReadByte(), message.ReadByte(), message.ReadByte(), message.ReadByte()),
                     follower,
                     camera
                 ));
@@ -75,7 +77,9 @@ namespace PolusGG.Behaviours.Inner {
                 yield return Effects.Lerp(current.Duration / 1000f, new Action<float>(dt => {
                     current.CameraOffset = Vector2.Lerp(previous.CameraOffset, current.CameraOffset, dt);
                     current.Angle = Mathf.Lerp(previous.Angle, current.Angle, dt);
-                    current.OverlayColor = Color.Lerp(previous.OverlayColor, current.OverlayColor, dt);
+                    Color color = Color.Lerp(previous.OverlayColor, current.OverlayColor, dt);
+                    HudManager.Instance.FullScreen.enabled = color.a != 0;
+                    current.OverlayColor = color;
                 }));
 
                 previous = current;
@@ -137,6 +141,19 @@ namespace PolusGG.Behaviours.Inner {
             public Color OverlayColor {
                 get => overlayColor;
                 set => HudManager.Instance.FullScreen.color = value;
+            }
+
+            public override string ToString() {
+                StringBuilder builder = new();
+                Type type = GetType();
+                builder.Append(type.Name).Append(" {\n");
+                PropertyInfo[] props = type.GetProperties();
+                foreach (PropertyInfo propertyInfo in props) {
+                    builder.Append("  ").Append(propertyInfo.Name).Append(" = ").Append(propertyInfo.GetValue(this)).Append("\n");
+                }
+
+                builder.Append("}");
+                return builder.ToString();
             }
         }
     }

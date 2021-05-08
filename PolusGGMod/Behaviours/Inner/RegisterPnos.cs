@@ -55,8 +55,9 @@ namespace PolusGG.Behaviours.Inner {
         public static PnoBehaviour CreatePoi() {
             GameObject pointyObject = new("PointOfInterest") {active = false};
             pointyObject.DontDestroy();
-
+            
             pointyObject.AddComponent<PolusPoi>();
+            pointyObject.AddComponent<PolusGraphic>();
             return pointyObject.AddComponent<PolusNetworkTransform>();
         }
 

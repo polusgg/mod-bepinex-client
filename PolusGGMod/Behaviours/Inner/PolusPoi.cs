@@ -5,7 +5,7 @@ using UnhollowerRuntimeLib;
 namespace PolusGG.Behaviours.Inner {
     public class PolusPoi : PnoBehaviour {
         private ArrowBehaviour arrow;
-        private CustomNetworkTransform cnt;
+        private PolusNetworkTransform cnt;
 
         static PolusPoi() {
             ClassInjector.RegisterTypeInIl2Cpp<PolusPoi>();
@@ -14,12 +14,14 @@ namespace PolusGG.Behaviours.Inner {
         public PolusPoi(IntPtr ptr) : base(ptr) { }
 
         private void Start() {
-            arrow = GetComponent<ArrowBehaviour>();
-            arrow.image = GetComponent<PolusGraphic>().renderer;
-            cnt = GetComponent<CustomNetworkTransform>();
+            arrow = gameObject.AddComponent<ArrowBehaviour>();
+            cnt = GetComponent<PolusNetworkTransform>();
         }
 
         private void FixedUpdate() {
+            if (arrow.image == null) {
+                arrow.image = GetComponent<PolusGraphic>().renderer;
+            }
             arrow.target = cnt.transform.position;
         }
     }

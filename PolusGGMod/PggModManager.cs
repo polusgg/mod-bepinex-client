@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using BepInEx.Logging;
+using PolusGG.Behaviours;
 using PolusGG.Extensions;
 using PolusGG.Mods;
 using TMPro;
@@ -30,12 +31,15 @@ namespace PolusGG {
             SceneManager.add_sceneLoaded(new Action<Scene, LoadSceneMode>((scene, mode) => {
                 try {
                     // if (scene.name == "MMOnline") AccountMenu.InitializeAccountMenu(scene);
+                    if (scene.name == "MMOnline") {
+                        GameObject.Find("NormalMenu").FindRecursive(x => x.name == "RegionText_TMP").AddComponent<RegionTextMonitorTMP>();
+                    }
                 } catch {
-                    // ignored
+                    throw; // ignored
                 }
 
                 if (!AllPatched) return;
-                if (scene.name != "OnlineGame") new PggObjectManager().EndedGame();
+                if (scene.name != "OnlineGame") PogusPlugin.ObjectManager.EndedGame();
                 if (OnlineScenes.Contains(scene.name) != _wasOnline) {
                     Logger.LogInfo(scene.name);
                     _wasOnline = OnlineScenes.Contains(scene.name);
@@ -104,7 +108,7 @@ namespace PolusGG {
                 mod.Stop();
             }
 
-            ((PggObjectManager) new PggObjectManager()).UnregisterAll();
+            PogusPlugin.ObjectManager.UnregisterAll();
 
             AllPatched = false;
         }

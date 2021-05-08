@@ -16,6 +16,7 @@ namespace PolusGG.Behaviours.Inner {
         private static readonly int Desat = Shader.PropertyToID("_Desat");
         private PassiveButton button;
         private Color32 color;
+        private bool active;
         private bool counting;
         private float currentTimer;
         private PolusGraphic graphic;
@@ -30,7 +31,7 @@ namespace PolusGG.Behaviours.Inner {
         public PolusClickBehaviour(IntPtr ptr) : base(ptr) { }
 
         private void Start() {
-            pno = new PggObjectManager().LocateNetObject(this);
+            pno = PogusPlugin.ObjectManager.LocateNetObject(this);
             pno.OnData = Deserialize;
             button = GetComponent<PassiveButton>();
             button.OnClick = new Button.ButtonClickedEvent();
@@ -59,15 +60,11 @@ namespace PolusGG.Behaviours.Inner {
         }
 
         private void Deserialize(MessageReader reader) {
-            if ((maxTimer = reader.ReadSingle()) > 0) {
-                currentTimer = reader.ReadSingle();
-                counting = reader.ReadBoolean();
-                color = new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
-            } else {
-                counting = false;
-                currentTimer = 0;
-                color = Palette.EnabledColor;
-            }
+            maxTimer = reader.ReadSingle();
+            currentTimer = reader.ReadSingle();
+            counting = reader.ReadBoolean();
+            active = reader.ReadBoolean();
+            color = new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
         }
 
         public void SetCooldown() {
@@ -76,7 +73,7 @@ namespace PolusGG.Behaviours.Inner {
             graphic.renderer.material.SetFloat(Percent, num);
             bool isCoolingDown = num > 0f && counting && PlayerControl.LocalPlayer.CanMove;
             if (isCoolingDown) {
-                graphic.renderer.material.SetFloat(Desat, 1f);
+                graphic.renderer.material.SetFloat(Desat, active ? 1f : 0f);
                 graphic.renderer.color = Palette.EnabledColor;
                 timerText.text = Mathf.CeilToInt(currentTimer).ToString();
                 timerText.gameObject.SetActive(true);
