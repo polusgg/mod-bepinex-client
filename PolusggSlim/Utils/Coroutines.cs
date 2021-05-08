@@ -2,36 +2,27 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using PolusggSlim.Utils.Attributes;
 using UnhollowerBaseLib;
-using UnhollowerBaseLib.Attributes;
 using UnityEngine;
 
 namespace PolusggSlim.Utils
 {
-    [RegisterInIl2Cpp]
-    public sealed class CoroutineManager : MonoBehaviour
+    public static class Coroutine
     {
-        private readonly List<CoroutineTuple> coroutinesStore = new();
-        private readonly List<IEnumerator> nextFrameCoroutines = new();
+        public static readonly List<CoroutineTuple> coroutinesStore = new();
+        public static readonly List<IEnumerator> nextFrameCoroutines = new();
 
-        private readonly List<IEnumerator> tempList = new();
-        private readonly List<IEnumerator> waitForEndOfFrameCoroutines = new();
-        private readonly List<IEnumerator> waitForFixedUpdateCoroutines = new();
+        public static readonly List<IEnumerator> tempList = new();
+        public static readonly List<IEnumerator> waitForEndOfFrameCoroutines = new();
+        public static readonly List<IEnumerator> waitForFixedUpdateCoroutines = new();
 
-        public CoroutineManager(IntPtr intPtr) : base(intPtr)
-        {
-        }
-
-        [HideFromIl2Cpp]
-        public IEnumerator Start(IEnumerator routine)
+        public static IEnumerator Start(IEnumerator routine)
         {
             ProcessNextOfCoroutine(routine);
             return routine;
         }
 
-        [HideFromIl2Cpp]
-        public void Stop(IEnumerator enumerator)
+        public static void Stop(IEnumerator enumerator)
         {
             if (nextFrameCoroutines.Contains(enumerator)) // the coroutine is running itself
             {
@@ -48,8 +39,7 @@ namespace PolusggSlim.Utils
             }
         }
 
-        [HideFromIl2Cpp]
-        private void ProcessCoroutineList(List<IEnumerator> target)
+        private static void ProcessCoroutineList(List<IEnumerator> target)
         {
             if (target.Count == 0) return;
 
@@ -61,7 +51,7 @@ namespace PolusggSlim.Utils
             tempList.Clear();
         }
 
-        private void Update()
+        public static void Process()
         {
             for (var i = coroutinesStore.Count - 1; i >= 0; i--)
             {
@@ -75,18 +65,17 @@ namespace PolusggSlim.Utils
             ProcessCoroutineList(nextFrameCoroutines);
         }
 
-        internal void ProcessWaitForFixedUpdate()
+        internal static void ProcessWaitForFixedUpdate()
         {
             ProcessCoroutineList(waitForFixedUpdateCoroutines);
         }
 
-        internal void ProcessWaitForEndOfFrame()
+        internal static void ProcessWaitForEndOfFrame()
         {
             ProcessCoroutineList(waitForEndOfFrameCoroutines);
         }
 
-        [HideFromIl2Cpp]
-        private void ProcessNextOfCoroutine(IEnumerator enumerator)
+        private static void ProcessNextOfCoroutine(IEnumerator enumerator)
         {
             try
             {
@@ -153,14 +142,13 @@ namespace PolusggSlim.Utils
                 ProcessNextOfCoroutine(nextCoroutine);
         }
 
-        [HideFromIl2Cpp]
-        private IEnumerator FindOriginalCoroutine(IEnumerator enumerator)
+        private static IEnumerator FindOriginalCoroutine(IEnumerator enumerator)
         {
             var index = coroutinesStore.FindIndex(ct => ct.WaitCondition == enumerator);
             return index == -1 ? enumerator : FindOriginalCoroutine(coroutinesStore[index].Coroutine);
         }
 
-        private struct CoroutineTuple
+        public struct CoroutineTuple
         {
             public object WaitCondition;
             public IEnumerator Coroutine;

@@ -1,7 +1,7 @@
 using System;
 using UnityEngine.SceneManagement;
 
-namespace PolusggSlim.Patches.Misc
+namespace PolusggSlim.Patches.GameTransitionScreen
 {
     public static class SkipIntroSplash
     {

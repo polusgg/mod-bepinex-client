@@ -4,7 +4,6 @@ using Hazel;
 using InnerNet;
 using PolusggSlim.Patches.GameTransitionScreen;
 using PolusggSlim.Patches.SetString;
-using PolusggSlim.Utils;
 using PolusggSlim.Utils.Extensions;
 using UnityEngine;
 

@@ -1,6 +1,6 @@
 <Project>
     <PropertyGroup>
-        <AmongUs>../../../AmongUsModded2021.4.12</AmongUs>
+        <AmongUs>../../../AmongUsModded2021.4.12s</AmongUs>
         <Mappings>NuclearPowered/Mappings:0.4.0</Mappings>
         <GameVersion>2021.4.12s</GameVersion>
     </PropertyGroup>

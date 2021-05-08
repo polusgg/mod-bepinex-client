@@ -1,6 +1,9 @@
 using System;
+using System.Collections;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using BepInEx;
 using HarmonyLib;
 using Il2CppSystem.Text;
@@ -15,6 +18,7 @@ using UnhollowerBaseLib.Attributes;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using Coroutine = PolusggSlim.Utils.Coroutine;
 using Encoding = System.Text.Encoding;
 
 namespace PolusggSlim.Behaviours
@@ -51,11 +55,13 @@ namespace PolusggSlim.Behaviours
         
         private SpriteRenderer _glyphRenderer;
 
-        private GameObject _nameTextBar;
         private GameObject _topButtonBar;
+        private GameObject _loggedInMenu;
 
         private GameObject _openLogInModalButton;
         private GameObject _createAccountButton;
+        
+        private GameObject _logOutButton;
         
         [HideFromIl2Cpp]
         private AuthContext _authContext => PluginSingleton<PolusggMod>.Instance.AuthContext;
@@ -73,18 +79,19 @@ namespace PolusggSlim.Behaviours
             var bundle = ResourceManager.GetAssetBundle("accountsmenu");
 
             var topButtonBarPrefab = bundle.LoadAsset("Assets/Mods/LoginMenu/TopAccount.prefab").Cast<GameObject>();
+            var loggedInMenuPrefab = bundle.LoadAsset("Assets/Mods/LoginMenu/LoggedInMenu.prefab").Cast<GameObject>();
             _glyphRenderer = new GameObject("GlyphRendererFix").AddComponent<SpriteRenderer>();
 
 
-            _nameTextBar = _normalMenu.FindRecursive(go => go.name.Contains("NameText"));
-            _nameTextBar.transform.localPosition = new Vector3(0, 2.32f, 0);
-            
-            var nameTextButton = _nameTextBar.GetComponent<PassiveButton>();
-            nameTextButton.OnClick.RemoveAllListeners();
-            nameTextButton.OnClick.AddListener(new Action(LogOut));
+            var nameTextBar = _normalMenu.FindRecursive(go => go.name.Contains("NameText"));
+            var nameTextBarPosition = nameTextBar.transform.position;
+            nameTextBar.active = false; 
 
             _topButtonBar = Instantiate(topButtonBarPrefab);
-            _topButtonBar.transform.position = _nameTextBar.transform.position;
+            _topButtonBar.transform.position = nameTextBarPosition;
+
+            _loggedInMenu = Instantiate(loggedInMenuPrefab);
+            _loggedInMenu.transform.position = nameTextBarPosition;
 
             _openLogInModalButton = _topButtonBar.FindRecursive(go => go.name.Contains("Login"));
             _createAccountButton = _topButtonBar.FindRecursive(go => go.name.Contains("Create"));
@@ -97,21 +104,23 @@ namespace PolusggSlim.Behaviours
                         .LoadAsset("Assets/Mods/LoginMenu/PolusggAccountMenu.prefab")).Cast<GameObject>();
                     menuObj.transform.localPosition = new Vector3(0, 0, -500f);
 
-                    var nameObj = menuObj.FindRecursive(x => x.name.Contains("EmailTextBox"));
+                    var emailObj = menuObj.FindRecursive(x => x.name.Contains("EmailTextBox"));
                     var passwordObj = menuObj.FindRecursive(x => x.name.Contains("PasswordTextBox"));
                     var loginButton = menuObj.FindRecursive(x => x.name.Contains("Login"));
 
                     var background = menuObj.FindRecursive(x => x.name.Contains("Background"));
                     var close = menuObj.FindRecursive(x => x.name.Contains("closeButton"));
 
-                    var nameField = CreateTextBoxTMP(nameObj);
+                    var emailField = CreateTextBoxTMP(emailObj);
                     var password = CreateTextBoxTMP(passwordObj);
 
-                    nameField.AllowEmail = true;
-                    nameField.AllowPaste = true;
+                    emailField.AllowEmail = true;
+                    emailField.AllowPaste = true;
 
                     password.allowAllCharacters = true;
                     password.AllowPaste = true;
+                    password.AllowSymbols = true;
+                    password.AllowEmail = true;
 
                     password.OnChange.AddListener(new Action(() =>
                     {
@@ -120,13 +129,29 @@ namespace PolusggSlim.Behaviours
                         password.outputText.ForceMeshUpdate(true, true);
                     }));
 
-                    loginButton.MakePassiveButton(() =>
+                    void LoginAction()
                     {
-                        if (Login(nameField.text, password.text))
-                            Destroy(menuObj);
-                    });
+                        AsyncCoroutine
+                            .CoContinueTaskWith(Task.Run(async () =>
+                            {
+                                PggLog.Message($"Thread {Thread.CurrentThread.ManagedThreadId}. IsThreadPool {Thread.CurrentThread.IsThreadPoolThread}");
+                                return await Login(emailField.text, password.text);
+                            }), () =>
+                            {
+                                _loggedInMenu.active = true;
+                                _topButtonBar.active = false;
 
-                    background.MakePassiveButton(() => Destroy(menuObj), false);
+                                UpdateGameSettingsWithName(_authContext.DisplayName);
+                                Destroy(menuObj);
+                            })
+                            .StartAsCoroutine();
+                    }
+
+                    emailField.OnEnter.AddListener((Action) LoginAction);
+                    password.OnEnter.AddListener((Action) LoginAction);
+                    loginButton.MakePassiveButton(LoginAction);
+
+                    background.MakePassiveButton(() => { }, false);
 
                     close.MakePassiveButton(() => Destroy(menuObj));
 
@@ -134,39 +159,34 @@ namespace PolusggSlim.Behaviours
                 }
                 catch (Exception e)
                 {
-                    PggLog.Error($"Error: {e.Message}, Stack: {e.StackTrace}");
+                    PggLog.Error($"Error: {e.Message}, Stack Trace: {e.StackTrace}");
                 }
             });
             _createAccountButton.MakePassiveButton(() => { Application.OpenURL("https://account.polus.gg"); });
 
+            _logOutButton = _loggedInMenu.FindRecursive(go => go.name.Contains("LogOut"));
+            _logOutButton.MakePassiveButton(LogOut);
             
-            _nameTextBar.active = _authContext.LoggedIn;
+            _loggedInMenu.active = _authContext.LoggedIn;
             _topButtonBar.active = !_authContext.LoggedIn;
             if (_authContext.LoggedIn)
                 UpdateGameSettingsWithName(_authContext.DisplayName);
         }
 
-        [HideFromIl2Cpp]
-        private bool Login(string email, string password)
+        private async Task<bool> Login(string email, string password)
         {
-            var result = _authContext.ApiClient
-                .LogIn(email, password)
-                .GetAwaiter().GetResult();
+            var result = await _authContext.ApiClient
+                .LogIn(email, password);
             if (result != null)
             {
                 _authContext.ParseClientIdAsUuid(result.Data.ClientId);
                 _authContext.ClientToken = result.Data.ClientToken;
                 _authContext.DisplayName = result.Data.DisplayName;
                 _authContext.Perks = result.Data.Perks;
-
-                _nameTextBar.active = true;
-                _topButtonBar.active = false;
-
-                UpdateGameSettingsWithName(result.Data.DisplayName);
                 
                 // TODO: Reorganize code
                 var filePath = Path.Combine(Paths.GameRootPath, "api.txt");
-                File.WriteAllText(filePath, 
+                await File.WriteAllTextAsync(filePath, 
                     Convert.ToBase64String(Encoding.UTF8.GetBytes(
                         JsonConvert.SerializeObject(new SavedAuthModel
                         {
@@ -191,7 +211,7 @@ namespace PolusggSlim.Behaviours
             
             UpdateGameSettingsWithName("Guest");
             
-            _nameTextBar.active = false;
+            _loggedInMenu.active = false;
             _topButtonBar.active = true;
             
             //TODO: Reorganize Code
@@ -206,12 +226,9 @@ namespace PolusggSlim.Behaviours
             SaveManager.PlayerName = displayName;
             SaveManager.lastPlayerName = displayName;
             
-            var tmp = _nameTextBar.GetComponentInChildren<TextMeshPro>();
-            tmp.m_text = $"Logged in as: {displayName}";
+            var tmp = _loggedInMenu.GetComponentInChildren<TextMeshPro>();
+            tmp.m_text = $"Welcome, {displayName}";
             
-            var background = _nameTextBar.FindRecursive(x => x.name.Equals("Background"));
-            background.active = false;
-
             // TODO: AccountManager.Instance.accountTab.UpdateNameDisplay();
         }
 

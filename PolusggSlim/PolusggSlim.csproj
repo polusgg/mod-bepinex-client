@@ -10,7 +10,7 @@
         <PackageReference Include="Newtonsoft.Json" Version="13.0.1">
             <PrivateAssets>true</PrivateAssets>
         </PackageReference>
-        <PackageReference Include="Reactor.OxygenFilter.MSBuild" Version="0.3.1" />
+        <PackageReference Include="Reactor.OxygenFilter.MSBuild" Version="0.3.6" />
     </ItemGroup>
     
     <ItemGroup>

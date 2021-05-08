@@ -5,7 +5,6 @@ using BepInEx;
 using BepInEx.IL2CPP;
 using HarmonyLib;
 using Newtonsoft.Json;
-using PolusggSlim.Api;
 using PolusggSlim.Auth;
 using PolusggSlim.Behaviours;
 using PolusggSlim.Patches.Misc;
@@ -48,6 +47,7 @@ namespace PolusggSlim
                 // Domain-Specific patches
                 RegisterInIl2CppAttribute.Register();
                 PermanentPatches.PatchAll(PermanentHarmony);
+                CoroutineManagerInitializer.Load();
                 //TODO: SkipIntroSplash.Load();
 
                 LocalLoad();
@@ -63,6 +63,7 @@ namespace PolusggSlim
             LocalUnload();
 
             //TODO: SkipIntroSplash.Unload();
+            CoroutineManagerInitializer.Unload();
             PermanentHarmony.UnpatchSelf();
             AuthContext.Dispose();
 
@@ -73,7 +74,7 @@ namespace PolusggSlim
         {
             PggLog.Message("Loading Polusgg mod");
             PggLog.Message($"Polusgg Server at {Configuration.Server.IpAddress}");
-            
+
 #if DEBUG
             var context = PluginSingleton<PolusggMod>.Instance.AuthContext;
             var result = context.ApiClient
@@ -103,7 +104,7 @@ namespace PolusggSlim
             }
 #endif
             AccountLoginBehaviour.Load();
-            
+
             Harmony.PatchAll();
         }
 
