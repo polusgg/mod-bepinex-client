@@ -30,11 +30,6 @@ namespace PolusGG {
         }
 
         public void HandleSpawn(uint spawnType, MessageReader reader) {
-            _spawnObjects.Count.Log(comment: "spawn object list");
-            foreach ((uint key, PnoBehaviour value) in _spawnObjects) {
-                key.Log();
-                value.name.Log();
-            }
             if (!_spawnObjects.ContainsKey(spawnType)) {
                 Debug.LogError("Couldn't find polus spawnable prefab: " + spawnType);
                 return;
@@ -77,7 +72,7 @@ namespace PolusGG {
                     return;
                 }
                 
-                childNetObject.GetType().FullName.Log(1, "has been spawned");
+                childNetObject.name.Log(1, "has been spawned");
 
                 MessageReader messageReader = reader.ReadMessage();
                 if (messageReader.Length > 0)
@@ -118,8 +113,9 @@ namespace PolusGG {
             if (_allObjectsFast.TryGetValue(netId, out PolusNetObject polusNetObject))
                 return polusNetObject.PnoBehaviour.transform;
 
-            if (AmongUsClient.Instance.allObjectsFast.TryGetValue(netId, out InnerNetObject innerNetObject))
-                return innerNetObject.transform;
+            if (AmongUsClient.Instance.allObjectsFast.ContainsKey(netId)) {
+                return AmongUsClient.Instance.allObjectsFast[netId].transform;
+            }
 
             return null;
         }

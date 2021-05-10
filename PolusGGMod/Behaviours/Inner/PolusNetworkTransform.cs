@@ -8,11 +8,11 @@ using UnityEngine;
 
 namespace PolusGG.Behaviours.Inner {
     public class PolusNetworkTransform : PnoBehaviour {
-        internal static readonly FloatRange _xRange = new(50f, -50f);
-        internal static readonly FloatRange _yRange = new(50f, -50f);
+        // internal static readonly FloatRange _xRange = new(50f, -50f);
+        // internal static readonly FloatRange _yRange = new(50f, -50f);
         private AspectPosition _aspectPosition;
-        private Vector2 _start;
-        private Vector2 _target;
+        // private Vector2 _start;
+        // private Vector2 _target;
 
         static PolusNetworkTransform() {
             ClassInjector.RegisterTypeInIl2Cpp<PolusNetworkTransform>();
@@ -33,8 +33,8 @@ namespace PolusGG.Behaviours.Inner {
         public void FixedUpdate() {
             if (pno.HasSpawnData()) Deserialize(pno.GetSpawnData());
 
-            Vector2 posv2 = transform.position;
-            Vector2 p = _target - posv2;
+            // Vector2 posv2 = transform.position;
+            // Vector2 p = _target - posv2;
             // if (p.sqrMagnitude >= 0.0001f) {
             //     p *= Vector2.Lerp(_target, posv2, 0.1f);
             // } else {
@@ -49,19 +49,23 @@ namespace PolusGG.Behaviours.Inner {
         }
 
         public void Deserialize(MessageReader reader) {
-            _aspectPosition.Alignment = (AspectPosition.EdgeAlignments) reader.ReadByte();
+            byte aln = reader.ReadByte();
+            _aspectPosition.Alignment = (AspectPosition.EdgeAlignments) aln;
 
             Vector3 pos = reader.ReadVector2();
             float z = reader.ReadSingle();
-            if (_aspectPosition.Alignment != 0) {
+            if (aln != 0) {
                 transform.parent = HudManager.Instance.gameObject.transform;
                 _aspectPosition.enabled = true;
                 _aspectPosition.DistanceFromEdge = new Vector3(0, 0, z) - pos;
                 _aspectPosition.AdjustPosition();
+                aln.Log(5, "huddies");
             } else {
                 _aspectPosition.enabled = false;
                 int parent = reader.ReadPackedInt32();
                 transform.parent = parent < 0 ? null : PogusPlugin.ObjectManager.GetNetObject((uint) parent);
+                if (transform.parent) transform.parent.name.Log(5, "got it bbg");
+                else "no homies irl".Log(5);
                 transform.position = new Vector3(pos.x, pos.y, z);
             }
         }

@@ -15,8 +15,8 @@ namespace PolusGG.Patches.Permanent {
 
         public static void Load() {
             _creditsMenu = Object.Instantiate(PogusPlugin.Bundle
-                .LoadAsset("Assets/Mods/CreditsMenu/CreditsMenu.prefab")
-                .Cast<GameObject>())
+                .LoadAsset("Assets/Mods/CreditsMenu/CreditsMenu.prefab"))
+                .Cast<GameObject>()
                 .DontDestroy()
                 .AddComponent<CreditsMenuHolder>();
             TransitionOpen transitionOpen = _creditsMenu.gameObject.AddComponent<TransitionOpen>();

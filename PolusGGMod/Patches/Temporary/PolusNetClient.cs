@@ -53,10 +53,10 @@ namespace PolusGG.Patches.Temporary {
         public class GameDataTempClass {
             [HarmonyPrefix]
             public static bool HandleGameDataInner(InnerNetClient._HandleGameDataInner_d__42 __instance) {
-                if (__instance.__state != 0) return true;
+                if (__instance.__1__state != 0) return true;
                 PlayerControl.LocalPlayer.SetThickAssAndBigDumpy(true, true);
 
-                InnerNetClient instance = __instance.__this;
+                InnerNetClient instance = __instance.__4__this;
                 MessageReader reader = __instance.reader;
                 int pos = reader.Position;
 

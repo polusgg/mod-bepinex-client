@@ -116,6 +116,7 @@ namespace PolusGG {
                     break;
                 }
                 case PolusRpcCalls.SetOpacity: {
+                    "SET PASSITY".Log(10);
                     PlayerControl control = netObject.Cast<PlayerControl>();
                     Color32 color = control.myRend.color;
                     color.a = reader.ReadByte();
@@ -216,8 +217,8 @@ namespace PolusGG {
                     break;
                 }
                 case PolusRootPackets.SetString: {
-                    StringLocations stringLocation = (StringLocations) reader.ReadByte();
                     string text = reader.ReadString();
+                    StringLocations stringLocation = (StringLocations) reader.ReadByte();
                     switch (stringLocation) {
                         case StringLocations.GameCode: {
                             GameStartManager.Instance.GameRoomName.text = text;

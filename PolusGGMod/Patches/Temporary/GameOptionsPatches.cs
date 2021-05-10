@@ -241,28 +241,10 @@ namespace PolusGG.Patches.Temporary {
 
             public static void ReceivedGameOptionPacket(GameOptionPacket packet) {
                 ushort sequenceId = packet.SequenceId;
-                // if (sequenceId != _nextSequenceReceived &&
-                    // NetHelpers.SidGreaterThan(sequenceId, _nextSequenceReceived)) {
-                    // $"Got {sequenceId}, waiting for ${_nextSequenceReceived}, {_packetQueue.Count} in queue right now".Log();
-                    // lock (_packetQueue) _packetQueue.Add(sequenceId, packet);
-                // } else
-                    lock (lockable) {
-                        ushort lastId = sequenceId;
-                        CatchHelper.TryCatch(() => HandlePacket(packet, sequenceId, true));
-
-                        IEnumerator<KeyValuePair<ushort, GameOptionPacket>> pkt =
-                            _packetQueue.OrderBy(x => ushort.MaxValue - x.Key).GetEnumerator();
-
-                        // while (pkt.MoveNext()) {
-                            // lastId = pkt.Current.Key;
-                            // CatchHelper.TryCatch(() => HandlePacket(pkt.Current.Value, pkt.Current.Key, false));
-                        // }
-
-                        // _packetQueue.Clear();
-
-                        // _nextSequenceReceived = (ushort) (lastId + 1);
-                        // $"Handled all packets up to seqid {_nextSequenceReceived}".Log();
-                    }
+                lock (lockable) {
+                    ushort lastId = sequenceId;
+                    CatchHelper.TryCatch(() => HandlePacket(packet, sequenceId, true));
+                }
             }
 
             private static void HandlePacket(GameOptionPacket packet, int d, bool isFirst) {

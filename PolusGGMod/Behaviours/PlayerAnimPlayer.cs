@@ -95,9 +95,9 @@ namespace PolusGG.Behaviours {
                 0,
                 0,
                 Player.myRend.color.a,
-                Player.myRend.color.a,
-                Player.myRend.color.a,
-                Player.myRend.color.a,
+                Player.HatRenderer.FrontLayer.color.a,
+                Player.CurrentPet.rend.color.a,
+                Player.MyPhysics.Skin.layer.color.a,
                 Player.myRend.material.GetColor(BackColor),
                 Player.myRend.material.GetColor(BodyColor),
                 Player.myRend.material.GetColor(VisorColor),
@@ -177,7 +177,9 @@ namespace PolusGG.Behaviours {
 
             public Vector2 Position {
                 get => _position;
-                set => _playerControl.transform.localPosition = value;
+                set {
+                    // _playerControl.myRend.;
+                }
             }
 
             public float Angle {
