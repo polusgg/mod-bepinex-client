@@ -7,7 +7,7 @@ namespace PolusggSlim.Patches.Misc
 {
     public class CoroutineManagerInitializer
     {
-        private static readonly Action<Scene, LoadSceneMode> ManagerInitializeHook = (scene, _) =>
+        private static readonly Action<Scene, LoadSceneMode> ManagerInitializeHook = (_, _) =>
         {
             var gameObject = new GameObject($"PolusggSlim - {nameof(CoroutineProcessor)}");
             gameObject.AddComponent<CoroutineProcessor>();

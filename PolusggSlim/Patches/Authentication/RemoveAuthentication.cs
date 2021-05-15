@@ -1,8 +1,7 @@
-using HarmonyLib;
 using InnerNet;
 using UnityEngine;
 
-namespace PolusggSlim.Patches.Misc
+namespace PolusggSlim.Patches.Authentication
 {
     public static class RemoveAuthentication
     {

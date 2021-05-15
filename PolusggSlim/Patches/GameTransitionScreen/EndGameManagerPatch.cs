@@ -1,5 +1,3 @@
-using HarmonyLib;
-
 namespace PolusggSlim.Patches.GameTransitionScreen
 {
     public static class EndGameManagerPatch

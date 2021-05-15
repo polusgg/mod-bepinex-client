@@ -13,7 +13,7 @@ namespace PolusggSlim.Utils
 
         public void Start()
         {
-            Camera.onPostRender = new Action<Camera>(camera => { Coroutine.ProcessWaitForEndOfFrame(); });
+            Camera.onPostRender = new Action<Camera>(_ => { Coroutine.ProcessWaitForEndOfFrame(); });
         }
 
         public void Update()

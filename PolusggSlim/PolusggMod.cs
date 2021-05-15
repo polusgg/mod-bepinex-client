@@ -7,6 +7,7 @@ using HarmonyLib;
 using Newtonsoft.Json;
 using PolusggSlim.Auth;
 using PolusggSlim.Behaviours;
+using PolusggSlim.Configuration;
 using PolusggSlim.Patches.Misc;
 using PolusggSlim.Utils;
 using PolusggSlim.Utils.Attributes;

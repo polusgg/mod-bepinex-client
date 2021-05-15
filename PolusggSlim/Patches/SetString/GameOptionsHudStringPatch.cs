@@ -1,5 +1,3 @@
-using HarmonyLib;
-
 namespace PolusggSlim.Patches.SetString
 {
     public static class GameOptionsHudStringPatch

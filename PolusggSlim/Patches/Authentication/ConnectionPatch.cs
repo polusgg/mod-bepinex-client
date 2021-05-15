@@ -28,7 +28,7 @@ namespace PolusggSlim.Patches.Authentication
             // if (ServerManager.Instance.CurrentRegion.PingServer ==
             //     PluginSingleton<PolusggMod>.Instance.Configuration.Server.IpAddress)
             // {
-            if (bytes[0] != 0x09 && AmongUsClient.Instance.GameMode == GameModes.OnlineGame)
+            if (AmongUsClient.Instance.GameMode == GameModes.OnlineGame)
             {
                 PluginSingleton<PolusggMod>.Instance.SigningHelper.SignByteArray(ref bytes);
                 length = bytes.Length;

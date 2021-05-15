@@ -6,10 +6,14 @@ namespace PolusggSlim.Patches.Misc
     public static class TextMeshProPatch
     {
         [HarmonyPatch(typeof(TextBoxTMP), nameof(TextBoxTMP.Start))]
-        public class TextBoxTMP_Start
+        public static class TextBoxTMP_Start
         {
+            private static bool _executed;
             public static void Postfix()
             {
+                if (_executed)
+                    return;
+
                 TextBoxTMP.SymbolChars.Add('#');
                 TextBoxTMP.SymbolChars.Add('$');
                 TextBoxTMP.SymbolChars.Add('*');
@@ -22,6 +26,8 @@ namespace PolusggSlim.Patches.Misc
                 TextBoxTMP.SymbolChars.Add('{');
                 TextBoxTMP.SymbolChars.Add('}');
                 TextBoxTMP.SymbolChars.Add('|');
+
+                _executed = true;
             }
         }
 

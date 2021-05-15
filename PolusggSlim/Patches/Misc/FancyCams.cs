@@ -5,19 +5,19 @@ namespace PolusggSlim.Patches.Misc
 {
     public static class FancyCams
     {
-        private static bool Enabled;
+        private static bool _enabled;
 
         // [HarmonyPatch(typeof(SurveillanceMinigame), nameof(SurveillanceMinigame.Begin))]
         public static class SurveillanceMinigame_Begin
         {
             public static void Prefix()
             {
-                Enabled = true;
+                _enabled = true;
             }
 
             public static void Postfix()
             {
-                Enabled = false;
+                _enabled = false;
             }
         }
 
@@ -28,7 +28,7 @@ namespace PolusggSlim.Patches.Misc
         {
             public static void Prefix([HarmonyArgument(0)] ref int width, [HarmonyArgument(1)] ref int height)
             {
-                if (!Enabled)
+                if (!_enabled)
                     return;
 
                 if (Screen.width > Screen.height)

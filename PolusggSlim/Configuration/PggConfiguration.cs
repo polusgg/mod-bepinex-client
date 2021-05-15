@@ -1,9 +1,8 @@
 using System;
 using System.IO;
 using BepInEx;
-using PolusggSlim.Configuration;
 
-namespace PolusggSlim
+namespace PolusggSlim.Configuration
 {
     public class PggConfiguration
     {

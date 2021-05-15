@@ -1,12 +1,10 @@
 using System;
-using System.Collections;
 using System.IO;
 using System.Linq;
-using System.Threading;
+using System.Text;
 using System.Threading.Tasks;
 using BepInEx;
 using HarmonyLib;
-using Il2CppSystem.Text;
 using Newtonsoft.Json;
 using PolusggSlim.Auth;
 using PolusggSlim.Utils;
@@ -18,8 +16,7 @@ using UnhollowerBaseLib.Attributes;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using Coroutine = PolusggSlim.Utils.Coroutine;
-using Encoding = System.Text.Encoding;
+using StringBuilder = Il2CppSystem.Text.StringBuilder;
 
 namespace PolusggSlim.Behaviours
 {
@@ -134,7 +131,6 @@ namespace PolusggSlim.Behaviours
                         AsyncCoroutine
                             .CoContinueTaskWith(Task.Run(async () =>
                             {
-                                PggLog.Message($"Thread {Thread.CurrentThread.ManagedThreadId}. IsThreadPool {Thread.CurrentThread.IsThreadPoolThread}");
                                 return await Login(emailField.text, password.text);
                             }), () =>
                             {
