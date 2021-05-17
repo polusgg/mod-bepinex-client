@@ -10,9 +10,13 @@ using UnityEngine;
 namespace PolusGG.Behaviours {
     public class PlayerAnimPlayer : MonoBehaviour {
         public PlayerControl Player;
-        private static readonly int BackColor = Shader.PropertyToID("_BackColor");
-        private static readonly int BodyColor = Shader.PropertyToID("_BodyColor");
-        private static readonly int VisorColor = Shader.PropertyToID("_VisorColor");
+        private static readonly int BackColorID = Shader.PropertyToID("_BackColor");
+        private static readonly int BodyColorID = Shader.PropertyToID("_BodyColor");
+        private static readonly int VisorColorID = Shader.PropertyToID("_VisorColor");
+        private Color _playerColor;
+        private Color _hatColor;
+        private Color _petColor;
+        private Color _skinColor;
 
         static PlayerAnimPlayer() {
             ClassInjector.RegisterTypeInIl2Cpp<PlayerAnimPlayer>();
@@ -22,6 +26,13 @@ namespace PolusGG.Behaviours {
 
         private void Start() {
             Player = GetComponent<PlayerControl>();
+        }
+
+        private void Update() {
+            Player.myRend.color = _playerColor;
+            Player.HatRenderer.color = _hatColor;
+            Player.MyPhysics.rend.color = _skinColor;
+            if (Player.CurrentPet) Player.CurrentPet.rend.color = _petColor;
         }
 
         public void HandleMessage(MessageReader reader) {
@@ -45,7 +56,8 @@ namespace PolusGG.Behaviours {
                     message.ReadVector2(),
                     message.ReadVector2(),
                     message.ReadSingle(),
-                    Player
+                    Player,
+                    this
                 ));
             }
 
@@ -53,7 +65,7 @@ namespace PolusGG.Behaviours {
         }
 
         [SuppressMessage("ReSharper", "AccessToModifiedClosure")]
-        public IEnumerator CoPlayAnimation(PlayerKeyframe[] frames, bool reset) {
+        private IEnumerator CoPlayAnimation(PlayerKeyframe[] frames, bool reset) {
             PlayerKeyframe resetTo = SerializeCurrentState();
             PlayerKeyframe previous = resetTo;
 
@@ -78,16 +90,15 @@ namespace PolusGG.Behaviours {
                 previous = current;
             }
 
-            if (reset) {
-                resetTo.PlayerOpacity = resetTo.PlayerOpacity;
-                resetTo.HatOpacity = resetTo.HatOpacity;
-                resetTo.PetOpacity = resetTo.PetOpacity;
-                resetTo.SkinOpacity = resetTo.SkinOpacity;
-                resetTo.SetPlayerColors(resetTo.MainColor, resetTo.ShadowColor, resetTo.VisorColor);
-                resetTo.Scale = resetTo.Scale;
-                resetTo.Position = resetTo.Position;
-                resetTo.Angle = resetTo.Angle;
-            }
+            if (!reset) yield break;
+            resetTo.PlayerOpacity = resetTo.PlayerOpacity;
+            resetTo.HatOpacity = resetTo.HatOpacity;
+            resetTo.PetOpacity = resetTo.PetOpacity;
+            resetTo.SkinOpacity = resetTo.SkinOpacity;
+            resetTo.SetPlayerColors(resetTo.MainColor, resetTo.ShadowColor, resetTo.VisorColor);
+            resetTo.Scale = resetTo.Scale;
+            resetTo.Position = resetTo.Position;
+            resetTo.Angle = resetTo.Angle;
         }
 
         private PlayerKeyframe SerializeCurrentState() {
@@ -98,13 +109,14 @@ namespace PolusGG.Behaviours {
                 Player.HatRenderer.FrontLayer.color.a,
                 Player.CurrentPet.rend.color.a,
                 Player.MyPhysics.Skin.layer.color.a,
-                Player.myRend.material.GetColor(BackColor),
-                Player.myRend.material.GetColor(BodyColor),
-                Player.myRend.material.GetColor(VisorColor),
+                Player.myRend.material.GetColor(BackColorID),
+                Player.myRend.material.GetColor(BodyColorID),
+                Player.myRend.material.GetColor(VisorColorID),
                 Player.transform.localScale,
                 Player.transform.position,
                 Player.transform.rotation.eulerAngles.y,
-                Player
+                Player,
+                this
             );
         }
 
@@ -116,6 +128,7 @@ namespace PolusGG.Behaviours {
             public uint Offset;
             private readonly float _petOpacity;
             private readonly PlayerControl _playerControl;
+            private readonly PlayerAnimPlayer _animPlayer;
 
             private readonly float _playerOpacity;
             private readonly Vector2 _position;
@@ -126,7 +139,7 @@ namespace PolusGG.Behaviours {
 
             public PlayerKeyframe(uint offset, uint duration, float playerOpacity, float hatOpacity, float petOpacity,
                 float skinOpacity, Color32 mainColor, Color32 shadowColor, Color32 visorColor, Vector2 scale,
-                Vector2 position, float angle, PlayerControl playerControl) {
+                Vector2 position, float angle, PlayerControl playerControl, PlayerAnimPlayer animPlayer) {
                 Offset = offset;
                 Duration = duration;
                 _playerOpacity = playerOpacity;
@@ -140,26 +153,27 @@ namespace PolusGG.Behaviours {
                 _position = position;
                 _angle = angle;
                 _playerControl = playerControl;
+                _animPlayer = animPlayer;
             }
 
             public float PlayerOpacity {
                 get => _playerOpacity;
-                set => _playerControl.myRend.color = new Color(1f, 1f, 1f, value);
+                set => _animPlayer._playerColor.a = value;
             }
 
             public float HatOpacity {
                 get => _hatOpacity;
-                set => _playerControl.HatRenderer.color = new Color(1f, 1f, 1f, value);
+                set => _animPlayer._hatColor.a = value;
             }
 
             public float PetOpacity {
                 get => _petOpacity;
-                set => _playerControl.CurrentPet.rend.color = new Color(1f, 1f, 1f, value);
+                set => _animPlayer._petColor.a = value;
             }
 
             public float SkinOpacity {
                 get => _skinOpacity;
-                set => _playerControl.MyPhysics.Skin.layer.color = new Color(1f, 1f, 1f, value);
+                set => _animPlayer._skinColor.a = value;
             }
 
             public Color MainColor => _mainColor;

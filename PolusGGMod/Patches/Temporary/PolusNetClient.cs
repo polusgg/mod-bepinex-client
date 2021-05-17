@@ -112,7 +112,7 @@ namespace PolusGG.Patches.Temporary {
                             return false;
                         }
 
-                        reader.ReadPackedInt32();//.Log(3, "owner id?");
+                        reader.ReadPackedInt32().Log(3, "owner id?");
 
                         reader.Position = pos;
                         return true;

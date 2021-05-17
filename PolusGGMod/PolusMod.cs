@@ -388,7 +388,7 @@ namespace PolusGG {
 
     public static class Lol {
         public static void SetThickAssAndBigDumpy(this PlayerControl playerControl, bool isThick, bool hasBigDumpy) {
-            //stub as fuck
+            //stub
         }
     }
 }

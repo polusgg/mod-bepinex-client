@@ -8,8 +8,8 @@ using UnityEngine;
 
 namespace PolusGG.Behaviours.Inner {
     public class PolusNetworkTransform : PnoBehaviour {
-        // internal static readonly FloatRange _xRange = new(50f, -50f);
-        // internal static readonly FloatRange _yRange = new(50f, -50f);
+        internal static readonly FloatRange XRange = new(50f, -50f);
+        internal static readonly FloatRange YRange = new(50f, -50f);
         private AspectPosition _aspectPosition;
         // private Vector2 _start;
         // private Vector2 _target;

@@ -13,7 +13,8 @@ namespace PolusGG.Behaviours {
         }
         public RegionTextMonitorTMP(IntPtr ptr) : base(ptr) {}
         public void Start() {
-            this.StartCoroutine(ReloadText());
+            // innersloth fixed the funny issue so i'm commenting this out
+            // this.StartCoroutine(ReloadText());
         }
 
         private IEnumerator ReloadText() {

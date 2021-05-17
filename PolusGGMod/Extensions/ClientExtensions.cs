@@ -21,7 +21,7 @@ namespace PolusGG.Extensions {
         public static Vector2 ReadVector2(this MessageReader reader) {
             float v = reader.ReadUInt16() / 65535f;
             float v2 = reader.ReadUInt16() / 65535f;
-            return new Vector2(PolusNetworkTransform._xRange.Lerp(v), PolusNetworkTransform._yRange.Lerp(v2));
+            return new Vector2(PolusNetworkTransform.XRange.Lerp(v), PolusNetworkTransform.YRange.Lerp(v2));
         }
     }
 }

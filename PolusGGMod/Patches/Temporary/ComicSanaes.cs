@@ -11,7 +11,7 @@ namespace PolusGG.Patches.Temporary {
         public static void Lmao(TextMeshPro __instance) {
             // __instance.outlineColor = Color.black;
             // __instance.SetOutlineThickness(0.1f);
-            // __instance.font = PogusPlugin.font;
+            __instance.font = PogusPlugin.font;
             // __instance.LoadFontAsset();
         }
     }

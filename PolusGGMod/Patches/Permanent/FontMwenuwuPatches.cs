@@ -28,6 +28,7 @@ namespace PolusGG.Patches.Permanent {
                 SettingsLanguageMenu langButton = Object.FindObjectOfType(Il2CppType.Of<SettingsLanguageMenu>(), true)
                     .Cast<SettingsLanguageMenu>();
                 GameObject gameObject = Object.Instantiate(langButton.gameObject, langButton.transform.parent);
+                gameObject.transform.position = new Vector3();
                 Object.DestroyImmediate(gameObject.GetComponent<SettingsLanguageMenu>());
                 gameObject.name = "FunnyFontMenuButton";
                 PassiveButton btn = gameObject.GetComponent<PassiveButton>();

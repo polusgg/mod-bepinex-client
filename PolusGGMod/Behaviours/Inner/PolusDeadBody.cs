@@ -19,8 +19,6 @@ namespace PolusGG.Behaviours.Inner {
             ClassInjector.RegisterTypeInIl2Cpp<PolusDeadBody>();
         }
 
-        // todo recreate dead body lmao
-        // todo patch murder player to not show dead body lmao
         // todo patch reporting to correctly allow reporting custom dead bodies
 
         public PolusDeadBody(IntPtr ptr) : base(ptr) { }

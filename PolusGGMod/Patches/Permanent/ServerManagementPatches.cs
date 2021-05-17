@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections;
 using System.Linq;
 using HarmonyLib;
+using PolusGG.Extensions;
 using PolusGG.Mods.Patching;
 using UnhollowerBaseLib;
 
@@ -19,13 +21,23 @@ namespace PolusGG.Patches.Permanent {
             Il2CppStructArray<uint> stats = new(8);
             Array.Copy(StatsManager.Instance.WinReasons, stats, 7);
             StatsManager.Instance.WinReasons = stats;
-            ServerManager.DefaultRegions =
-            ServerManager.DefaultRegions.Prepend(PggConstants.Region).ToArray();
-            __instance.SetRegion(PggConstants.Region.Duplicate());
+            // ServerManager.DefaultRegions =
+            // ServerManager.DefaultRegions.Prepend(PggConstants.Region).ToArray();
+            ServerManager.Instance.AddOrUpdateRegion(PggConstants.Region);
             if (PogusPlugin.ModManager.AllPatched) return false;
             PogusPlugin.ModManager.LoadMods();
             PogusPlugin.ModManager.PatchMods();
+
+            __instance.StartCoroutine(SetPggRegion());
             return false;
+        }
+
+        private static IEnumerator SetPggRegion() {
+            yield return ServerManager.Instance.WaitForServers();
+
+            // if (ServerManager.Instance.AvailableRegions.All(x => x.PingServer != PggConstants.Region.PingServer)) {
+            // }
+            ServerManager.Instance.SetRegion(PggConstants.Region);
         }
     }
 

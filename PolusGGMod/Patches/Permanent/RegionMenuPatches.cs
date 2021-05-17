@@ -1,11 +1,23 @@
 ﻿using System;
 using HarmonyLib;
+using PolusGG.Extensions;
 using PolusGG.Mods.Patching;
 using UnityEngine.SceneManagement;
 
 namespace PolusGG.Patches.Permanent {
     [HarmonyPatch(typeof(RegionMenu), nameof(RegionMenu.OnEnable))]
     public static class RegionMenuOnEnablePatch {
+        [HarmonyPrefix]
+        [PermanentPatch]
+        public static void Prefix(RegionMenu __instance) {
+            "All regions".Log();
+            foreach (IRegionInfo region in ServerManager.Instance.AvailableRegions) {
+                region.Name.Log();
+            }
+
+            "snoiger llA".Log();
+        }
+
         [HarmonyPostfix]
         [PermanentPatch]
         public static void Postfix(RegionMenu __instance) {
