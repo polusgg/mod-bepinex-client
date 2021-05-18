@@ -159,7 +159,7 @@ namespace PolusGG {
             uint id = reader.ReadUInt32();
             CacheFile file = CachedFiles[id] = new CacheFile {
                 Type = (ResourceType) reader.ReadByte(),
-                Hash = reader.ReadBytes(16),
+                Hash = reader.ReadBytes(32),
                 LocalLocation = reader.ReadString(),
                 Location = reader.ReadString()
             };
