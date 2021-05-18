@@ -155,7 +155,7 @@ namespace PolusGG {
                 case PolusRootPackets.FetchResource: {
                     uint resource = reader.ReadPackedUInt32();
                     string location = reader.ReadString();
-                    byte[] hash = reader.ReadBytes(16);
+                    byte[] hash = reader.ReadBytes(32);
                     uint resourceType = reader.ReadByte();
                     MessageWriter writer;
                     if (Cache.IsCachedAndValid(resource, hash)) {
