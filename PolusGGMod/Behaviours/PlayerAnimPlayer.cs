@@ -88,7 +88,7 @@ namespace PolusGG.Behaviours {
                         field[6] ? Color.Lerp(previous.VisorColor.Value, current.VisorColor.Value, dt) : null
                     );
                     if (field[7]) current.Scale = Vector2.Lerp(previous.Scale.Value, current.Scale.Value, dt);
-                    if (field[8]) current.Position = Vector2.Lerp(previous.Position.Value, current.Position.Value, dt);
+                    // if (field[8]) current.Position = Vector2.Lerp(previous.Position.Value, current.Position.Value, dt);
                     if (field[9]) current.Angle = Mathf.Lerp(previous.Angle.Value, current.Angle.Value, dt);
                 }));
 
@@ -96,14 +96,14 @@ namespace PolusGG.Behaviours {
             }
 
             if (!reset) yield break;
-            resetTo.PlayerOpacity = resetTo.PlayerOpacity;
-            resetTo.HatOpacity = resetTo.HatOpacity;
-            resetTo.PetOpacity = resetTo.PetOpacity;
-            resetTo.SkinOpacity = resetTo.SkinOpacity;
-            resetTo.SetPlayerColors(resetTo.MainColor, resetTo.ShadowColor, resetTo.VisorColor);
-            resetTo.Scale = resetTo.Scale;
-            resetTo.Position = resetTo.Position;
-            resetTo.Angle = resetTo.Angle;
+            if (field[0]) resetTo.PlayerOpacity = resetTo.PlayerOpacity;
+            if (field[1]) resetTo.HatOpacity = resetTo.HatOpacity;
+            if (field[2]) resetTo.PetOpacity = resetTo.PetOpacity;
+            if (field[3]) resetTo.SkinOpacity = resetTo.SkinOpacity;
+            resetTo.SetPlayerColors(field[4] ? resetTo.MainColor : null, field[5] ? resetTo.MainColor : null, field[6] ? resetTo.MainColor : null);
+            if (field[7]) resetTo.Scale = resetTo.Scale;
+            // if (field[8]) resetTo.Position = resetTo.Position;
+            if (field[9]) resetTo.Angle = resetTo.Angle;
         }
 
         public bool[] BitfieldParser(ushort value, byte size) {

@@ -113,7 +113,6 @@ namespace PolusGG {
                         string[] extra = (string[]) y.ExtraData;
                         writer.Write(extra.Length);
                         foreach (string s in extra) writer.Write(s);
-
                         break;
                     }
                     case ResourceType.Asset: {
@@ -121,6 +120,7 @@ namespace PolusGG {
                         break;
                     }
                     default: {
+                        PogusPlugin.Logger.LogError($"Invalid asset type {y.Type}");
                         throw new ArgumentOutOfRangeException();
                     }
                 }

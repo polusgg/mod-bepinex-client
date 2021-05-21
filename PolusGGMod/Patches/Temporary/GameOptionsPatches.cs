@@ -19,12 +19,12 @@ namespace PolusGG.Patches.Temporary {
         public static Dictionary<string, List<GameOption>> Categories = new();
         public static List<GameOption> NoCategory = new();
         public static Dictionary<string, GameOption> OptionMap = new();
-        internal static object lockable = new();
+        internal static object Lockable = new();
 
-        private static TextMeshPro groupTitle;
-        private static KeyValueOption enumOption;
-        private static NumberOption numbOption;
-        private static ToggleOption boolOption;
+        private static TextMeshPro _groupTitle;
+        private static KeyValueOption _enumOption;
+        private static NumberOption _numbOption;
+        private static ToggleOption _boolOption;
 
         public static void UpdateHudString() {
             CatchHelper.TryCatch(
@@ -35,39 +35,39 @@ namespace PolusGG.Patches.Temporary {
         public class OnEnablePatch {
             [HarmonyPrefix]
             public static bool OnEnable(GameSettingMenu __instance) {
-                lock (lockable) {
+                lock (Lockable) {
                     if (!CustomPlayerMenu.Instance || CustomPlayerMenu.Instance.selectedTab != 4) return true;
-                    if (groupTitle == null) {
-                        groupTitle = Object.Instantiate(__instance.AllItems[3].GetComponentInChildren<TextMeshPro>())
+                    if (_groupTitle == null) {
+                        _groupTitle = Object.Instantiate(__instance.AllItems[3].GetComponentInChildren<TextMeshPro>())
                             .DontDestroy();
-                        groupTitle.gameObject.active = false;
-                        groupTitle.name = "CategoryTitlePrefab";
-                        groupTitle.transform.localPosition = new Vector3(-1.254f, 0);
+                        _groupTitle.gameObject.active = false;
+                        _groupTitle.name = "CategoryTitlePrefab";
+                        _groupTitle.transform.localPosition = new Vector3(-1.254f, 0);
                     }
 
-                    if (enumOption == null) {
-                        enumOption = Object.Instantiate(__instance.AllItems[1].gameObject)
+                    if (_enumOption == null) {
+                        _enumOption = Object.Instantiate(__instance.AllItems[1].gameObject)
                             .GetComponent<KeyValueOption>().DontDestroy();
-                        enumOption.gameObject.active = false;
-                        enumOption.name = "EnumOptionPrefab";
-                        enumOption.transform.localPosition = new Vector3(0, 0);
+                        _enumOption.gameObject.active = false;
+                        _enumOption.name = "EnumOptionPrefab";
+                        _enumOption.transform.localPosition = new Vector3(0, 0);
                     }
 
-                    if (numbOption == null) {
-                        numbOption = Object.Instantiate(__instance.AllItems[2].gameObject)
+                    if (_numbOption == null) {
+                        _numbOption = Object.Instantiate(__instance.AllItems[2].gameObject)
                             .GetComponent<NumberOption>().DontDestroy();
-                        numbOption.gameObject.active = false;
-                        numbOption.name =
+                        _numbOption.gameObject.active = false;
+                        _numbOption.name =
                             "NumberOptionPrefab"; //todo fix this semicolon and also x pos on game options :(
-                        numbOption.transform.localPosition = new Vector3(0, 0);
+                        _numbOption.transform.localPosition = new Vector3(0, 0);
                     }
 
-                    if (boolOption == null) {
-                        boolOption = Object.Instantiate(__instance.AllItems[3].gameObject)
+                    if (_boolOption == null) {
+                        _boolOption = Object.Instantiate(__instance.AllItems[3].gameObject)
                             .GetComponent<ToggleOption>().DontDestroy();
-                        boolOption.gameObject.active = false;
-                        boolOption.name = "BooleanOptionPrefab";
-                        boolOption.transform.localPosition = new Vector3(0, 0);
+                        _boolOption.gameObject.active = false;
+                        _boolOption.name = "BooleanOptionPrefab";
+                        _boolOption.transform.localPosition = new Vector3(0, 0);
                     }
 
                     List<Transform> options = new();
@@ -77,7 +77,7 @@ namespace PolusGG.Patches.Temporary {
                             case OptionType.Number: {
                                 FloatValue value = (FloatValue) gameOption.Value;
                                 NumberOption option =
-                                    Object.Instantiate(numbOption);
+                                    Object.Instantiate(_numbOption);
                                 option.name = gameOption.Title;
                                 option.Increment = value.Step;
                                 option.ValidRange = new FloatRange(value.Lower, value.Upper);
@@ -92,7 +92,7 @@ namespace PolusGG.Patches.Temporary {
                             case OptionType.Boolean: {
                                 BooleanValue value = (BooleanValue) gameOption.Value;
                                 ToggleOption option =
-                                    Object.Instantiate(boolOption);
+                                    Object.Instantiate(_boolOption);
                                 option.name = gameOption.Title;
                                 option.CheckMark.enabled = value.Value;
                                 option.TitleText.text = gameOption.Title;
@@ -104,7 +104,7 @@ namespace PolusGG.Patches.Temporary {
                             case OptionType.Enum: {
                                 EnumValue value = (EnumValue) gameOption.Value;
                                 KeyValueOption option =
-                                    Object.Instantiate(enumOption);
+                                    Object.Instantiate(_enumOption);
                                 option.name = gameOption.Title;
                                 option.Values =
                                     new Il2CppSystem.Collections.Generic.List<
@@ -133,7 +133,7 @@ namespace PolusGG.Patches.Temporary {
 
                     foreach ((string name, List<GameOption> opts) in Categories.OrderBy(pair => pair.Value.Min(x => x.Priority)).ThenBy(x => x.Key)) {
                         TextMeshPro newTitle =
-                            Object.Instantiate(groupTitle);
+                            Object.Instantiate(_groupTitle);
                         newTitle.text = name;
                         options.Add(newTitle.transform);
 
@@ -241,14 +241,14 @@ namespace PolusGG.Patches.Temporary {
 
             public static void ReceivedGameOptionPacket(GameOptionPacket packet) {
                 ushort sequenceId = packet.SequenceId;
-                lock (lockable) {
+                lock (Lockable) {
                     ushort lastId = sequenceId;
-                    CatchHelper.TryCatch(() => HandlePacket(packet, sequenceId, true));
+                    CatchHelper.TryCatch(() => HandlePacket(packet));
                 }
             }
 
-            private static void HandlePacket(GameOptionPacket packet, int d, bool isFirst) {
-                lock (lockable) {
+            private static void HandlePacket(GameOptionPacket packet) {
+                lock (Lockable) {
                     MessageReader reader = MessageReader.GetSized(packet.Reader.Length);
                     reader.Buffer = packet.Reader;
                     reader.Length = packet.Reader.Length;
@@ -286,12 +286,6 @@ namespace PolusGG.Patches.Temporary {
                                 category = Categories[cat];
                             } else {
                                 category = NoCategory;
-                            }
-
-                            // $"{name} ({d}) added to {cat}".Log(level: LogLevel.Error);
-                            int i = 0;
-                            foreach (string catName in Categories.Keys.Cast<string>()) {
-                                // $"\t{i++} - {catName}".Log();
                             }
 
                             if (category.Any(x => x.Title == name)) {
@@ -360,7 +354,7 @@ namespace PolusGG.Patches.Temporary {
         }
 
         [HarmonyPatch(typeof(KeyValueOption), nameof(KeyValueOption.Increase))]
-        public class KVIncrease {
+        public class KvIncrease {
             [HarmonyPrefix]
             public static bool Increase(KeyValueOption __instance) {
                 __instance.Selected = Mathf.Clamp(__instance.Selected + 1, 0, __instance.Values.Count - 1);
@@ -370,7 +364,7 @@ namespace PolusGG.Patches.Temporary {
         }
 
         [HarmonyPatch(typeof(KeyValueOption), nameof(KeyValueOption.Decrease))]
-        public class KVDecrease {
+        public class KvDecrease {
             [HarmonyPrefix]
             public static bool Decrease(KeyValueOption __instance) {
                 __instance.Selected = Mathf.Clamp(__instance.Selected - 1, 0, __instance.Values.Count - 1);
@@ -526,7 +520,7 @@ namespace PolusGG.Patches.Temporary {
         }
 
         public class TitleOption : MonoBehaviour {
-            public TextMeshPro Title;
+            public TextMeshPro title;
             public TitleOption(IntPtr ptr) : base(ptr) { }
         }
 
@@ -560,7 +554,7 @@ namespace PolusGG.Patches.Temporary {
                     });
                 }
 
-                lock (lockable) {
+                lock (Lockable) {
                     GenerateHud(null, NoCategory);
 
                     foreach ((string key, List<GameOption> value) in Categories.OrderBy(pair => pair.Value.Min(x => x.Priority)).ThenBy(x => x.Key)) {

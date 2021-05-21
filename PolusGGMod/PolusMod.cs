@@ -129,7 +129,7 @@ namespace PolusGG {
                 case PolusRpcCalls.SetOutline: {
                     PlayerControl control = netObject.Cast<PlayerControl>();
                     control.myRend.material.SetFloat(Outline, reader.ReadByte());
-                    control.myRend.material.SetColor(OutlineColor, Color.red);
+                    control.myRend.material.SetColor(OutlineColor, new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte()));
                     break;
                 }
                 case PolusRpcCalls.DespawnAllVents: {
@@ -316,7 +316,9 @@ namespace PolusGG {
         }
 
         public override void FixedUpdate() {
-            
+            if (MeetingHud.Instance) {
+                PlayerControl.LocalPlayer.SetThickAssAndBigDumpy(true, true);
+            }
         }
 
         public override void Update() {

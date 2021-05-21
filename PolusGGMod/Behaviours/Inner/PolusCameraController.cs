@@ -36,7 +36,6 @@ namespace PolusGG.Behaviours.Inner {
         private void HandleRpc(MessageReader reader, byte callid) {
             if (callid != (int) PolusRpcCalls.BeginAnimationCamera) return;
             List<CameraKeyframe> keyframe = new();
-            int i = 0;
             while (reader.Position < reader.Length - 1) {
                 MessageReader message = reader.ReadMessage();
                 keyframe.Add(new CameraKeyframe(
