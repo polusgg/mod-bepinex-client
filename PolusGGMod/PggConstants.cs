@@ -4,7 +4,7 @@ using UnhollowerBaseLib;
 
 namespace PolusGG {
     public static class PggConstants {
-        public static readonly string DownloadServer = "https://polusgg-assetbundles.nyc3.digitaloceanspaces.com/";
+        public static readonly string DownloadServer = "https://client-assetbundles.polus.gg/";
         public static readonly string SaveFileName = "pggSaveData";
         private static string _dlFolder;
 

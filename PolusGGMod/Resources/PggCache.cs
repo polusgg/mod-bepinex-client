@@ -80,10 +80,15 @@ namespace PolusGG {
                 // }
 
                 using (BinaryWriter writer = new(File.Create(PggConstants.CacheLocation))) {
-                    Serialize(writer);
+                    try {
+                        Serialize(writer);
+                    } catch (Exception ex) {
+                        PogusPlugin.Logger.LogWarning($"Failed to cache {location}!");
+                        PogusPlugin.Logger.LogWarning(ex);
+                    }
                 }
 
-                PogusPlugin.Logger.LogMessage($"Downloaded and cached file at {location} ({id}, {hash})");
+                PogusPlugin.Logger.LogMessage($"Downloaded file at {location} ({id}, {hash})");
                 return cacheFile;
             }
 

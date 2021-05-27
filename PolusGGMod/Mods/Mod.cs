@@ -37,6 +37,14 @@ namespace PolusGG.Mods {
         /// </summary>
         public abstract void Update();
         /// <summary>
+        /// Called when the game establishes a connection (game only, does not include announcement protocol)
+        /// </summary>
+        public abstract void ConnectionEstablished();
+        /// <summary>
+        /// Called when the game ends a connection (game only, does not include announcement protocol)
+        /// </summary>
+        public abstract void ConnectionDestroyed();
+        /// <summary>
         /// Called when the user joins a lobby
         /// </summary>
         public abstract void LobbyJoined();

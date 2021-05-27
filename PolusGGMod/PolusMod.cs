@@ -28,6 +28,7 @@ namespace PolusGG {
         private bool loaded;
         private bool optionsDirty;
         public static PolusMod Instance;
+        private GameObject maintnet;
 
         public override string Name => "PolusMod";
 
@@ -77,27 +78,19 @@ namespace PolusGG {
                 case PolusRpcCalls.SetRole: {
                     playerControl = netObject.Cast<PlayerControl>();
 
-                    if (reader.ReadBoolean()) {
-                        if (playerControl == PlayerControl.LocalPlayer) {
-                            DestroyableSingleton<HudManager>.Instance.KillButton.gameObject.SetActive(true);
-                            playerControl.SetKillTimer(PlayerControl.GameOptions.KillCooldown);
-                        }
+                    HudManager.Instance.KillButton.gameObject.active = false;
 
-                        if (PlayerControl.LocalPlayer.Data.IsImpostor)
+                    if (reader.ReadBoolean()) { 
+                        if (PlayerControl.LocalPlayer.Data.IsImpostor) {
                             playerControl.Data.Object.nameText.color = Palette.ImpostorRed;
-                    } else {
-                        if (playerControl == PlayerControl.LocalPlayer) {
-                            playerControl.SetKillTimer(21f);
-                            HudManager.Instance.KillButton.gameObject.SetActive(false);
-                            foreach (GameData.PlayerInfo player in GameData.Instance.AllPlayers)
-                                player.Object.nameText.color = Palette.White;
                         }
-
-                        playerControl.Data.Object.nameText.color = Palette.White;
+                    } else if (playerControl == PlayerControl.LocalPlayer) {
+                        foreach (GameData.PlayerInfo player in GameData.Instance.AllPlayers)
+                            player.Object.nameText.color = Palette.White;
                     }
 
                     foreach (GameData.PlayerInfo player in GameData.Instance.AllPlayers) {
-                        $"{player.Object.name} - {player.IsImpostor}".Log();
+                        // $"{player.Object.name} - {player.IsImpostor}".Log();
                         player.Object.nameText.color = player.IsImpostor && PlayerControl.LocalPlayer.Data.IsImpostor
                             ? Palette.ImpostorRed
                             : Palette.White;
@@ -117,13 +110,12 @@ namespace PolusGG {
                 }
                 case PolusRpcCalls.SetOpacity: {
                     "SET PASSITY".Log(10);
-                    PlayerControl control = netObject.Cast<PlayerControl>();
-                    Color32 color = control.myRend.color;
-                    color.a = reader.ReadByte();
-                    control.myRend.color = color;
-                    control.HatRenderer.color = color;
-                    control.MyPhysics.Skin.layer.color = color;
-                    control.CurrentPet.rend.color = color;
+                    PlayerAnimPlayer animator = netObject.Cast<PlayerControl>().gameObject.EnsureComponent<PlayerAnimPlayer>();
+                    float alpha = reader.ReadByte();
+                    animator.playerColor.a = alpha;
+                    animator.hatColor.a = alpha;
+                    animator.petColor.a = alpha;
+                    animator.skinColor.a = alpha;
                     break;
                 }
                 case PolusRpcCalls.SetOutline: {
@@ -319,6 +311,8 @@ namespace PolusGG {
             if (MeetingHud.Instance) {
                 PlayerControl.LocalPlayer.SetThickAssAndBigDumpy(true, true);
             }
+            
+            
         }
 
         public override void Update() {
@@ -331,12 +325,23 @@ namespace PolusGG {
             }
         }
 
+        public override void ConnectionEstablished() {
+            //todo write code that calls this
+        }
+
+        public override void ConnectionDestroyed() {
+            //todo write code that calls this
+        }
+
         public override void LobbyJoined() {
             Logger.LogInfo("Joined Lobby!");
-            new GameObject().AddComponent<MaintenanceBehaviour>();
+            maintnet = new GameObject("maintent").DontDestroy();
+            maintnet.AddComponent<MaintenanceBehaviour>();
         }
 
         public override void LobbyLeft() {
+            Object.Destroy(maintnet);
+            maintnet = null;
             PingTrackerTextPatch.PingText = null;
             RoomTrackerTextPatch.RoomText = null;
             GameOptionsPatches.OnEnablePatch.Reset();

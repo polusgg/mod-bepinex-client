@@ -13,10 +13,10 @@ namespace PolusGG.Behaviours {
         private static readonly int BackColorID = Shader.PropertyToID("_BackColor");
         private static readonly int BodyColorID = Shader.PropertyToID("_BodyColor");
         private static readonly int VisorColorID = Shader.PropertyToID("_VisorColor");
-        private Color _playerColor;
-        private Color _hatColor;
-        private Color _petColor;
-        private Color _skinColor;
+        public Color playerColor = Color.white;
+        public Color hatColor = Color.white;
+        public Color petColor = Color.white;
+        public Color skinColor = Color.white;
 
         static PlayerAnimPlayer() {
             ClassInjector.RegisterTypeInIl2Cpp<PlayerAnimPlayer>();
@@ -29,10 +29,10 @@ namespace PolusGG.Behaviours {
         }
 
         private void Update() {
-            Player.myRend.color = _playerColor;
-            Player.HatRenderer.color = _hatColor;
-            Player.MyPhysics.rend.color = _skinColor;
-            if (Player.CurrentPet) Player.CurrentPet.rend.color = _petColor;
+            Player.myRend.color = playerColor;
+            Player.HatRenderer.color = hatColor;
+            Player.MyPhysics.rend.color = skinColor;
+            if (Player.CurrentPet) Player.CurrentPet.rend.color = petColor;
         }
 
         public void HandleMessage(MessageReader reader) {
@@ -108,12 +108,16 @@ namespace PolusGG.Behaviours {
 
         public bool[] BitfieldParser(ushort value, byte size) {
             bool[] output = new bool[size];
-            for (byte i = 0; i < size; i++) output[i] = (value & (1 << i)) != 0;
+            for (byte i = 0; i < size; i++) {
+                output[i] = (value & (1 << i)) != 0;
+                PogusPlugin.Logger.LogInfo($"{i} {output[i]}");
+            }
             return output;
         }
 
         private PlayerKeyframe SerializeCurrentState() {
-            return new(
+            if (Player == null) Player = GetComponent<PlayerControl>();
+            return new PlayerKeyframe(
                 0,
                 0,
                 Player.myRend.color.a,
@@ -171,28 +175,28 @@ namespace PolusGG.Behaviours {
             public float? PlayerOpacity {
                 get => _playerOpacity;
                 set {
-                    if (value != null) _animPlayer._playerColor.a = value.Value;
+                    if (value != null) _animPlayer.playerColor.a = value.Value;
                 }
             }
 
             public float? HatOpacity {
-                get => _hatOpacity ?? 0;
+                get => _hatOpacity;
                 set {
-                    if (value != null) _animPlayer._hatColor.a = value.Value;
+                    if (value != null) _animPlayer.hatColor.a = value.Value;
                 }
             }
 
             public float? PetOpacity {
-                get => _petOpacity ?? 0;
+                get => _petOpacity;
                 set {
-                    if (value != null) _animPlayer._petColor.a = value.Value;
+                    if (value != null) _animPlayer.petColor.a = value.Value;
                 }
             }
 
             public float? SkinOpacity {
-                get => _skinOpacity ?? 0;
+                get => _skinOpacity;
                 set {
-                    if (value != null) _animPlayer._skinColor.a = value.Value;
+                    if (value != null) _animPlayer.skinColor.a = value.Value;
                 }
             }
 
@@ -201,7 +205,7 @@ namespace PolusGG.Behaviours {
             public Color? VisorColor => _visorColor;
 
             public Vector2? Scale {
-                get => _scale ?? Vector2.zero;
+                get => _scale;
                 set {
                     if (value == null) return;
                     Transform transform1 = _playerControl.transform;
