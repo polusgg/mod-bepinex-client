@@ -25,19 +25,18 @@ namespace PolusGG.Behaviours.Inner {
             follower = HudManager.Instance.PlayerCam;
             camera = follower.GetComponent<Camera>();
             pno = PogusPlugin.ObjectManager.LocateNetObject(this);
-            pno.OnData = Deserialize;
-            pno.OnRpc = HandleRpc;
         }
 
         private void FixedUpdate() {
-            if (pno.HasSpawnData()) Deserialize(pno.GetSpawnData());
+            if (pno != null && pno.HasData()) Deserialize(pno.GetSpawnData());
+            if (pno != null && pno.HasRpc()) HandleRpc(pno.GetRpcData());
         }
 
-        private void HandleRpc(MessageReader reader, byte callid) {
-            if (callid != (int) PolusRpcCalls.BeginAnimationCamera) return;
+        private void HandleRpc(PolusNetObject.Rpc rpc) {
+            if (rpc.CallId != (int) PolusRpcCalls.BeginAnimationCamera) return;
             List<CameraKeyframe> keyframe = new();
-            while (reader.Position < reader.Length - 1) {
-                MessageReader message = reader.ReadMessage();
+            while (rpc.Reader.Position < rpc.Reader.Length - 1) {
+                MessageReader message = rpc.Reader.ReadMessage();
                 keyframe.Add(new CameraKeyframe(
                     message.ReadPackedUInt32(),
                     message.ReadPackedUInt32(),
@@ -49,7 +48,7 @@ namespace PolusGG.Behaviours.Inner {
                 ));
             }
 
-            this.StartCoroutine(CoPlayAnimation(keyframe.ToArray(), reader.ReadBoolean()));
+            this.StartCoroutine(CoPlayAnimation(keyframe.ToArray(), rpc.Reader.ReadBoolean()));
         }
 
         private CameraKeyframe SerializeCurrentState() {

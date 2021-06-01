@@ -13,7 +13,7 @@ namespace PolusGG.Behaviours.Inner {
 
         private void Start() {
             pno = PogusPlugin.ObjectManager.LocateNetObject(this);
-            if (pno.HasSpawnData())
+            if (pno.HasRpc())
                 Instantiate(PogusPlugin.Cache.CachedFiles[pno.GetSpawnData().ReadPackedUInt32()].Get<GameObject>(),
                     transform);
         }

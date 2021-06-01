@@ -16,7 +16,6 @@ namespace PolusGG.Behaviours.Inner {
 
             PolusDeadBody polusDeadBody = gameObject.AddComponent<PolusDeadBody>();
             gameObject.AddComponent<PolusNetworkTransform>();
-            gameObject.AddComponent<PolusClickBehaviour>();
 
             return polusDeadBody;
         }

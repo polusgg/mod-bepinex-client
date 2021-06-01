@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using BepInEx.Logging;
@@ -29,6 +30,7 @@ namespace PolusGG {
         private bool optionsDirty;
         public static PolusMod Instance;
         private GameObject maintnet;
+        private static CoroutineManager coMan;
 
         public override string Name => "PolusMod";
 
@@ -42,6 +44,8 @@ namespace PolusGG {
             if (loaded) return;
 
             loaded = true;
+
+            if (!coMan) coMan = new GameObject("PMC").DontDestroy().AddComponent<CoroutineManager>();
 
             PogusPlugin.ObjectManager.InnerRpcReceived += OnInnerRpcReceived;
             PogusPlugin.ObjectManager.Register(0x80, RegisterPnos.CreateImage());
@@ -348,7 +352,19 @@ namespace PolusGG {
         }
 
         public override void PlayerSpawned(PlayerControl player) {
-            
+            StartCoroutine(CoPlayFunny(player));
+        }
+
+        public IEnumerator CoPlayFunny(PlayerControl player) {
+            yield break;
+            yield return new WaitForSeconds(3f);
+            PlayerAnimPlayer pap = player.gameObject.EnsureComponent<PlayerAnimPlayer>();
+            player.StartCoroutine(pap.CoPlayAnimation(
+                new[] {true, true, true, true, false, false, false, false, false, false, false},
+                new PlayerAnimPlayer.PlayerKeyframe[] {
+                    new(0, 1000, 0, 0, 0, 0, null, null, null, null, null, null, player, pap),
+                    new(5000, 1000, 1, 1, 1, 0, null, null, null, null, null, null, player, pap),
+                }, false));
         }
 
         public override void PlayerDestroyed(PlayerControl player) {
@@ -372,6 +388,10 @@ namespace PolusGG {
             writer.EndMessage();
             AmongUsClient.Instance.SendOrDisconnect(writer);
             writer.Recycle();
+        }
+
+        public static IEnumerator StartCoroutine(IEnumerator coroutine) {
+            return coMan.Start(coroutine);
         }
 
         public void SetPlayerAppearance(PlayerControl player, PlayerControl corpse) {

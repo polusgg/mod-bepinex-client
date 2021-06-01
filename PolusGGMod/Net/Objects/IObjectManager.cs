@@ -19,7 +19,7 @@ namespace PolusGG.Net {
         public void RemoveNetObject(PolusNetObject obj);
         public bool HasObject(uint netId, out PolusNetObject obj);
         public bool IsDestroyed(uint netId);
-        public T FindObjectByNetId<T>(uint netId) where T : PolusNetObject;
+        public PolusNetObject FindObjectByNetId(uint netId);
         public void EndedGame();
         Transform GetNetObject(uint netId);
     }

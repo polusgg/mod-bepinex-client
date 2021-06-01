@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using BepInEx.Logging;
+using HarmonyLib;
 using PolusGG.Behaviours;
 using PolusGG.Extensions;
 using PolusGG.Mods;
@@ -120,6 +121,11 @@ namespace PolusGG {
                 ClassInjector.RegisterTypeInIl2Cpp<EventHandlerBehaviour>();
             }
 
+            private void Start() {
+                PlayerSpawnedEventPatch.ModManager = ModManager;
+                PlayerDestroyedEventPatch.ModManager = ModManager;
+            }
+
             public EventHandlerBehaviour(IntPtr ptr) : base(ptr) { }
 
             private void Update() {
@@ -128,6 +134,24 @@ namespace PolusGG {
 
             private void FixedUpdate() {
                 foreach ((PggMod _, Mod mod) in ModManager.TemporaryMods) mod.FixedUpdate();
+            }
+        
+            [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.Start))]
+            internal class PlayerSpawnedEventPatch {
+                public static PggModManager ModManager;
+                [HarmonyPostfix]
+                public static void Start(PlayerControl __instance) {
+                    foreach ((PggMod _, Mod mod) in ModManager.TemporaryMods) mod.PlayerSpawned(__instance);
+                }
+            }
+        
+            [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.OnDestroy))]
+            internal class PlayerDestroyedEventPatch {
+                public static PggModManager ModManager;
+                [HarmonyPostfix]
+                public static void OnDestroy(PlayerControl __instance) {
+                    foreach ((PggMod _, Mod mod) in ModManager.TemporaryMods) mod.PlayerDestroyed(__instance);
+                }
             }
         }
     }

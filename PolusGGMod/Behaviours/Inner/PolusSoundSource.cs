@@ -19,12 +19,11 @@ namespace PolusGG.Behaviours.Inner {
 
         private void Start() {
             pno = PogusPlugin.ObjectManager.LocateNetObject(this);
-            pno.OnData = Deserialize;
             source = GetComponent<AudioSource>();
         }
 
         private void FixedUpdate() {
-            if (pno.HasSpawnData()) Deserialize(pno.GetSpawnData());
+            if (pno != null && pno.HasData()) Deserialize(pno.GetSpawnData());
 
             if (PlayerControl.LocalPlayer) {
                 source.rolloffMode = AudioRolloffMode.Linear;

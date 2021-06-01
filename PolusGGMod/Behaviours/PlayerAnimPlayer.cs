@@ -29,10 +29,13 @@ namespace PolusGG.Behaviours {
         }
 
         private void Update() {
+            Player.nameText.color = playerColor;
             Player.myRend.color = playerColor;
             Player.HatRenderer.color = hatColor;
-            Player.MyPhysics.rend.color = skinColor;
-            if (Player.CurrentPet) Player.CurrentPet.rend.color = petColor;
+            Player.MyPhysics.Skin.layer.color = skinColor;
+            if (!Player.CurrentPet) return;
+            Player.CurrentPet.rend.color = petColor;
+            Player.CurrentPet.shadowRend.color = petColor;
         }
 
         public void HandleMessage(MessageReader reader) {
@@ -70,14 +73,16 @@ namespace PolusGG.Behaviours {
 
         [SuppressMessage("ReSharper", "AccessToModifiedClosure")]
         [SuppressMessage("ReSharper", "PossibleInvalidOperationException")]
-        private IEnumerator CoPlayAnimation(bool[] field, PlayerKeyframe[] frames, bool reset) {
+        public IEnumerator CoPlayAnimation(bool[] field, PlayerKeyframe[] frames, bool reset) {
             PlayerKeyframe resetTo = SerializeCurrentState();
             PlayerKeyframe previous = resetTo;
+            int i = 0;
 
             foreach (PlayerKeyframe current in frames) {
 
                 yield return new WaitForSeconds(current.Offset / 1000f);
                 yield return Effects.Lerp(current.Duration / 1000f, new Action<float>(dt => {
+                    $"amogn suu s {playerColor.a} {dt} {i}".Log();
                     if (field[0]) current.PlayerOpacity = Mathf.Lerp(previous.PlayerOpacity.Value, current.PlayerOpacity.Value, dt);
                     if (field[1]) current.HatOpacity = Mathf.Lerp(previous.HatOpacity.Value, current.HatOpacity.Value, dt);
                     if (field[2]) current.PetOpacity = Mathf.Lerp(previous.PetOpacity.Value, current.PetOpacity.Value, dt);
@@ -92,6 +97,7 @@ namespace PolusGG.Behaviours {
                     if (field[9]) current.Angle = Mathf.Lerp(previous.Angle.Value, current.Angle.Value, dt);
                 }));
 
+                i++;
                 previous = current;
             }
 

@@ -50,17 +50,14 @@ namespace PolusGG.Mods {
         public abstract void LobbyJoined();
         /// <summary>
         /// Called when the user leaves/is disconnected from the lobby
-        /// 
         /// </summary>
         public abstract void LobbyLeft();
         /// <summary>
-        /// TODO Implement handling players being spawned in and destroyed
         /// Called at the end of a player's Start event
         /// </summary>
         /// <param name="player"></param>
         public abstract void PlayerSpawned(PlayerControl player);
         /// <summary>
-        /// TODO Implement handling players being spawned in and destroyed
         /// Called directly before player's OnDestroy event
         /// </summary>
         /// <param name="player">The player which is being destroyed</param>

@@ -25,7 +25,6 @@ namespace PolusGG.Behaviours.Inner {
 
         private void Start() {
             pno = PogusPlugin.ObjectManager.LocateNetObject(this);
-            pno.OnData = Deserialize;
             rend = GetComponent<SpriteRenderer>();
             anim = GetComponent<SpriteAnim>();
             deadBody = GetComponent<DeadBody>();
@@ -34,7 +33,7 @@ namespace PolusGG.Behaviours.Inner {
         }
 
         private void FixedUpdate() {
-            if (pno.HasSpawnData()) Deserialize(pno.GetSpawnData());
+            if (pno != null && pno.HasData()) Deserialize(pno.GetSpawnData());
         }
 
         public void Deserialize(MessageReader reader) {

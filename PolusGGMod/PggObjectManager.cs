@@ -77,7 +77,7 @@ namespace PolusGG {
                 MessageReader messageReader = reader.ReadMessage();
                 if (messageReader.Length > 0)
                     // messageReader.Length.Log(6, "spawn length");
-                    polusNetObject.Spawn(messageReader);
+                    polusNetObject.Data(messageReader);
                 // "did it really".Log();
             }
 
@@ -85,7 +85,8 @@ namespace PolusGG {
         }
 
         public void RemoveNetObject(PolusNetObject obj) {
-            Object.Destroy(obj.PnoBehaviour);
+            Object.Destroy(obj.PnoBehaviour.gameObject);
+
             _destroyedObjects.Add(obj.NetId);
         }
 
@@ -97,11 +98,7 @@ namespace PolusGG {
             return _destroyedObjects.Contains(netId);
         }
 
-        public T FindObjectByNetId<T>(uint netId) where T : PolusNetObject {
-            if (_allObjectsFast.TryGetValue(netId, out PolusNetObject polusNetObject)) return (T) polusNetObject;
-
-            return default;
-        }
+        public PolusNetObject FindObjectByNetId(uint netId) => _allObjectsFast.TryGetValue(netId, out PolusNetObject netObject) ? netObject : null;
 
         public void EndedGame() {
             _allObjects = new List<PolusNetObject>();

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using Hazel;
@@ -9,18 +10,21 @@ using TMPro;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 using UnityEngine.UI;
+using Object = UnityEngine.Object;
 
 namespace PolusGG.Behaviours.Inner {
     public class PolusClickBehaviour : PnoBehaviour {
         private static readonly int Percent = Shader.PropertyToID("_Percent");
         private static readonly int Desat = Shader.PropertyToID("_Desat");
+        internal static readonly List<PolusClickBehaviour> Buttons = new();
+        private static Material funnyButtonMaterial;
+        internal PolusNetworkTransform netTransform;
+        private PolusGraphic graphic;
         private PassiveButton button;
         private Color32 color;
         private bool active;
         private bool counting;
         private float currentTimer;
-        private PolusGraphic graphic;
-
         private float maxTimer;
         private TMP_Text timerText;
 
@@ -32,21 +36,24 @@ namespace PolusGG.Behaviours.Inner {
 
         private void Start() {
             pno = PogusPlugin.ObjectManager.LocateNetObject(this);
-            pno.OnData = Deserialize;
+            Buttons.Add(this);
             button = GetComponent<PassiveButton>();
+            netTransform = GetComponent<PolusNetworkTransform>();
             button.OnClick = new Button.ButtonClickedEvent();
             button.OnClick.AddListener(new Action(OnClick));
             button.Colliders = button.Colliders.AddItem(GetComponent<BoxCollider2D>()).ToArray();
             graphic = GetComponent<PolusGraphic>();
             KillButtonManager kb = HudManager.Instance.KillButton;
-            Material m = kb.renderer.GetMaterial();
-            m.name.Log();
-            graphic.renderer.SetMaterial(m);
+            if (!funnyButtonMaterial) {
+                funnyButtonMaterial = Instantiate(kb.renderer.GetMaterial()).DontDestroy();
+                funnyButtonMaterial.name.Log();
+            }
+            graphic.renderer.SetMaterial(funnyButtonMaterial);
             timerText = Instantiate(kb.TimerText, transform);
         }
 
         private void FixedUpdate() {
-            if (pno.HasSpawnData()) {
+            if (pno.HasData()) {
                 Deserialize(pno.GetSpawnData());
                 CooldownHelpers.SetCooldownNormalizedUvs(graphic.renderer);
             }
@@ -59,8 +66,21 @@ namespace PolusGG.Behaviours.Inner {
             SetCooldown();
         }
 
+        private void OnEnable() {
+            SetCountingDown(true);
+        }
+
+        private void OnDisable() {
+            SetCountingDown(false);
+        }
+
+        private void OnDestroy() {
+            Buttons.Remove(this);
+        }
+
         private void Deserialize(MessageReader reader) {
-            maxTimer = reader.ReadSingle();
+            "Button changed!!!!!"
+                .Log();            maxTimer = reader.ReadSingle();
             currentTimer = reader.ReadSingle();
             counting = reader.ReadBoolean();
             active = reader.ReadBoolean();
@@ -72,8 +92,8 @@ namespace PolusGG.Behaviours.Inner {
             float num = Mathf.Clamp(currentTimer / maxTimer, 0f, 1f);
             graphic.renderer.material.SetFloat(Percent, num);
             bool isCoolingDown = num > 0f && counting && PlayerControl.LocalPlayer.CanMove;
+            graphic.renderer.material.SetFloat(Desat, isCoolingDown || !active ? 1f : 0f);
             if (isCoolingDown) {
-                graphic.renderer.material.SetFloat(Desat, active ? 1f : 0f);
                 graphic.renderer.color = Palette.EnabledColor;
                 timerText.text = Mathf.CeilToInt(currentTimer).ToString();
                 timerText.gameObject.SetActive(true);
@@ -83,7 +103,16 @@ namespace PolusGG.Behaviours.Inner {
 
             timerText.gameObject.SetActive(false);
             graphic.renderer.color = Palette.EnabledColor;
-            graphic.renderer.material.SetFloat(Desat, 0f);
+        }
+
+        public void SetCountingDown(bool isCountingDown) {
+            // TODO ANTI-CHEAT THIS USING CURRENT TIME DIFFERENCE OF 6ISH SECONDS
+            // TODO MAKE SURE THAT THIS IS LIMITED ON THE SERVER TO PREVENT EARLY COOLDOWN BYPASS
+            // TODO DON'T BE STUPID DUMB IDIOT WHEN WRITING THAT ANTI-CHEAT CODE
+            MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(pno.NetId, (byte) PolusRpcCalls.SetCountingDown, SendOption.Reliable);
+            counting = false;
+            writer.Write(isCountingDown);
+            writer.Write(currentTimer);
         }
 
         public void OnClick() {

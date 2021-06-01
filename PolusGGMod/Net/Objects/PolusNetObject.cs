@@ -1,39 +1,46 @@
-﻿using Hazel;
+﻿using System.Collections.Concurrent;
+using Hazel;
+using PolusGG.Extensions;
 
 namespace PolusGG.Net {
     public class PolusNetObject {
         public delegate void OnDataDel(MessageReader reader);
-
         public delegate void OnRpcDel(MessageReader reader, byte callId);
 
-        private MessageReader data;
-        private bool hasSpawn;
+        public record Rpc(MessageReader Reader, byte CallId) {
+            public MessageReader Reader { get; } = Reader;
+            public byte CallId { get; } = CallId;
+        }
+
+        private readonly ConcurrentQueue<MessageReader> _data = new();
+        private readonly ConcurrentQueue<Rpc> _rpc = new();
         public uint NetId;
-        public OnDataDel OnData;
-        public OnRpcDel OnRpc;
         public PnoBehaviour PnoBehaviour;
 
         public MessageReader GetSpawnData() {
-            hasSpawn = false;
-            return data;
+            _data.TryDequeue(out MessageReader reader);
+            return reader;
+        }
+
+        public Rpc GetRpcData() {
+            _rpc.TryDequeue(out Rpc rpcData);
+            return rpcData;
         }
 
         public void HandleRpc(MessageReader reader, byte callId) {
-            OnRpc?.Invoke(reader, callId);
-        }
-
-        public void Spawn(MessageReader reader) {
-            // reader.Length.Log(3, "3 times i will cry in real life");
-            hasSpawn = true;
-            data = reader;
+            _rpc.Enqueue(new Rpc(reader, callId));
         }
 
         public void Data(MessageReader reader) {
-            OnData?.Invoke(reader);
+            _data.Enqueue(reader);
         }
 
-        public bool HasSpawnData() {
-            return hasSpawn;
+        public bool HasData() {
+            return !_data.IsEmpty;
+        }
+
+        public bool HasRpc() {
+            return !_rpc.IsEmpty;
         }
     }
 }

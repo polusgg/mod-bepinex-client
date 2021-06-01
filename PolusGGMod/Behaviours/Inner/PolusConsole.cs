@@ -14,13 +14,10 @@ namespace PolusGG.Behaviours.Inner {
 
         private void Start() {
             pno = PogusPlugin.ObjectManager.LocateNetObject(this);
-            pno.OnData = Deserialize;
         }
 
-        private void Update() { }
-
-        private void FixedUpdate() {
-            if (pno.HasSpawnData()) Deserialize(pno.GetSpawnData());
+        private void Update() {
+            if (pno != null && pno.HasData()) Deserialize(pno.GetSpawnData());
         }
 
         private void Deserialize(MessageReader reader) { }

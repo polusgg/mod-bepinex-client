@@ -73,11 +73,8 @@ namespace PolusGG.Mods.Patching {
                 foreach (Type bulkPatchType in _harmonyBulkPatchTypes) {
                     MethodInfo method = assemblyType.GetMethods(AccessTools.all).FirstOrDefault(method =>
                         method.GetCustomAttributes(true)
-                            .Any(attr => attr.GetType().FullName == bulkPatchType.FullName));
-
-                    if (method is null)
-                        method = assemblyType.GetMethod(bulkPatchType.FullName.Replace("HarmonyLib.Harmony", ""),
-                            AccessTools.all);
+                            .Any(attr => attr.GetType().FullName == bulkPatchType.FullName)) ?? assemblyType.GetMethod(bulkPatchType.FullName.Replace("HarmonyLib.Harmony", ""),
+                        AccessTools.all);
 
                     if (method is not null) {
                         IEnumerable<MethodBase> methodBases = (IEnumerable<MethodBase>) method.Invoke(null, null);
@@ -88,8 +85,7 @@ namespace PolusGG.Mods.Patching {
                 if (originalMethod is not null)
                     patchDetails.Add(new PatchDetails(originalMethod, prefixPatches, postfixPatches));
 
-                foreach (MethodBase targetMethod in bulkOriginalMethods)
-                    patchDetails.Add(new PatchDetails(targetMethod, prefixPatches, postfixPatches));
+                patchDetails.AddRange(bulkOriginalMethods.Select(targetMethod => new PatchDetails(targetMethod, prefixPatches, postfixPatches)));
 
                 return patchDetails;
             }

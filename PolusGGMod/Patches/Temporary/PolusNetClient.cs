@@ -65,7 +65,7 @@ namespace PolusGG.Patches.Temporary {
                     case 1: {
                         uint netId = reader.ReadPackedUInt32();
                         if (objectManager.HasObject(netId, out PolusNetObject polusNetObject)) {
-                            // polusNetObject.NetId.Log(1, "for dataPOg");
+                            polusNetObject.NetId.Log(1, "for dataPOg");
                             polusNetObject.Data(reader);
                             return false;
                         }
@@ -119,10 +119,10 @@ namespace PolusGG.Patches.Temporary {
                     }
                     case 5: {
                         uint num6 = reader.ReadPackedUInt32();
-                        instance.DestroyedObjects.Add(num6);
                         PolusNetObject polusNetObject =
-                            objectManager.FindObjectByNetId<PolusNetObject>(num6); //todo pno despawns
-                        if (polusNetObject != null) {
+                            objectManager.FindObjectByNetId(num6); //todo pno despawns
+                        PogusPlugin.Logger.LogWarning($"Despawning {num6}, but is it a pno? {polusNetObject != null}");
+                        if ((polusNetObject != null).Log(2, "waawoo")) {
                             objectManager.RemoveNetObject(polusNetObject);
                             return false;
                         }

@@ -289,7 +289,8 @@ namespace PolusGG.Patches.Temporary {
                             }
 
                             if (category.Any(x => x.Title == name)) {
-                                category.Find(x => x.Title == name).Value = optionType switch {
+                                GameOption option = category.Find(x => x.Title == name);
+                                option.Value = optionType switch {
                                     OptionType.Boolean => new BooleanValue(reader.ReadBoolean()),
                                     OptionType.Number => new FloatValue(reader.ReadSingle(), reader.ReadSingle(),
                                         reader.ReadSingle(), reader.ReadSingle(), reader.ReadBoolean(),
@@ -297,6 +298,7 @@ namespace PolusGG.Patches.Temporary {
                                     OptionType.Enum => EnumValue.ConstructEnumValue(reader),
                                     _ => throw new ArgumentOutOfRangeException()
                                 };
+                                OptionMap[name] = option;
                             } else {
                                 GameOption option = new() {
                                     Title = name,
