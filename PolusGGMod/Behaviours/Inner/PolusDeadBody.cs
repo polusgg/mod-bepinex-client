@@ -1,5 +1,7 @@
 ﻿using System;
 using Hazel;
+using PolusGG.Enums;
+using PolusGG.Extensions;
 using PolusGG.Net;
 using PowerTools;
 using UnhollowerRuntimeLib;
@@ -28,8 +30,10 @@ namespace PolusGG.Behaviours.Inner {
             rend = GetComponent<SpriteRenderer>();
             anim = GetComponent<SpriteAnim>();
             deadBody = GetComponent<DeadBody>();
+            deadBody.ParentId = 255;
             netTransform = GetComponent<PolusNetworkTransform>();
             clickBehaviour = GetComponent<PolusClickBehaviour>();
+            if (pno.HasData()) Deserialize(pno.GetSpawnData());
         }
 
         private void FixedUpdate() {
@@ -46,5 +50,7 @@ namespace PolusGG.Behaviours.Inner {
             rend.material.SetColor(BodyColor,
                 new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte()));
         }
+
+        public void OnReported() => AmongUsClient.Instance.SendRpcImmediately(pno.NetId, (byte) PolusRpcCalls.ReportDeadBody);
     }
 }

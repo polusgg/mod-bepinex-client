@@ -2,6 +2,7 @@
 using System.Linq;
 using HarmonyLib;
 using Il2CppSystem.Collections.Generic;
+using PolusGG.Enums;
 using PolusGG.Extensions;
 using TMPro;
 using UnhollowerRuntimeLib;
@@ -49,25 +50,20 @@ namespace PolusGG.Patches.Temporary {
         private static TextMeshPro _winDescText;
         private static Color _descColor = UnityEngine.Color.white;
         private static readonly int Color = Shader.PropertyToID("_Color");
+        private static float stingerTime = 1f;
 
         [HarmonyPatch(typeof(EndGameManager), nameof(EndGameManager.SetEverythingUp))]
         public class SetYoMamaUp {
-            [HarmonyPrefix]
-            public static bool Prefix() {
-                if (TempData.EndReason != (GameOverReason) 7) return true;
-                TempData.winners.Clear();
-                foreach (WinningPlayerData winningPlayerData in PolusMod.RoleData.OutroPlayers)
-                    TempData.winners.Add(winningPlayerData);
-                TempData.winners.Count.Log(2, "player count for outro");
-                if (TempData.winners.Count != 0) return true;
-                StatsManager.Instance.GamesFinished++;
-                return false;
+            private static void GetStingerVol(AudioSource source, float dt) {
+                stingerTime += dt * 0.75f;
+                source.volume = Mathf.Clamp(1f / stingerTime, 0f, 1f);
             }
 
-            [HarmonyPostfix]
-            public static void Postfix(EndGameManager __instance) {
-                if (TempData.EndReason != (GameOverReason) 7) return;
-                SoundManager.Instance.StopSound(__instance.DisconnectStinger);
+            [HarmonyPrefix]
+            public static bool Prefix(EndGameManager __instance) {
+                TempData.winners.Clear();
+                TempData.winners.Count.Log(2, "player count for outro");
+
                 __instance.WinText.text = PolusMod.RoleData.OutroName;
                 __instance.BackgroundBar.material.SetColor(Color, PolusMod.RoleData.OutroColor);
                 __instance.gameObject.AddComponent<SetYoMamaUpTheIncredibleQuadrilogy>();
@@ -76,6 +72,78 @@ namespace PolusGG.Patches.Temporary {
                 _winDescText.fontSizeMax = 4f;
                 _winDescText.fontSize = 4f;
                 _winDescText.text = PolusMod.RoleData.OutroDesc;
+
+                AudioClip sound;
+                switch (PolusMod.RoleData.WinSound) {
+                    case WinSounds.CustomSound:
+                        sound = PogusPlugin.Cache.CachedFiles[PolusMod.RoleData.WinSoundCustom].Get<AudioClip>();
+                        SoundManager.Instance.PlayNamedSound("Stinger", sound, false, true);
+                        break;
+                    case WinSounds.CrewmateWin: {
+                        sound = __instance.CrewStinger;
+                        SoundManager.Instance.PlayDynamicSound("Stinger", sound, false,
+                            new Action<AudioSource, float>(GetStingerVol), true);
+                        break;
+                    }
+                    case WinSounds.ImpostorWin: {
+                        sound = __instance.ImpostorStinger;
+                        SoundManager.Instance.PlayDynamicSound("Stinger", sound, false,
+                            new Action<AudioSource, float>(GetStingerVol), true);
+                        break;
+                    }
+                    case WinSounds.Disconnect:
+                        sound = __instance.DisconnectStinger;
+                        SoundManager.Instance.PlayNamedSound("Stinger", sound, false, true);
+                        break;
+                    default:
+                        PolusMod.RoleData.WinSound.Log(comment: "uwu susussys");
+                        break;
+                }
+
+                System.Collections.Generic.List<WinningPlayerData> list = PolusMod.RoleData.OutroPlayers
+                    .OrderBy(b => b.IsYou ? -1 : 0)
+                    .ToList();
+
+                for (int i = 0; i < list.Count; i++) {
+                    WinningPlayerData winningPlayerData2 = list[i];
+                    int num = i % 2 == 0 ? -1 : 1;
+                    int num2 = (i + 1) / 2;
+                    float num3 = 1f - num2 * 0.075f;
+                    float num4 = 1f - num2 * 0.035f;
+                    float num5 = i == 0 ? -8 : -1;
+                    PoolablePlayer poolablePlayer = Object.Instantiate(__instance.PlayerPrefab, __instance.transform);
+                    poolablePlayer.transform.localPosition = new Vector3(0.8f * num * num2 * num4,
+                        __instance.BaseY - 0.25f + num2 * 0.1f, num5 + num2 * 0.01f) * 1.25f;
+                    Vector3 vector = new Vector3(num3, num3, num3) * 1.25f;
+                    poolablePlayer.transform.localScale = vector;
+                    if (winningPlayerData2.IsDead) {
+                        poolablePlayer.Body.sprite = __instance.GhostSprite;
+                        poolablePlayer.SetDeadFlipX(i % 2 != 0);
+                    } else {
+                        poolablePlayer.SetFlipX(i % 2 == 0);
+                    }
+
+                    if (!winningPlayerData2.IsDead) {
+                        DestroyableSingleton<HatManager>.Instance.SetSkin(poolablePlayer.SkinSlot,
+                            winningPlayerData2.SkinId);
+                    } else {
+                        poolablePlayer.HatSlot.color = new Color(1f, 1f, 1f, 0.5f);
+                    }
+
+                    PlayerControl.SetPlayerMaterialColors(winningPlayerData2.ColorId, poolablePlayer.Body);
+                    poolablePlayer.HatSlot.SetHat(winningPlayerData2.HatId, winningPlayerData2.ColorId);
+                    PlayerControl.SetPetImage(winningPlayerData2.PetId, winningPlayerData2.ColorId,
+                        poolablePlayer.PetSlot);
+                    poolablePlayer.NameText.text = winningPlayerData2.Name;
+                    if (winningPlayerData2.IsImpostor) {
+                        poolablePlayer.NameText.color = Palette.ImpostorRed;
+                    }
+
+                    poolablePlayer.NameText.transform.localScale = global::Extensions.Inv(vector);
+                }
+
+                StatsManager.Instance.GamesFinished++;
+                return false;
             }
         }
 

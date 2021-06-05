@@ -40,7 +40,6 @@ namespace PolusGG.Behaviours.Inner {
         }
 
         public void Deserialize(MessageReader reader) {
-            int i = 0;
             byte aln = reader.ReadByte();
             _aspectPosition.Alignment = (AspectPosition.EdgeAlignments) aln;
             Vector3 pos = reader.ReadVector2();
@@ -50,7 +49,6 @@ namespace PolusGG.Behaviours.Inner {
                 _aspectPosition.enabled = true;
                 _aspectPosition.DistanceFromEdge = new Vector3(0, 0, z) - pos;
                 _aspectPosition.AdjustPosition();
-                aln.Log(5, "huddies");
             } else {
                 _aspectPosition.enabled = false;
                 int parent = reader.ReadPackedInt32();

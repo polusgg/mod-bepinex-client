@@ -110,13 +110,12 @@ namespace PolusGG.Behaviours.Inner {
             // TODO MAKE SURE THAT THIS IS LIMITED ON THE SERVER TO PREVENT EARLY COOLDOWN BYPASS
             // TODO DON'T BE STUPID DUMB IDIOT WHEN WRITING THAT ANTI-CHEAT CODE
             MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(pno.NetId, (byte) PolusRpcCalls.SetCountingDown, SendOption.Reliable);
-            counting = false;
+            counting = isCountingDown;
             writer.Write(isCountingDown);
             writer.Write(currentTimer);
+            AmongUsClient.Instance.FinishRpcImmediately(writer);
         }
 
-        public void OnClick() {
-            AmongUsClient.Instance.SendRpcImmediately(pno.NetId, (byte) PolusRpcCalls.Click);
-        }
+        public void OnClick() => AmongUsClient.Instance.SendRpcImmediately(pno.NetId, (byte) PolusRpcCalls.Click);
     }
 }

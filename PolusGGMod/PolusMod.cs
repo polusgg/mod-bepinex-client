@@ -199,14 +199,13 @@ namespace PolusGG {
                     RoleData.OutroDesc = reader.ReadString();
                     RoleData.OutroColor = new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(),
                         reader.ReadByte());
-                    RoleData.OutroPlayers = Enumerable.Repeat(15, reader.Length - reader.Position - 2)
+                    RoleData.OutroPlayers = Enumerable.Repeat(15, reader.ReadByte())
                         .Select(_ => new WinningPlayerData(GameData.Instance.GetPlayerById(reader.ReadByte())))
                         .ToList();
-                    if (RoleData.OutroPlayers.Count == 1) {
-                        RoleData.OutroPlayers[0].IsYou = true;
-                    }
                     RoleData.ShowQuit = reader.ReadBoolean();
                     RoleData.ShowPlayAgain = reader.ReadBoolean();
+                    RoleData.WinSound = (WinSounds) reader.ReadByte();
+                    if (RoleData.WinSound == WinSounds.CustomSound) RoleData.WinSoundCustom = reader.ReadPackedUInt32();
 
                     // test go directly to endgame
                     // SceneManager.LoadScene("EndGame");
@@ -408,6 +407,8 @@ namespace PolusGG {
         public Color OutroColor = Color.green;
         public string OutroDesc = "Failed to set ending correctly!";
         public string OutroName = "Error!";
+        public WinSounds WinSound = WinSounds.NoSound;
+        public uint WinSoundCustom = 6942021;
         public List<WinningPlayerData> OutroPlayers = new();
         public bool ShowPlayAgain;
         public bool ShowQuit = true;
