@@ -73,32 +73,32 @@ namespace PolusGG.Patches.Temporary {
                 _winDescText.fontSize = 4f;
                 _winDescText.text = PolusMod.RoleData.OutroDesc;
 
-                AudioClip sound;
+                AudioClip sound = null;
                 switch (PolusMod.RoleData.WinSound) {
                     case WinSounds.CustomSound:
                         sound = PogusPlugin.Cache.CachedFiles[PolusMod.RoleData.WinSoundCustom].Get<AudioClip>();
-                        SoundManager.Instance.PlayNamedSound("Stinger", sound, false, true);
                         break;
                     case WinSounds.CrewmateWin: {
                         sound = __instance.CrewStinger;
-                        SoundManager.Instance.PlayDynamicSound("Stinger", sound, false,
-                            new Action<AudioSource, float>(GetStingerVol), true);
                         break;
                     }
                     case WinSounds.ImpostorWin: {
                         sound = __instance.ImpostorStinger;
-                        SoundManager.Instance.PlayDynamicSound("Stinger", sound, false,
-                            new Action<AudioSource, float>(GetStingerVol), true);
                         break;
                     }
                     case WinSounds.Disconnect:
                         sound = __instance.DisconnectStinger;
-                        SoundManager.Instance.PlayNamedSound("Stinger", sound, false, true);
                         break;
                     default:
                         PolusMod.RoleData.WinSound.Log(comment: "uwu susussys");
                         break;
                 }
+
+                if (sound is not null)
+                    //only play this using non dynamic sound system
+                    SoundManager.Instance.PlayNamedSound("Stinger", sound, false, true);
+                    // SoundManager.Instance.PlayDynamicSound("Stinger", sound, false,
+                    //     new Action<AudioSource, float>(GetStingerVol), true);
 
                 System.Collections.Generic.List<WinningPlayerData> list = PolusMod.RoleData.OutroPlayers
                     .OrderBy(b => b.IsYou ? -1 : 0)

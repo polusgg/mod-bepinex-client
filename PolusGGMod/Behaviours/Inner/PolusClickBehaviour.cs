@@ -102,7 +102,7 @@ namespace PolusGG.Behaviours.Inner {
             }
 
             timerText.gameObject.SetActive(false);
-            graphic.renderer.color = Palette.EnabledColor;
+            graphic.renderer.color = Palette.DisabledClear;
         }
 
         public void SetCountingDown(bool isCountingDown) {
