@@ -6,11 +6,12 @@ using BepInEx;
 using BepInEx.IL2CPP;
 using BepInEx.Logging;
 using HarmonyLib;
+using InnerNet;
 using PolusGG.Extensions;
-using PolusGG.Net;
 using PolusGG.Patches.Permanent;
 using PolusGG.Utils;
 using TMPro;
+using UnhollowerRuntimeLib;
 using UnityEngine;
 using Debug = System.Diagnostics.Debug;
 
@@ -42,6 +43,17 @@ namespace PolusGG {
                 return _bundle;
             }
         }
+
+        // public class BelpinexPno : InnerNetObject {
+        //     static BelpinexPno() {
+        //         ClassInjector.RegisterTypeInIl2Cpp<BelpinexPno>();
+        //     }
+        //     public BelpinexPno(IntPtr ptr) : base(ptr) {}
+        //
+        //     private void Start() {
+        //         throw new NotImplementedException();
+        //     }
+        // }
 
         public override void Load() {
             Logger = Log;

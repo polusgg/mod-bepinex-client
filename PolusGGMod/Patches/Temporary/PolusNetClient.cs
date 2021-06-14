@@ -88,12 +88,20 @@ namespace PolusGG.Patches.Temporary {
 
                         if (instance.allObjectsFast.ContainsKey(netId)) {
                             byte call = reader.ReadByte();
-                            // PogusPlugin.Logger.LogInfo($"WOO RPC FOR {call}");
-                            if (call >= 0x80)
+                            if (call >= 0x80) {
                                 objectManager.HandleInnerRpc(instance.allObjectsFast[netId],
                                     reader, call);
-                            else instance.allObjectsFast[netId].HandleRpc(call, reader);
-                            return false;
+                                return false;
+                            }
+
+                            call.Log(comment: $"Vanilla Rpc! ({(RpcCalls)call})");
+                            reader.Position = pos;
+                            return true;
+                        } else {
+                            byte call = reader.ReadByte();
+                            call.Log(comment: $"Vanilla Rpc? ({(RpcCalls)call})");
+                            reader.Position = pos;
+                            return true;
                         }
 
                         if (netId != 4294967295U && !instance.DestroyedObjects.Contains(netId) &&
@@ -120,7 +128,7 @@ namespace PolusGG.Patches.Temporary {
                     case 5: {
                         uint num6 = reader.ReadPackedUInt32();
                         PolusNetObject polusNetObject =
-                            objectManager.FindObjectByNetId(num6); //todo pno despawns
+                            objectManager.FindObjectByNetId(num6);
                         PogusPlugin.Logger.LogWarning($"Despawning {num6}, but is it a pno? {polusNetObject != null}");
                         if ((polusNetObject != null).Log(2, "waawoo")) {
                             objectManager.RemoveNetObject(polusNetObject);
@@ -139,8 +147,7 @@ namespace PolusGG.Patches.Temporary {
                     }
                 }
 
-                Debug.Log(string.Format("Pgg bad tag {0} at {1}+{2}={3}:  ", reader.Tag, reader.Offset, reader.Position,
-                    reader.Length) + string.Join(" ", reader.Buffer));
+                Debug.Log($"Pgg bad tag {reader.Tag} at {reader.Offset}+{reader.Position}={reader.Length}:  " + string.Join(" ", reader.Buffer));
                 return false;
             }
         }

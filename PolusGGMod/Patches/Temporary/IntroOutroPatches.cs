@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Linq;
+using System.Reflection;
 using HarmonyLib;
 using Il2CppSystem.Collections.Generic;
 using PolusGG.Enums;
@@ -14,22 +16,13 @@ namespace PolusGG.Patches.Temporary {
     // this is the saddest day of my life
     // can't wait til i need to use this info oh wait i do it like 2mil different times now
 
-    [HarmonyPatch(typeof(IntroCutscene), nameof(IntroCutscene.BeginCrewmate))]
-    public class IntroCrewmatePatch {
-        [HarmonyPrefix]
-        public static void Prefix([HarmonyArgument(0)] ref List<PlayerControl> team) {
-            IntroImpostorPatch.Prefix(ref team);
+    [HarmonyPatch]
+    public class ServersideIntroPatch {
+        [HarmonyTargetMethods]
+        public static System.Collections.Generic.IEnumerable<MethodBase> Methods() {
+            yield return AccessTools.Method(typeof(IntroCutscene), nameof(IntroCutscene.BeginCrewmate));
+            yield return AccessTools.Method(typeof(IntroCutscene), nameof(IntroCutscene.BeginImpostor));
         }
-
-        [HarmonyPostfix]
-        public static void Postfix(IntroCutscene __instance) {
-            IntroImpostorPatch.Postfix(__instance);
-            __instance.ImpostorText.gameObject.SetActive(true);
-        }
-    }
-
-    [HarmonyPatch(typeof(IntroCutscene), nameof(IntroCutscene.BeginImpostor))]
-    public class IntroImpostorPatch {
         [HarmonyPrefix]
         public static void Prefix([HarmonyArgument(0)] ref List<PlayerControl> team) {
             team.Clear();
@@ -41,12 +34,13 @@ namespace PolusGG.Patches.Temporary {
         public static void Postfix(IntroCutscene __instance) {
             __instance.Title.text = PolusMod.RoleData.IntroName;
             __instance.Title.color = PolusMod.RoleData.IntroColor;
+            __instance.ImpostorText.gameObject.SetActive(true);
             __instance.ImpostorText.text = PolusMod.RoleData.IntroDesc;
             __instance.BackgroundBar.material.color = PolusMod.RoleData.IntroColor;
         }
     }
 
-    public class OutroPatches {
+    public class ServersideOutroPatches {
         private static TextMeshPro _winDescText;
         private static Color _descColor = UnityEngine.Color.white;
         private static readonly int Color = Shader.PropertyToID("_Color");

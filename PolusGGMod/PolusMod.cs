@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using BepInEx.Logging;
+using HarmonyLib;
 using Hazel;
 using InnerNet;
 using PolusGG.Behaviours;
@@ -10,10 +11,12 @@ using PolusGG.Behaviours.Inner;
 using PolusGG.Enums;
 using PolusGG.Extensions;
 using PolusGG.Mods;
+using PolusGG.Mods.Patching;
 using PolusGG.Net;
 using PolusGG.Patches.Temporary;
 using PolusGG.Resources;
 using TMPro;
+using UnhollowerBaseLib;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -319,13 +322,12 @@ namespace PolusGG {
         }
 
         public override void Update() {
-            if (optionsDirty) {
-                GameSettingMenu menu = Object.FindObjectOfType<GameSettingMenu>();
-                if (menu) menu.OnEnable();
-                if (LobbyBehaviour.Instance)
-                    GameOptionsPatches.UpdateHudString();
-                optionsDirty = false;
-            }
+            if (!optionsDirty) return;
+            GameSettingMenu menu = Object.FindObjectOfType<GameSettingMenu>();
+            if (menu) menu.OnEnable();
+            if (LobbyBehaviour.Instance)
+                GameOptionsPatches.UpdateHudString();
+            optionsDirty = false;
         }
 
         public override void ConnectionEstablished() {
@@ -334,6 +336,15 @@ namespace PolusGG {
 
         public override void ConnectionDestroyed() {
             //todo write code that calls this
+        }
+
+        [HarmonyPatch(typeof(InnerNetClient), nameof(InnerNetClient.SendClientReady))]
+        public class ReadyUp {
+            [PermanentPatch]
+            [HarmonyPrefix]
+            public static void Ready() {
+                "Ready Called (this logs three times, please tell sanae if this calls more than that for whatever stupid reason)".Log(3);
+            }
         }
 
         public override void LobbyJoined() {
@@ -356,14 +367,14 @@ namespace PolusGG {
 
         public IEnumerator CoPlayFunny(PlayerControl player) {
             yield break;
-            yield return new WaitForSeconds(3f);
-            PlayerAnimPlayer pap = player.gameObject.EnsureComponent<PlayerAnimPlayer>();
-            player.StartCoroutine(pap.CoPlayAnimation(
-                new[] {true, true, true, true, false, false, false, false, false, false, false},
-                new PlayerAnimPlayer.PlayerKeyframe[] {
-                    new(0, 1000, 0, 0, 0, 0, null, null, null, null, null, null, player, pap),
-                    new(5000, 1000, 1, 1, 1, 0, null, null, null, null, null, null, player, pap),
-                }, false));
+            // yield return new WaitForSeconds(3f);
+            // PlayerAnimPlayer pap = player.gameObject.EnsureComponent<PlayerAnimPlayer>();
+            // player.StartCoroutine(pap.CoPlayAnimation(
+            //     new[] {true, true, true, true, false, false, false, false, false, false, false},
+            //     new PlayerAnimPlayer.PlayerKeyframe[] {
+            //         new(0, 1000, 0, 0, 0, 0, null, null, null, null, null, null, player, pap),
+            //         new(5000, 1000, 1, 1, 1, 0, null, null, null, null, null, null, player, pap),
+            //     }, false));
         }
 
         public override void PlayerDestroyed(PlayerControl player) {
@@ -398,6 +409,59 @@ namespace PolusGG {
                 corpse.SetThickAssAndBigDumpy(true, true);
         }
     }
+    
+    // PREZ ROLE FIX TESTING STUFF
+    // [HarmonyPatch(typeof(GameData), nameof(GameData.SetTasks))]
+    // public class SetTasksPatch
+    // {
+    //     [PermanentPatch]
+    //     [HarmonyPrefix]
+    //     public static void Prefix(GameData __instance, [HarmonyArgument(0)]byte playerId, [HarmonyArgument(1)]Il2CppStructArray<byte> tasks)
+    //     {
+    //         PogusPlugin.Logger.LogMessage("SetTasks for "+playerId+" with length "+tasks.Length);
+    //     }
+    // }
+    //
+    // [HarmonyPatch(typeof(GameData), nameof(GameData.RpcSetTasks))]
+    // public class RpcSetTasksPatch
+    // {
+    //     [PermanentPatch]
+    //     [HarmonyPrefix]
+    //     public static void Prefix(GameData __instance, [HarmonyArgument(0)]byte playerId, [HarmonyArgument(1)]Il2CppStructArray<byte> tasks)
+    //     {
+    //         PogusPlugin.Logger.LogMessage("RpcSetTasks for "+playerId+" with length "+tasks.Length);
+    //     }
+    // }
+    //
+    // [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.SetTasks))]
+    // public class PCSetTasksPatch
+    // {
+    //     [PermanentPatch]
+    //     [HarmonyPrefix]
+    //     public static void Prefix(PlayerControl __instance, [HarmonyArgument(0)]List<GameData.TaskInfo> tasks)
+    //     {
+    //         PogusPlugin.Logger.LogMessage("PC SetTasks for "+__instance.PlayerId+" with length "+tasks.Count);
+    //     }
+    // }
+    //
+    // [HarmonyPatch(typeof(GameData), nameof(GameData.HandleRpc))]
+    // public class HandleRpcPatch
+    // {
+    //     [PermanentPatch]
+    //     [HarmonyPrefix]
+    //     public static bool Prefix(GameData __instance, [HarmonyArgument(0)]byte callId, [HarmonyArgument(1)]MessageReader reader)
+    //     {
+    //         if (callId == 29)
+    //         {
+    //             var playerId = reader.ReadByte();
+    //             var tasks = reader.ReadBytesAndSize();
+    //             PogusPlugin.Logger.LogMessage("SetTasks RPC received for "+playerId+" with length "+tasks.Length);
+    //             __instance.SetTasks(playerId, tasks);
+    //             return false;
+    //         }
+    //         return true;
+    //     }
+    // }
 
     public class RoleData {
         public Color IntroColor = Color.magenta;
@@ -407,7 +471,7 @@ namespace PolusGG {
         public Color OutroColor = Color.green;
         public string OutroDesc = "Failed to set ending correctly!";
         public string OutroName = "Error!";
-        public WinSounds WinSound = WinSounds.NoSound;
+        public WinSounds WinSound = WinSounds.Disconnect;
         public uint WinSoundCustom = 6942021;
         public List<WinningPlayerData> OutroPlayers = new();
         public bool ShowPlayAgain;
@@ -417,6 +481,7 @@ namespace PolusGG {
     public static class Lol {
         public static void SetThickAssAndBigDumpy(this PlayerControl playerControl, bool isThick, bool hasBigDumpy) {
             //stub
+            "uwu kissies mwah! @Sanae#4092 on discord!!!".Log();
         }
     }
 }

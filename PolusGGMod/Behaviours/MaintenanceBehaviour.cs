@@ -30,7 +30,7 @@ namespace PolusGG.Behaviours {
 
         private void Start() {
             Instance = this;
-            ShowToast("Hello world");
+            // ShowToast("Hello world");
         }
 
         private void Update() {

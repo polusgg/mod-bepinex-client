@@ -91,7 +91,7 @@ namespace PolusGG.Behaviours.Inner {
             // return;
             float num = Mathf.Clamp(currentTimer / maxTimer, 0f, 1f);
             graphic.renderer.material.SetFloat(Percent, num);
-            bool isCoolingDown = num > 0f && counting && PlayerControl.LocalPlayer.CanMove;
+            bool isCoolingDown = num > 0f && !counting && !PlayerControl.LocalPlayer.CanMove;
             graphic.renderer.material.SetFloat(Desat, isCoolingDown || !active ? 1f : 0f);
             if (isCoolingDown) {
                 graphic.renderer.color = Palette.EnabledColor;
