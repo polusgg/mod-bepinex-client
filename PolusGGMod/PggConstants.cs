@@ -16,9 +16,9 @@ namespace PolusGG {
             get {
                 if (_dlFolder != null) return _dlFolder;
 #if DEBUG
-                _dlFolder = "PolusCache" + Guid.NewGuid();
+                _dlFolder = Path.Join("Cache", "PolusCache" + Guid.NewGuid());
 #else
-                _dlFolder = "PolusCache";
+                _dlFolder = Path.Join("Cache","PolusCache");
 #endif
                 return _dlFolder;
             }
