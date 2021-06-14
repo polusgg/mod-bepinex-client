@@ -12,7 +12,6 @@ using PolusGG.Enums;
 using PolusGG.Extensions;
 using PolusGG.Mods;
 using PolusGG.Mods.Patching;
-using PolusGG.Net;
 using PolusGG.Patches.Temporary;
 using PolusGG.Resources;
 using TMPro;
@@ -409,59 +408,6 @@ namespace PolusGG {
                 corpse.SetThickAssAndBigDumpy(true, true);
         }
     }
-    
-    // PREZ ROLE FIX TESTING STUFF
-    // [HarmonyPatch(typeof(GameData), nameof(GameData.SetTasks))]
-    // public class SetTasksPatch
-    // {
-    //     [PermanentPatch]
-    //     [HarmonyPrefix]
-    //     public static void Prefix(GameData __instance, [HarmonyArgument(0)]byte playerId, [HarmonyArgument(1)]Il2CppStructArray<byte> tasks)
-    //     {
-    //         PogusPlugin.Logger.LogMessage("SetTasks for "+playerId+" with length "+tasks.Length);
-    //     }
-    // }
-    //
-    // [HarmonyPatch(typeof(GameData), nameof(GameData.RpcSetTasks))]
-    // public class RpcSetTasksPatch
-    // {
-    //     [PermanentPatch]
-    //     [HarmonyPrefix]
-    //     public static void Prefix(GameData __instance, [HarmonyArgument(0)]byte playerId, [HarmonyArgument(1)]Il2CppStructArray<byte> tasks)
-    //     {
-    //         PogusPlugin.Logger.LogMessage("RpcSetTasks for "+playerId+" with length "+tasks.Length);
-    //     }
-    // }
-    //
-    // [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.SetTasks))]
-    // public class PCSetTasksPatch
-    // {
-    //     [PermanentPatch]
-    //     [HarmonyPrefix]
-    //     public static void Prefix(PlayerControl __instance, [HarmonyArgument(0)]List<GameData.TaskInfo> tasks)
-    //     {
-    //         PogusPlugin.Logger.LogMessage("PC SetTasks for "+__instance.PlayerId+" with length "+tasks.Count);
-    //     }
-    // }
-    //
-    // [HarmonyPatch(typeof(GameData), nameof(GameData.HandleRpc))]
-    // public class HandleRpcPatch
-    // {
-    //     [PermanentPatch]
-    //     [HarmonyPrefix]
-    //     public static bool Prefix(GameData __instance, [HarmonyArgument(0)]byte callId, [HarmonyArgument(1)]MessageReader reader)
-    //     {
-    //         if (callId == 29)
-    //         {
-    //             var playerId = reader.ReadByte();
-    //             var tasks = reader.ReadBytesAndSize();
-    //             PogusPlugin.Logger.LogMessage("SetTasks RPC received for "+playerId+" with length "+tasks.Length);
-    //             __instance.SetTasks(playerId, tasks);
-    //             return false;
-    //         }
-    //         return true;
-    //     }
-    // }
 
     public class RoleData {
         public Color IntroColor = Color.magenta;
