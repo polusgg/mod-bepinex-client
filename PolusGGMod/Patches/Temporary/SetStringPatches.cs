@@ -31,8 +31,8 @@ namespace PolusGG.Patches.Temporary {
                         Append(ref textText,
                             TranslationController.Instance.GetString(Palette.ColorNames[player.ColorId],
                                 new Il2CppReferenceArray<Object>(0)), false);
-                        Append(ref textText, $"id:{player.PlayerId}", false);
-                        Append(ref textText, $"idx:{GameData.Instance.AllPlayers.IndexOf(player)}</color>");
+                        Append(ref textText, $"{player.PlayerId}", false);
+                        Append(ref textText, $"{player.IsDead} {player.Disconnected}");
                     }
                     __instance.text.text += textText;
                 }

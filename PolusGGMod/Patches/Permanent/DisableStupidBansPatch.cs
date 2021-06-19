@@ -1,7 +1,9 @@
 ﻿using HarmonyLib;
+using Il2CppSystem;
 using InnerNet;
 using PolusGG.Mods.Patching;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace PolusGG.Patches.Permanent {
     [HarmonyPatch(typeof(StatsManager), nameof(StatsManager.AmBanned), MethodType.Getter)]
@@ -19,6 +21,7 @@ namespace PolusGG.Patches.Permanent {
         // [PermanentPatch]
         [HarmonyPrefix]
         private static bool StupidNonce(AuthManager._CoWaitForNonce_d__5 __instance, out bool __result) {
+            __instance.__4__this.LastNonceReceived = new Nullable<uint>(0);
             __result = false;
             return false;
         }
@@ -34,6 +37,26 @@ namespace PolusGG.Patches.Permanent {
         }
     }
 
+    [HarmonyPatch(typeof(AccountManager), nameof(AccountManager.CanPlayOnline))]
+    public class AlrightBaeNowYouCanPlayOnline {
+        // [PermanentPatch]
+        [HarmonyPrefix]
+        private static bool HeyBabyNowYouCanPlayOnline(out bool __result) {
+            __result = true;
+            return false;
+        }
+    }
+
+    [HarmonyPatch(typeof(EOSManager), nameof(EOSManager.ProductUserId), MethodType.Getter)]
+    public class ProductionUserIdentifier {
+        // [PermanentPatch]
+        [HarmonyPrefix]
+        public static bool ProducerAuthorizationBuzzword(out string __result) {
+            __result = "sick beats from a cool dude (this can be anything i just choose to put stupid shit here)";
+            return false;
+        }
+    }
+
     [HarmonyPatch(typeof(MainMenuManager), nameof(MainMenuManager.Start))]
     public static class MainMenuEnableOnline {
         [PermanentPatch]
@@ -45,6 +68,15 @@ namespace PolusGG.Patches.Permanent {
             ButtonRolloverHandler rollo = play.GetComponent<ButtonRolloverHandler>();
             rollo.OutColor = Color.white;
             rollo.OverColor = Color.green;
+        }
+    }
+
+    [HarmonyPatch(typeof(AccountManager), nameof(AccountManager.Awake))]
+    public static class DisableAccountManager {
+        [PermanentPatch]
+        [HarmonyPrefix]
+        public static void Awake(AccountManager __instance) {
+            __instance.gameObject.SetActive(false);
         }
     }
 

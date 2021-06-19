@@ -48,11 +48,11 @@ namespace PolusGG.Patches.Temporary {
             }
         }
 
-        [HarmonyPatch(typeof(InnerNetClient._HandleGameDataInner_d__42),
-            nameof(InnerNetClient._HandleGameDataInner_d__42.MoveNext))]
+        [HarmonyPatch(typeof(InnerNetClient._HandleGameDataInner_d__44),
+            nameof(InnerNetClient._HandleGameDataInner_d__44.MoveNext))]
         public class GameDataTempClass {
             [HarmonyPrefix]
-            public static bool HandleGameDataInner(InnerNetClient._HandleGameDataInner_d__42 __instance) {
+            public static bool HandleGameDataInner(InnerNetClient._HandleGameDataInner_d__44 __instance) {
                 if (__instance.__1__state != 0) return true;
                 PlayerControl.LocalPlayer.SetThickAssAndBigDumpy(true, true);
 

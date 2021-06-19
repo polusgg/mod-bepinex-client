@@ -424,10 +424,10 @@ namespace PolusGG {
         public bool ShowQuit = true;
     }
 
-    public static class Lol {
+    public static class IfLudwigThen {
         public static void SetThickAssAndBigDumpy(this PlayerControl playerControl, bool isThick, bool hasBigDumpy) {
             //stub
-            "uwu kissies mwah! @Sanae#4092 on discord!!!".Log();
+            "uwu kissies mwah! @Sanae#4092 on discord!!!".Log(level: LogLevel.Debug);
         }
     }
 }

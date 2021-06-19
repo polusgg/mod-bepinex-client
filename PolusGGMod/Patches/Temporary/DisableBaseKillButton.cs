@@ -13,7 +13,7 @@ namespace PolusGG.Patches.Temporary {
         }
 
         [HarmonyPrefix]
-        public static bool Nop() {
+        public static bool Nop(KillButtonManager __instance) {
             return false;
         }
     }

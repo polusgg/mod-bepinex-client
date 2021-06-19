@@ -107,7 +107,7 @@ namespace PolusGG.Patches.Temporary {
                     float num5 = i == 0 ? -8 : -1;
                     PoolablePlayer poolablePlayer = Object.Instantiate(__instance.PlayerPrefab, __instance.transform);
                     poolablePlayer.transform.localPosition = new Vector3(0.8f * num * num2 * num4,
-                        __instance.BaseY - 0.25f + num2 * 0.1f, num5 + num2 * 0.01f) * 1.25f;
+                        EndGameManager.BaseY - 0.25f + num2 * 0.1f, num5 + num2 * 0.01f) * 1.25f;
                     Vector3 vector = new Vector3(num3, num3, num3) * 1.25f;
                     poolablePlayer.transform.localScale = vector;
                     if (winningPlayerData2.IsDead) {
@@ -141,10 +141,10 @@ namespace PolusGG.Patches.Temporary {
             }
         }
 
-        [HarmonyPatch(typeof(EndGameManager._CoBegin_d__18), nameof(EndGameManager._CoBegin_d__18.MoveNext))]
+        [HarmonyPatch(typeof(EndGameManager._CoBegin_d__21), nameof(EndGameManager._CoBegin_d__21.MoveNext))]
         public class SetYoMamaUpTheSequel {
             [HarmonyPrefix]
-            public static void YoMama(EndGameManager._CoBegin_d__18 __instance) {
+            public static void YoMama(EndGameManager._CoBegin_d__21 __instance) {
                 if (TempData.EndReason != (GameOverReason) 7) return;
                 float num = Mathf.Min(1f, __instance._timer_5__5 / 3f);
                 _descColor.a = Mathf.Lerp(0f, PolusMod.RoleData.OutroColor.a, (num - 0.3f) * 3f);
