@@ -34,7 +34,9 @@ namespace PolusGG.Behaviours {
             Player.HatRenderer.color = hatColor;
             Player.MyPhysics.Skin.layer.color = skinColor;
             if (!Player.CurrentPet) return;
-            Player.CurrentPet.rend.color = petColor;
+            if (!Player.CurrentPet.rend) return;
+            if (!Player.CurrentPet.shadowRend) return;
+            Player.CurrentPet.rend.color = petColor; 
             Player.CurrentPet.shadowRend.color = petColor;
         }
 

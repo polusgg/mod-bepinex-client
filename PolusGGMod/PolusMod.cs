@@ -69,7 +69,7 @@ namespace PolusGG {
 
         private void OnInnerRpcReceived(InnerNetObject netObject, MessageReader reader, byte callId) {
             PlayerControl playerControl;
-            switch ((PolusRpcCalls) callId) {
+            switch ((PolusRpcCalls) callId) { 
                 case PolusRpcCalls.ChatVisibility: {
                     bool lol = reader.ReadByte() > 0;
                     if (HudManager.Instance.Chat.gameObject.active != lol)
@@ -115,9 +115,8 @@ namespace PolusGG {
                     break;
                 }
                 case PolusRpcCalls.SetOpacity: {
-                    "SET PASSITY".Log(10);
                     PlayerAnimPlayer animator = netObject.Cast<PlayerControl>().gameObject.EnsureComponent<PlayerAnimPlayer>();
-                    float alpha = reader.ReadByte();
+                    float alpha = reader.ReadByte() / 255.0f;
                     animator.playerColor.a = alpha;
                     animator.hatColor.a = alpha;
                     animator.petColor.a = alpha;
