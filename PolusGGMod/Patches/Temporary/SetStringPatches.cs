@@ -1,4 +1,6 @@
-﻿using HarmonyLib;
+﻿using System.Collections;
+using HarmonyLib;
+using PolusGG.Extensions;
 using TMPro;
 using UnhollowerBaseLib;
 using UnityEngine;
@@ -38,7 +40,7 @@ namespace PolusGG.Patches.Temporary {
                 }
             #endif
 
-            if (PingText is not null) __instance.text.text = PingText;
+            if (PingText is not null) __instance.text.text = PingText.Replace("%s", AmongUsClient.Instance.Ping.ToString());
         }
 
         public static string ToHexColor(this Color32 color) {
@@ -54,10 +56,27 @@ namespace PolusGG.Patches.Temporary {
     [HarmonyPatch(typeof(RoomTracker), nameof(RoomTracker.FixedUpdate))]
     public class RoomTrackerTextPatch {
         public static string RoomText = null;
+        [HarmonyPrefix]
+        public static bool Update(RoomTracker __instance) {
+            if (RoomText is not null)
+            {
+                CustomSlide(__instance, RoomText);
+                __instance.text.text = RoomText;
+                return false;
+            }
 
-        [HarmonyPostfix]
-        public static void Update(RoomTracker __instance) {
-            if (RoomText is not null) __instance.text.text = RoomText;
+            return true;
+        }
+
+        private static void CustomSlide(RoomTracker __instance, string text)
+        {
+            Vector3 tempPos = __instance.text.transform.localPosition;
+            Color tempColor = Color.white;
+            __instance.text.text = text;
+            tempPos.y = __instance.SourceY;
+            tempColor.a = 1f;
+            __instance.text.transform.localPosition = tempPos;
+            __instance.text.color = tempColor;
         }
     }
 
