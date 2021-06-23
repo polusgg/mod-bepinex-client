@@ -9,6 +9,7 @@
         SetGameOption = 0x89,
         DeleteGameOption = 0x8A,
         LoadHat = 0x8B,
+        SetHudVisibility = 0x8C,
         DisplaySystemAnnouncement = 0xFA
     }
 }

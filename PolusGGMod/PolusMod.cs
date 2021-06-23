@@ -300,6 +300,46 @@ namespace PolusGG {
                         Cache.CachedFiles[reader.ReadPackedUInt32()].Get<HatBehaviour>());
                     break;
                 }
+                case PolusRootPackets.SetHudVisibility: {
+                    HudItem item = (HudItem) reader.ReadByte();
+                    bool enabled = reader.ReadBoolean();
+
+                    switch (item) {
+                        case HudItem.MapButton: {
+                            HudManager.Instance.MapButton.gameObject.SetActive(enabled);
+                            break;
+                        }
+                        case HudItem.MapSabotageButtons: {
+                            HudShowMapPatch.sabotagesEnabled = enabled;
+                            break;
+                        }
+                        case HudItem.MapDoorButtons: {
+                            HudShowMapPatch.doorsEnabled = enabled;
+                            break;
+                        }
+                        case HudItem.SabotageButton: {
+                            UseButtonTargetPatch.sabotageButtonEnabled = enabled;
+                            break;
+                        }
+                        case HudItem.VentButton: {
+                            UseButtonTargetPatch.ventButtonEnabled = enabled;
+                            break;
+                        }
+                        case HudItem.UseButton: {
+                            UseButtonTargetPatch.useButtonEnabled = enabled;
+                            break;
+                        }
+                        case HudItem.TaskListPopup: {
+                            TaskPanelUpdatePatch.enabled = enabled;
+                            break;
+                        }
+                        case HudItem.TaskProgressBar: {
+                            ProgressTrackerUpdatePatch.enabled = enabled;
+                            break;
+                        }
+                    }
+                    break;
+                }
                 default: {
                     Logger.LogError($"Invalid packet with id {reader.Tag}");
                     break;
