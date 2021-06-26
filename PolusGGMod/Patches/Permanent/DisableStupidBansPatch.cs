@@ -21,7 +21,7 @@ namespace PolusGG.Patches.Permanent {
         // [PermanentPatch]
         [HarmonyPrefix]
         private static bool StupidNonce(AuthManager._CoWaitForNonce_d__5 __instance, out bool __result) {
-            __instance.__4__this.LastNonceReceived = new Nullable<uint>(0);
+            // __instance.__4__this.LastNonceReceived = new Nullable<uint>();
             __result = false;
             return false;
         }
@@ -62,7 +62,7 @@ namespace PolusGG.Patches.Permanent {
         [PermanentPatch]
         [HarmonyPostfix]
         public static void Postfix() {
-            GameObject play = GameObject.Find("PlayOnlineButton");
+            GameObject play = EOSManager.Instance.FindPlayOnlineButton();
             play.GetComponent<SpriteRenderer>().color = Color.white;
             play.GetComponent<PassiveButton>().enabled = true;
             ButtonRolloverHandler rollo = play.GetComponent<ButtonRolloverHandler>();

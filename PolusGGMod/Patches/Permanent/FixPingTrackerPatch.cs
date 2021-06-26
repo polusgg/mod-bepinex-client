@@ -8,7 +8,7 @@ namespace PolusGG.Patches.Permanent {
         [PermanentPatch]
         [HarmonyPostfix]
         public static void Update(PingTracker __instance) {
-            __instance.text.alignment = TextAlignmentOptions.Bottom;
+            // __instance.text.alignment = TextAlignmentOptions.Bottom;
         }
     }
 }

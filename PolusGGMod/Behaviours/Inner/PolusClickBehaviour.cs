@@ -23,7 +23,8 @@ namespace PolusGG.Behaviours.Inner {
         private PassiveButton button;
         private Color32 color;
         private bool active;
-        private bool counting;
+        private bool isCountingDown;
+        private bool lastCounting;
         private float currentTimer;
         private float maxTimer;
         private TMP_Text timerText;
@@ -52,14 +53,19 @@ namespace PolusGG.Behaviours.Inner {
             timerText = Instantiate(kb.TimerText, transform);
         }
 
-        private void FixedUpdate() {
+        private void Update() {
             if (pno.HasData()) {
                 Deserialize(pno.GetSpawnData());
                 CooldownHelpers.SetCooldownNormalizedUvs(graphic.renderer);
             }
 
-            if (counting) {
-                currentTimer -= Time.fixedDeltaTime;
+            if (netTransform._aspectPosition.Alignment == 0 && lastCounting != PlayerControl.LocalPlayer.CanMove) {
+                lastCounting = PlayerControl.LocalPlayer.CanMove;
+                SetCountingDown(lastCounting);
+            }
+
+            if (isCountingDown) {
+                currentTimer -= Time.deltaTime;
                 if (currentTimer < 0) currentTimer = 0;
             }
 
@@ -82,7 +88,7 @@ namespace PolusGG.Behaviours.Inner {
             "Button changed!!!!!"
                 .Log();            maxTimer = reader.ReadSingle();
             currentTimer = reader.ReadSingle();
-            counting = reader.ReadBoolean();
+            isCountingDown = reader.ReadBoolean();
             active = reader.ReadBoolean();
             color = new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
         }
@@ -91,26 +97,30 @@ namespace PolusGG.Behaviours.Inner {
             // return;
             float num = Mathf.Clamp(currentTimer / maxTimer, 0f, 1f);
             graphic.renderer.material.SetFloat(Percent, num);
-            bool isCoolingDown = num > 0f && !counting && !PlayerControl.LocalPlayer.CanMove;
+            bool isCoolingDown = num > 0f || isCountingDown || !PlayerControl.LocalPlayer.CanMove;
             graphic.renderer.material.SetFloat(Desat, isCoolingDown || !active ? 1f : 0f);
             if (isCoolingDown) {
-                graphic.renderer.color = Palette.EnabledColor;
+                graphic.renderer.color = Palette.DisabledClear;
+                timerText.gameObject.SetActive(currentTimer != 0);
+                if (currentTimer == 0) return;
                 timerText.text = Mathf.CeilToInt(currentTimer).ToString();
-                timerText.gameObject.SetActive(true);
                 timerText.color = color;
                 return;
             }
 
             timerText.gameObject.SetActive(false);
-            graphic.renderer.color = Palette.DisabledClear;
+            graphic.renderer.color = Palette.EnabledColor;
         }
 
         public void SetCountingDown(bool isCountingDown) {
             // TODO ANTI-CHEAT THIS USING CURRENT TIME DIFFERENCE OF 6ISH SECONDS
             // TODO MAKE SURE THAT THIS IS LIMITED ON THE SERVER TO PREVENT EARLY COOLDOWN BYPASS
             // TODO DON'T BE STUPID DUMB IDIOT WHEN WRITING THAT ANTI-CHEAT CODE
+
+            isCountingDown.Log(comment: "YOU");
+            
             MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(pno.NetId, (byte) PolusRpcCalls.SetCountingDown, SendOption.Reliable);
-            counting = isCountingDown;
+            // this.isCountingDown = isCountingDown;
             writer.Write(isCountingDown);
             writer.Write(currentTimer);
             AmongUsClient.Instance.FinishRpcImmediately(writer);
