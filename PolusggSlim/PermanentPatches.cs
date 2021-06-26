@@ -9,10 +9,10 @@ namespace PolusggSlim
     {
         public static void PatchAll(Harmony harmony)
         {
-            // harmony.Patch(
-            //     typeof(ServerManager).GetMethod(nameof(ServerManager.LoadServers)),
-            //     new HarmonyMethod(ServerManager_LoadServers.PrefixMethod)
-            // );
+            harmony.Patch(
+                typeof(ServerManager).GetMethod(nameof(ServerManager.Awake)),
+                postfix: new HarmonyMethod(ServerManager_Awake.PostfixMethod)
+            );
 
             // harmony.Patch(
             //     typeof(ServerManager).GetMethod(nameof(ServerManager.SetRegion)),
@@ -20,35 +20,35 @@ namespace PolusggSlim
             // );
         }
 
-        public static class ServerManager_LoadServers
+        public static class ServerManager_Awake
         {
-            public static MethodInfo PrefixMethod => typeof(ServerManager_LoadServers).GetMethod(nameof(Prefix));
+            public static MethodInfo PostfixMethod => typeof(ServerManager_Awake).GetMethod(nameof(Postfix));
 
-            public static bool Prefix(ServerManager __instance)
+            public static void Postfix(ServerManager __instance)
             {
                 var serverConfig = PluginSingleton<PolusggMod>.Instance.Configuration.Server;
-                var regions = new[]
-                {
-                    new StaticRegionInfo(
-                        serverConfig.RegionName,
-                        StringNames.NoTranslation,
-                        serverConfig.IpAddress,
-                        new[]
-                        {
-                            new ServerInfo(serverConfig.ServerName, serverConfig.IpAddress, serverConfig.Port)
-                        }
-                    ).Cast<IRegionInfo>()
-                };
+                // var regions = new[]
+                // {
+                var newRegion = new StaticRegionInfo(
+                    serverConfig.RegionName,
+                    StringNames.NoTranslation,
+                    serverConfig.IpAddress,
+                    new[]
+                    {
+                        new ServerInfo(serverConfig.ServerName, serverConfig.IpAddress, serverConfig.Port)
+                    }
+                ).Cast<IRegionInfo>();
+                // };
+                //
+                // ServerManager.DefaultRegions = ServerManager.DefaultRegions.Concat(regions).ToArray();
+                // __instance.AvailableRegions = regions;
+                // __instance.CurrentRegion = regions[0];
+                // __instance.CurrentServer = regions[0].Servers[0];
+                // __instance.state = ServerManager.UpdateState.Success;
 
-                ServerManager.DefaultRegions = ServerManager.DefaultRegions.Concat(regions).ToArray();
-                __instance.AvailableRegions = regions;
-                __instance.CurrentRegion = regions[0];
-                __instance.CurrentServer = regions[0].Servers[0];
-                __instance.state = ServerManager.UpdateState.Success;
-
+                __instance.AddOrUpdateRegion(newRegion);
+                
                 PggLog.Message("Loaded Polus.gg Servers");
-
-                return false;
             }
         }
 

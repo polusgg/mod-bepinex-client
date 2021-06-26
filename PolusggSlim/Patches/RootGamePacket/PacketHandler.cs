@@ -5,6 +5,7 @@ using InnerNet;
 using PolusggSlim.Patches.GameTransitionScreen;
 using PolusggSlim.Patches.SetString;
 using PolusggSlim.Utils.Extensions;
+using TMPro;
 using UnityEngine;
 
 namespace PolusggSlim.Patches.RootGamePacket
@@ -86,8 +87,8 @@ namespace PolusggSlim.Patches.RootGamePacket
                         }
                         else if (location == SetStringLocations.TaskCompletion)
                         {
-                            DestroyableSingleton<HudManager>.Instance.TaskCompleteOverlay.GetComponent<TextRenderer>()
-                                .Text = newString;
+                            DestroyableSingleton<HudManager>.Instance.TaskCompleteOverlay.GetComponent<TextMeshPro>()
+                                .text = newString;
                         }
                         else if (location == SetStringLocations.GameOptions)
                         {

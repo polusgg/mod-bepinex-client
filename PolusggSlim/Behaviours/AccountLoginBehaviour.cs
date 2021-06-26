@@ -25,14 +25,20 @@ namespace PolusggSlim.Behaviours
     {
         private const string LOGIN_SCENE = "MMOnline";
 
-        private static GameObject? _normalMenu;
+        private static GameObject _positionAnchorObject;
 
         private static readonly Action<Scene, LoadSceneMode> ShowAccountMenuHook = (scene, _) =>
         {
             if (scene.name == LOGIN_SCENE)
             {
-                _normalMenu = GameObject.Find("NormalMenu");
-                _normalMenu?.AddComponent<AccountLoginBehaviour>();
+                _positionAnchorObject = new GameObject("PggAccountsAnchor");
+                var aspectPosition = _positionAnchorObject.AddComponent<AspectPosition>();
+
+                aspectPosition.Alignment = AspectPosition.EdgeAlignments.Top;
+                aspectPosition.DistanceFromEdge = new Vector3(0f, 0.5f);
+                aspectPosition.AdjustPosition();
+
+                _positionAnchorObject.AddComponent<AccountLoginBehaviour>();
             }
         };
 
@@ -45,7 +51,9 @@ namespace PolusggSlim.Behaviours
 
         public static void Unload()
         {
-            _normalMenu?.TryDestroyComponent<AccountLoginBehaviour>();
+            if (_positionAnchorObject != null)
+                Destroy(_positionAnchorObject);
+
             SceneManager.remove_sceneLoaded(ShowAccountMenuHook);
         }
         
@@ -70,9 +78,6 @@ namespace PolusggSlim.Behaviours
 
         public void Awake()
         {
-            if (_normalMenu is null)
-                return;
-
             var bundle = ResourceManager.GetAssetBundle("accountsmenu");
 
             var topButtonBarPrefab = bundle.LoadAsset("Assets/Mods/LoginMenu/TopAccount.prefab").Cast<GameObject>();
@@ -80,15 +85,11 @@ namespace PolusggSlim.Behaviours
             _glyphRenderer = new GameObject("GlyphRendererFix").AddComponent<SpriteRenderer>();
 
 
-            var nameTextBar = _normalMenu.FindRecursive(go => go.name.Contains("NameText"));
-            var nameTextBarPosition = nameTextBar.transform.position;
-            nameTextBar.active = false; 
+            _topButtonBar = Instantiate(topButtonBarPrefab, _positionAnchorObject.transform);
+            _topButtonBar.transform.localPosition = Vector3.zero;
 
-            _topButtonBar = Instantiate(topButtonBarPrefab);
-            _topButtonBar.transform.position = nameTextBarPosition;
-
-            _loggedInMenu = Instantiate(loggedInMenuPrefab);
-            _loggedInMenu.transform.position = nameTextBarPosition;
+            _loggedInMenu = Instantiate(loggedInMenuPrefab, _positionAnchorObject.transform);
+            _loggedInMenu.transform.localPosition = Vector3.zero;
 
             _openLogInModalButton = _topButtonBar.FindRecursive(go => go.name.Contains("Login"));
             _createAccountButton = _topButtonBar.FindRecursive(go => go.name.Contains("Create"));
@@ -180,7 +181,7 @@ namespace PolusggSlim.Behaviours
                 _authContext.DisplayName = result.Data.DisplayName;
                 _authContext.Perks = result.Data.Perks;
                 
-                // TODO: Reorganize code
+                // TODO: Reorganize code into auth context
                 var filePath = Path.Combine(Paths.GameRootPath, "api.txt");
                 await File.WriteAllTextAsync(filePath, 
                     Convert.ToBase64String(Encoding.UTF8.GetBytes(
@@ -210,7 +211,7 @@ namespace PolusggSlim.Behaviours
             _loggedInMenu.active = false;
             _topButtonBar.active = true;
             
-            //TODO: Reorganize Code
+            //TODO: Reorganize Code into auth context
             var filePath = Path.Combine(Paths.GameRootPath, "api.txt");
             if (File.Exists(filePath))
                 File.Delete(filePath);

@@ -76,19 +76,6 @@ namespace PolusggSlim
             PggLog.Message("Loading Polusgg mod");
             PggLog.Message($"Polusgg Server at {Configuration.Server.IpAddress}");
 
-#if DEBUG
-            var context = PluginSingleton<PolusggMod>.Instance.AuthContext;
-            var result = context.ApiClient
-                .LogIn("saghetti@polus.gg", "")
-                .GetAwaiter().GetResult();
-            if (result != null)
-            {
-                context.ParseClientIdAsUuid(result.Data.ClientId);
-                context.ClientToken = result.Data.ClientToken;
-                context.DisplayName = result.Data.DisplayName;
-                context.Perks = result.Data.Perks;
-            }
-#elif RELEASE
             var filePath = Path.Combine(Paths.GameRootPath, "api.txt");
             if (File.Exists(filePath))
             {
@@ -103,7 +90,7 @@ namespace PolusggSlim
                     AuthContext.Perks = authModel.Perks;
                 }
             }
-#endif
+
             AccountLoginBehaviour.Load();
 
             Harmony.PatchAll();

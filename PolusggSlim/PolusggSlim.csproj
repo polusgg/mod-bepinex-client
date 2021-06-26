@@ -4,22 +4,24 @@
         <TargetFramework>netstandard2.1</TargetFramework>
         <AssemblyName>PolusggSlim</AssemblyName>
         <LangVersion>latest</LangVersion>
+        <DebugType>embedded</DebugType>
     </PropertyGroup>
     
+    <PropertyGroup>
+        <GameProvider>Static</GameProvider>
+        <GameVersion>../../../AmongUsModded2021615s</GameVersion>
+    </PropertyGroup>
+
     <ItemGroup>
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.1">
-            <PrivateAssets>true</PrivateAssets>
-        </PackageReference>
-        <PackageReference Include="Reactor.OxygenFilter.MSBuild" Version="0.3.6" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+        <PackageReference Include="Reactor.MSBuild" Version="0.1.2" />
     </ItemGroup>
     
     <ItemGroup>
-      <Folder Include="Patches\RpcPacket" />
       <EmbeddedResource Include="Resources\**" />
-      <Folder Include="Patches\Testing" />
     </ItemGroup>
 
-    <Target Name="Copy" AfterTargets="Reobfuscate">
-        <Copy SourceFiles="$(OutputPath)reobfuscated/$(AssemblyName)-$(GameVersion).dll" DestinationFolder="$(AmongUs)/BepInEx/plugins/" />
+    <Target Name="Copy" AfterTargets="Build">
+        <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFolder="$(GameVersion)/BepInEx/plugins/" />
     </Target>
 </Project>
