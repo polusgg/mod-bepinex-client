@@ -27,7 +27,7 @@ namespace PolusGG.Patches.Temporary
         [HarmonyPostfix]
         public static void Postfix(InfectedOverlay __instance) {
             foreach (var button in __instance.allButtons) {
-                if (button.gameObject.name == "closeDoors") {
+                if (button.gameObject.name == "closeDoors" || button.gameObject.name == "Doors") {
                     button.gameObject.SetActive(doorsEnabled);
                 }
                 else {
