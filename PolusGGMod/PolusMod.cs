@@ -14,6 +14,7 @@ using PolusGG.Mods;
 using PolusGG.Mods.Patching;
 using PolusGG.Patches.Temporary;
 using PolusGG.Resources;
+using PowerTools;
 using TMPro;
 using UnhollowerBaseLib;
 using UnityEngine;
@@ -141,6 +142,19 @@ namespace PolusGG {
                 case PolusRpcCalls.BeginAnimationPlayer:
                     netObject.gameObject.EnsureComponent<PlayerAnimPlayer>().HandleMessage(reader);
                     break;
+                case PolusRpcCalls.SetAliveState: {
+                    PlayerControl player = netObject.Cast<PlayerControl>();
+                    SetAliveState(player, reader.ReadBoolean());
+                    break;
+                }
+                case PolusRpcCalls.DisplayKillAnimation: {
+                    PlayerControl killer = GameData.Instance.GetPlayerById(reader.ReadByte()).Object;
+                    PlayerControl target = GameData.Instance.GetPlayerById(reader.ReadByte()).Object;
+                    Vector2 targetPosition = reader.ReadVector2();
+                    byte animationID = reader.ReadByte();
+                    killer.MyPhysics.StartCoroutine(DisplayKillAnimation(killer, target, targetPosition, animationID));
+                    break;
+                }
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -445,6 +459,44 @@ namespace PolusGG {
         public void SetPlayerAppearance(PlayerControl player, PlayerControl corpse) {
             if (player.name.Contains("Ludwig", StringComparison.InvariantCultureIgnoreCase))
                 corpse.SetThickAssAndBigDumpy(true, true);
+        }
+
+        private void SetAliveState(PlayerControl player, bool alive) {
+            if (alive) player.Revive();
+            else player.Die(DeathReason.Kill);
+        }
+
+        private IEnumerator DisplayKillAnimation(PlayerControl killer, PlayerControl target, Vector2 pos,
+            byte animationId) {
+            if (Constants.ShouldPlaySfx())
+            {
+                SoundManager.Instance.PlaySound(killer.KillSfx, false, 0.8f);
+            }
+            FollowerCamera cam = Camera.main.GetComponent<FollowerCamera>();
+            bool isParticipant = PlayerControl.LocalPlayer == killer || PlayerControl.LocalPlayer == target;
+            PlayerPhysics sourcePhys = killer.MyPhysics;
+            KillAnimation.SetMovement(killer, false);
+            KillAnimation.SetMovement(target, false);
+            if (isParticipant)
+            {
+                cam.Locked = true;
+                ConsoleJoystick.SetMode_Task();
+                if (PlayerControl.LocalPlayer.AmOwner)
+                {
+                    PlayerControl.LocalPlayer.MyPhysics.inputHandler.enabled = true;
+                }
+            }
+            SpriteAnim sourceAnim = killer.GetComponent<SpriteAnim>();
+            yield return new WaitForAnimationFinish(sourceAnim, killer.KillAnimations[animationId].BlurAnim);
+            killer.NetTransform.SnapTo(pos);
+            sourceAnim.Play(sourcePhys.IdleAnim, 1f);
+            KillAnimation.SetMovement(killer, true);
+            KillAnimation.SetMovement(target, true);
+            if (isParticipant)
+            {
+                cam.Locked = false;
+            }
+            yield break;
         }
     }
 

@@ -15,9 +15,10 @@
         BeginAnimationPlayer = 0x8c,
         BeginAnimationCamera = 0x8d,
         EnterVent = 0x8e,
-        ExitVent = 0x8e,
+        ExitVent = 0x8f,
         SetCountingDown = 0x90,
         ReportDeadBody = 0x90,
-        
+        SetAliveState = 0x91,
+        DisplayKillAnimation = 0x92,
     }
 }
