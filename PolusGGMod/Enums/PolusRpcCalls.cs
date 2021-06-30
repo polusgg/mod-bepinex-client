@@ -18,7 +18,7 @@
         ExitVent = 0x8f,
         SetCountingDown = 0x90,
         ReportDeadBody = 0x90,
-        SetAliveState = 0x91,
-        DisplayKillAnimation = 0x92,
+        SetAliveState = 0x92,
+        DisplayKillAnimation = 0x93,
     }
 }
