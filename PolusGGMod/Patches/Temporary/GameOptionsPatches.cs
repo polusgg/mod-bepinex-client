@@ -537,7 +537,7 @@ namespace PolusGG.Patches.Temporary {
                 void GenerateHud(string categoryTitle, List<GameOption> options) {
                     CatchHelper.TryCatch(() => {
                         string output = "";
-                        if (categoryTitle != null) output += $"\n{categoryTitle}\n";
+                        if (categoryTitle != null) output += $"{categoryTitle}\n";
                         foreach (GameOption option in options.OrderBy(x => x.Priority).ThenBy(x => x.Title)) {
                             if (categoryTitle != null) output += "  ";
                             output += $"{option.Title}: ";
@@ -552,6 +552,7 @@ namespace PolusGG.Patches.Temporary {
                             output += '\n';
                         }
 
+                        output += '\n';
                         oute += output;
                     });
                 }

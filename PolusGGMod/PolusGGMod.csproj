@@ -18,15 +18,14 @@
         <Authors>Sanae6</Authors>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
-
         <GameProvider>Static</GameProvider>
         <GameVersion>$(AmongUs)</GameVersion>
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Reactor.MSBuild" Version="0.1.2" />
         <PackageReference Include="DokanNet" Version="1.4.0" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-        <PackageReference Include="Reactor.MSBuild" Version="0.1.2" />
     </ItemGroup>
 
     <ItemGroup>
@@ -38,8 +37,8 @@
     <!--        <Copy SourceFiles="$(OutputPath)reobfuscated/$(AssemblyName)-$(GameVersion).dll" DestinationFolder="$(AmongAss)/BepInEx/plugins/" />-->
     <!--    </Target>-->
 
-<!--    <Target Name="AnotherCustomTarget" AfterTargets="AfterBuild">-->
-<!--        <Message Text="Should run after build" Importance="High" />-->
-<!--        <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFolder="$(AmongUs)/BepInEx/plugins/" />-->
-<!--    </Target>-->
+    <Target Name="AnotherCustomTarget" AfterTargets="AfterBuild">
+        <Message Text="Should run after build" Importance="High" />
+        <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFolder="$(AmongUs)/BepInEx/plugins/" />
+    </Target>
 </Project>

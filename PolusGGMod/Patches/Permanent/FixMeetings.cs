@@ -10,7 +10,7 @@ namespace PolusGG.Patches.Permanent {
 
                 foreach (PlayerVoteArea playerVoteArea in __instance.playerStates) {
                     GameData.PlayerInfo playerById = GameData.Instance.GetPlayerById(playerVoteArea.TargetPlayerId);
-                    if (playerById == null)
+                    if (playerById == null || playerById.Disconnected)
                         playerVoteArea.SetDisabled();
                     else {
                         bool flag = playerById.Disconnected || playerById.IsDead;
