@@ -151,8 +151,8 @@ namespace PolusGG {
                     PlayerControl killer = GameData.Instance.GetPlayerById(reader.ReadByte()).Object;
                     PlayerControl target = GameData.Instance.GetPlayerById(reader.ReadByte()).Object;
                     Vector2 targetPosition = reader.ReadVector2();
-                    byte animationID = reader.ReadByte();
-                    killer.MyPhysics.StartCoroutine(DisplayKillAnimation(killer, target, targetPosition, animationID));
+                    bool killOverlayEnabled = reader.ReadBoolean();
+                    killer.MyPhysics.StartCoroutine(DisplayKillAnimation(killer, target, targetPosition, killOverlayEnabled));
                     break;
                 }
                 default:
@@ -463,39 +463,74 @@ namespace PolusGG {
 
         private void SetAliveState(PlayerControl player, bool alive) {
             if (alive) player.Revive();
-            else player.Die(DeathReason.Kill);
+            else
+            {
+                player.Die(DeathReason.Kill);
+                ImportantTextTask importantTextTask = new GameObject("_Player").AddComponent<ImportantTextTask>();
+                importantTextTask.transform.SetParent(player.transform, false);
+                if (!PlayerControl.GameOptions.GhostsDoTasks)
+                {
+                    player.ClearTasks();
+                    importantTextTask.Text = DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.GhostIgnoreTasks, new Il2CppReferenceArray<Il2CppSystem.Object>(0));
+                }
+                else
+                {
+                    importantTextTask.Text = DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.GhostDoTasks, new Il2CppReferenceArray<Il2CppSystem.Object>(0));
+                }
+                player.myTasks.Insert(0, importantTextTask);
+            }
         }
 
         private IEnumerator DisplayKillAnimation(PlayerControl killer, PlayerControl target, Vector2 pos,
-            byte animationId) {
-            if (Constants.ShouldPlaySfx())
+            bool killOverlayEnabled) {
+            if (Constants.ShouldPlaySfx() && killer.AmOwner)
             {
                 SoundManager.Instance.PlaySound(killer.KillSfx, false, 0.8f);
             }
+
+            if (target.AmOwner)
+            {
+                if (Minigame.Instance)
+                {
+                    try
+                    {
+                        Minigame.Instance.Close();
+                        Minigame.Instance.Close();
+                    }
+                    catch {}
+                }
+
+                if (killOverlayEnabled)
+                {
+                    DestroyableSingleton<HudManager>.Instance.KillOverlay.ShowKillAnimation(killer.Data, target.Data);
+                    DestroyableSingleton<HudManager>.Instance.ShadowQuad.gameObject.SetActive(false);
+                }
+                target.nameText.GetComponent<MeshRenderer>().material.SetInt("_Mask", 0);
+                target.RpcSetScanner(false);
+            }
+            
             FollowerCamera cam = Camera.main.GetComponent<FollowerCamera>();
             bool isParticipant = PlayerControl.LocalPlayer == killer || PlayerControl.LocalPlayer == target;
             PlayerPhysics sourcePhys = killer.MyPhysics;
             KillAnimation.SetMovement(killer, false);
             KillAnimation.SetMovement(target, false);
+            //target.SetPlayerMaterialColors(deadBody.bloodSplatter);
             if (isParticipant)
             {
                 cam.Locked = true;
                 ConsoleJoystick.SetMode_Task();
-                if (PlayerControl.LocalPlayer.AmOwner)
-                {
+                if (PlayerControl.LocalPlayer.AmOwner) { 
                     PlayerControl.LocalPlayer.MyPhysics.inputHandler.enabled = true;
                 }
             }
-            SpriteAnim sourceAnim = killer.GetComponent<SpriteAnim>();
-            yield return new WaitForAnimationFinish(sourceAnim, killer.KillAnimations[animationId].BlurAnim);
+
+            SpriteAnim sourceAnim = killer.MyAnim;
+            yield return new WaitForAnimationFinish(sourceAnim, killer.KillAnimations[0].BlurAnim);
             killer.NetTransform.SnapTo(pos);
             sourceAnim.Play(sourcePhys.IdleAnim, 1f);
             KillAnimation.SetMovement(killer, true);
             KillAnimation.SetMovement(target, true);
-            if (isParticipant)
-            {
-                cam.Locked = false;
-            }
+            cam.Locked = false;
             yield break;
         }
     }
