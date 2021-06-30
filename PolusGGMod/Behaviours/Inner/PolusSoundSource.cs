@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if no
+using System;
 using Hazel;
 using PolusGG.Enums;
 using PolusGG.Net;
@@ -49,3 +50,4 @@ namespace PolusGG.Behaviours.Inner {
         }
     }
 }
+#endif

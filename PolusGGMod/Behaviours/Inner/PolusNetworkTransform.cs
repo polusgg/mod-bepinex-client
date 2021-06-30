@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if no
+using System;
 using System.Linq;
 using HarmonyLib;
 using Hazel;
@@ -60,3 +61,4 @@ namespace PolusGG.Behaviours.Inner {
         }
     }
 }
+#endif

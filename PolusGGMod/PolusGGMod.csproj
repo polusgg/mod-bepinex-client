@@ -7,8 +7,8 @@
         <Version>2021.4.12</Version>
         <AssemblyName>Polus</AssemblyName>
         <!-- Build env Among Us -->
-        <AmongUs>C:\Users\Sanae\Downloads\depotdownloader-2.3.6\depots\945361\6834168</AmongUs>
-<!--        <AmongUs>D:\SteamLibrary\steamapps\common\Among Us</AmongUs>-->
+<!--        <AmongUs>C:\Users\Sanae\Downloads\depotdownloader-2.3.6\depots\945361\6834168</AmongUs>-->
+        <AmongUs>D:\SteamLibrary\steamapps\common\Among Us</AmongUs>
         <!--        <AmongUs>C:\Users\Sanae\Downloads\depotdownloader-2.3.6\depots\945361\6529205</AmongUs>-->
         <!-- Runtime env Among Us-->
         <!--        <AmongAss>C:\Users\Sanae\Downloads\depotdownloader-2.3.6\depots\945361\6542129</AmongAss>-->

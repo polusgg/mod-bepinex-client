@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿#if no
+using System.Linq;
 using PolusGG.Extensions;
 using PolusGG.Net;
 using UnityEngine;
@@ -107,3 +108,4 @@ namespace PolusGG.Behaviours.Inner {
         }
     }
 }
+#endif

@@ -9,7 +9,7 @@ namespace PolusGG.Patches.Temporary {
             if (__instance.Reported)
                 return false;
             if (__instance.ParentId != 255) return true;
-            __instance.GetComponent<PolusDeadBody>().OnReported();
+            __instance.GetComponent<po>().OnReported();
             return false;
 
         }

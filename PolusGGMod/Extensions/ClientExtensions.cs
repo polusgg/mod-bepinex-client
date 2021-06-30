@@ -1,5 +1,5 @@
 ﻿using Hazel;
-using PolusGG.Behaviours.Inner;
+using PolusGG.Behaviours.Ino;
 using UnityEngine;
 
 namespace PolusGG.Extensions {
@@ -21,7 +21,7 @@ namespace PolusGG.Extensions {
         public static Vector2 ReadVector2(this MessageReader reader) {
             float v = reader.ReadUInt16() / 65535f;
             float v2 = reader.ReadUInt16() / 65535f;
-            return new Vector2(PolusNetworkTransform.XRange.Lerp(v), PolusNetworkTransform.YRange.Lerp(v2));
+            return new Vector2(PogusNetTransform.XRange.Lerp(v), PogusNetTransform.YRange.Lerp(v2));
         }
     }
 }

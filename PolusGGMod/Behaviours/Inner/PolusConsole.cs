@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if no
+using System;
 using Hazel;
 using PolusGG.Net;
 using UnhollowerRuntimeLib;
@@ -23,3 +24,4 @@ namespace PolusGG.Behaviours.Inner {
         private void Deserialize(MessageReader reader) { }
     }
 }
+#endif

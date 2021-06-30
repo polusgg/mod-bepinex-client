@@ -9,14 +9,10 @@ using Object = UnityEngine.Object;
 
 namespace PolusGG {
     public class PggObjectManager : IObjectManager {
-        private List<PolusNetObject> _allObjects = new();
-        private Dictionary<uint, PolusNetObject> _allObjectsFast = new();
-        private HashSet<uint> _destroyedObjects = new();
-        private Dictionary<uint, PnoBehaviour> _spawnObjects = new();
-
         public void Register(uint index, PnoBehaviour netObject) {
-            PogusPlugin.Logger.LogInfo($"Registered {netObject.GetType().Name} at index {index} with {_spawnObjects.Count}");
-            _spawnObjects[index] = netObject;
+            PogusPlugin.Logger.LogInfo($"Registered {netObject.GetType().Name} at index {index}");
+            AmongUsClient.Instance.NonAddressableSpawnableObjects
+            // _spawnObjects[index] = netObject;
         }
 
         public PolusNetObject LocateNetObject(PnoBehaviour netBehaviour) {

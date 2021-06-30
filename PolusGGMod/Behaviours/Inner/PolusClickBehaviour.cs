@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if no
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
@@ -129,3 +130,4 @@ namespace PolusGG.Behaviours.Inner {
         public void OnClick() => AmongUsClient.Instance.SendRpcImmediately(pno.NetId, (byte) PolusRpcCalls.Click);
     }
 }
+#endif

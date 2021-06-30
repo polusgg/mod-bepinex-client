@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if no
+using System;
 using PolusGG.Net;
 using UnhollowerRuntimeLib;
 using UnityEngine;
@@ -32,3 +33,4 @@ namespace PolusGG.Behaviours.Inner {
         }
     }
 }
+#endif

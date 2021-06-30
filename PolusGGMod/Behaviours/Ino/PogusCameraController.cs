@@ -1,43 +1,33 @@
-﻿#if no
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 using Hazel;
+using InnerNet;
 using PolusGG.Enums;
 using PolusGG.Extensions;
-using PolusGG.Net;
-using UnhollowerRuntimeLib;
 using UnityEngine;
 
-namespace PolusGG.Behaviours.Inner {
-    public class PolusCameraController : PnoBehaviour {
+namespace PolusGG.Behaviours.Ino {
+    public class PogusCameraController : InnerNetObject {
         private Camera camera;
         private FollowerCamera follower;
-
-        static PolusCameraController() {
-            ClassInjector.RegisterTypeInIl2Cpp<PolusCameraController>();
-        }
-
-        public PolusCameraController(IntPtr ptr) : base(ptr) { }
 
         private void Start() {
             follower = HudManager.Instance.PlayerCam;
             camera = follower.GetComponent<Camera>();
-            pno = PogusPlugin.ObjectManager.LocateNetObject(this);
         }
 
-        private void FixedUpdate() {
-            if (pno != null && pno.HasData()) Deserialize(pno.GetSpawnData());
-            if (pno != null && pno.HasRpc()) HandleRpc(pno.GetRpcData());
+        public override void Deserialize(MessageReader reader, bool initialState) {
+            HudManager.Instance.PlayerCam.Offset = reader.ReadVector2();
         }
 
-        private void HandleRpc(PolusNetObject.Rpc rpc) {
-            if (rpc.CallId != (int) PolusRpcCalls.BeginAnimationCamera) return;
+        public override void HandleRpc(byte callId, MessageReader reader) {
+            if (callId != (int) PolusRpcCalls.BeginAnimationCamera) return;
             List<CameraKeyframe> keyframe = new();
-            while (rpc.Reader.Position < rpc.Reader.Length - 1) {
-                MessageReader message = rpc.Reader.ReadMessage();
+            while (reader.Position < reader.Length - 1) {
+                MessageReader message = reader.ReadMessage();
                 keyframe.Add(new CameraKeyframe(
                     message.ReadPackedUInt32(),
                     message.ReadPackedUInt32(),
@@ -49,7 +39,7 @@ namespace PolusGG.Behaviours.Inner {
                 ));
             }
 
-            this.StartCoroutine(CoPlayAnimation(keyframe.ToArray(), rpc.Reader.ReadBoolean()));
+            this.StartCoroutine(CoPlayAnimation(keyframe.ToArray(), reader.ReadBoolean()));
         }
 
         private CameraKeyframe SerializeCurrentState() {
@@ -89,17 +79,6 @@ namespace PolusGG.Behaviours.Inner {
                 resetTo.Angle = resetTo.Angle;
                 resetTo.OverlayColor = resetTo.OverlayColor;
             }
-        }
-
-        private void Deserialize(MessageReader reader) {
-            // Camera hudCamera = HudManager.Instance.GetComponentInChildren<Camera>();
-            // Camera camera = Camera.main;
-            // Camera shadowCamera = FindObjectOfType<ShadowCamera>().GetComponent<Camera>();
-            // HudManager.Instance.ShadowQuad.transform.localScale = 
-            // shadowCamera.orthographicSize = camera.orthographicSize = hudCamera.orthographicSize = reader.ReadSingle();
-            // ResolutionManager.ResolutionChanged.Invoke((float)Screen.width / Screen.height);
-            // todo add scale later on
-            HudManager.Instance.PlayerCam.Offset = reader.ReadVector2();
         }
 
         public class CameraKeyframe {
@@ -157,4 +136,3 @@ namespace PolusGG.Behaviours.Inner {
         }
     }
 }
-#endif

@@ -51,13 +51,13 @@ namespace PolusGG {
             if (!coMan) coMan = new GameObject("PMC").DontDestroy().AddComponent<CoroutineManager>();
 
             PogusPlugin.ObjectManager.InnerRpcReceived += OnInnerRpcReceived;
-            PogusPlugin.ObjectManager.Register(0x80, RegisterPnos.CreateImage());
-            PogusPlugin.ObjectManager.Register(0x81, RegisterPnos.CreateButton());
-            PogusPlugin.ObjectManager.Register(0x83, RegisterPnos.CreateDeadBodyPrefab());
-            PogusPlugin.ObjectManager.Register(0x85, RegisterPnos.CreateSoundSource());
-            PogusPlugin.ObjectManager.Register(0x87, RegisterPnos.CreatePoi());
-            PogusPlugin.ObjectManager.Register(0x88, RegisterPnos.CreateCameraController());
-            PogusPlugin.ObjectManager.Register(0x89, RegisterPnos.CreatePrefabHandle());
+            // PogusPlugin.ObjectManager.Register(0x80, RegisterPnos.CreateImage());
+            // PogusPlugin.ObjectManager.Register(0x81, RegisterPnos.CreateButton());
+            // PogusPlugin.ObjectManager.Register(0x83, RegisterPnos.CreateDeadBodyPrefab());
+            // PogusPlugin.ObjectManager.Register(0x85, RegisterPnos.CreateSoundSource());
+            // PogusPlugin.ObjectManager.Register(0x87, RegisterPnos.CreatePoi());
+            // PogusPlugin.ObjectManager.Register(0x88, RegisterPnos.CreateCameraController());
+            // PogusPlugin.ObjectManager.Register(0x89, RegisterPnos.CreatePrefabHandle());
 
             ResolutionManagerPlus.Resolution();
             Cache = PogusPlugin.Cache;

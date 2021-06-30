@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if no
+using System;
 using Hazel;
 using PolusGG.Net;
 using UnhollowerRuntimeLib;
@@ -27,3 +28,4 @@ namespace PolusGG.Behaviours.Inner {
         }
     }
 }
+#endif

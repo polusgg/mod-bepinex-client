@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using HarmonyLib;
+using Il2CppSystem.Collections.Generic;
 using PolusGG.Extensions;
 using PolusGG.Mods.Patching;
 using UnityEngine;
@@ -26,6 +27,12 @@ namespace PolusGG.Patches.Permanent {
                 if (_globalPool == null) {
                     _globalPool = Object.Instantiate(__instance.pool).DontDestroy();
                     Object.Destroy(_globalPool.GetComponent<PlayerParticles>());
+                    _globalPool.poolSize = Palette.ColorNames.Length;
+                    foreach (PoolableBehavior pb in _globalPool.inactiveChildren) Object.DestroyImmediate(pb);
+                    foreach (PoolableBehavior pb in _globalPool.activeChildren) Object.DestroyImmediate(pb);
+                    _globalPool.activeChildren = new List<PoolableBehavior>();
+                    _globalPool.inactiveChildren = new List<PoolableBehavior>();
+                    _globalPool.InitPool(_globalPool.Prefab);
                     SceneManager.add_sceneLoaded(new Action<Scene, LoadSceneMode>(OnSceneChanged));
                     // _globalPool.ReclaimAll();
                 }
@@ -41,7 +48,7 @@ namespace PolusGG.Patches.Permanent {
             [HarmonyPrefix]
             public static void Update(PlayerParticle __instance) {
                 __instance.OwnerPool = _globalPool;
-                __instance.velocity *= new Vector2(1.001f, 1.001f);
+                __instance.velocity *= new Vector2(1.01f, 1.01f);
             }
         }
 

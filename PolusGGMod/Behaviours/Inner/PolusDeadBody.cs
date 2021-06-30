@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if no
+using System;
 using Hazel;
 using PolusGG.Enums;
 using PolusGG.Extensions;
@@ -54,3 +55,4 @@ namespace PolusGG.Behaviours.Inner {
         public void OnReported() => AmongUsClient.Instance.SendRpcImmediately(pno.NetId, (byte) PolusRpcCalls.ReportDeadBody);
     }
 }
+#endif
