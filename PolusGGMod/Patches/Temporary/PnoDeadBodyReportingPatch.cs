@@ -1,5 +1,5 @@
 ﻿using HarmonyLib;
-using PolusGG.Behaviours.Inner;
+using PolusGG.Behaviours.Ino;
 
 namespace PolusGG.Patches.Temporary {
     [HarmonyPatch(typeof(DeadBody), nameof(DeadBody.OnClick))]
@@ -9,7 +9,7 @@ namespace PolusGG.Patches.Temporary {
             if (__instance.Reported)
                 return false;
             if (__instance.ParentId != 255) return true;
-            __instance.GetComponent<po>().OnReported();
+            __instance.GetComponent<PogusDeadBody>().OnReported();
             return false;
 
         }

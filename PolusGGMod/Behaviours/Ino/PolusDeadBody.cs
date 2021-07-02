@@ -1,6 +1,7 @@
 ﻿using System;
 using Hazel;
 using InnerNet;
+using PolusGG.Extensions;
 using PowerTools;
 using UnityEngine;
 
@@ -11,7 +12,7 @@ namespace PolusGG.Behaviours.Ino {
         public SpriteAnim anim;
         public DeadBody deadBody;
         public SpriteRenderer rend;
-        public PogusNetTransform netTransform;
+        public PolusNetworkTransform netTransform;
         public PogusClickBehaviour clickBehaviour;
 
         private void Start() {
@@ -19,12 +20,16 @@ namespace PolusGG.Behaviours.Ino {
             anim = GetComponent<SpriteAnim>();
             deadBody = GetComponent<DeadBody>();
             deadBody.ParentId = 255;
-            netTransform = GetComponent<PogusNetTransform>();
+            netTransform = GetComponent<PolusNetworkTransform>();
             clickBehaviour = GetComponent<PogusClickBehaviour>();
         }
 
         public override void Deserialize(MessageReader reader, bool initialState) {
             
+        }
+
+        public void OnReported() {
+            "todo report dead body".Log();
         }
     }
 }

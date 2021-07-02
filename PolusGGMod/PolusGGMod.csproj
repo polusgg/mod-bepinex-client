@@ -32,11 +32,6 @@
         <EmbeddedResource Include="bepinexresources" />
     </ItemGroup>
 
-    <!--    <Target Name="Copy" AfterTargets="CoreCompile">-->
-    <!--        <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFolder="$(AmongUs)/BepInEx/plugins/" />-->
-    <!--        <Copy SourceFiles="$(OutputPath)reobfuscated/$(AssemblyName)-$(GameVersion).dll" DestinationFolder="$(AmongAss)/BepInEx/plugins/" />-->
-    <!--    </Target>-->
-
     <Target Name="AnotherCustomTarget" AfterTargets="AfterBuild">
         <Message Text="Should run after build" Importance="High" />
         <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFolder="$(AmongUs)/BepInEx/plugins/" />

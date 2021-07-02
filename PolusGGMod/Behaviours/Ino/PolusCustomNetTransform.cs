@@ -6,7 +6,7 @@ using PolusGG.Extensions;
 using UnityEngine;
 
 namespace PolusGG.Behaviours.Ino {
-    public class PogusNetTransform : InnerNetObject {
+    public class PolusNetworkTransform : InnerNetObject {
         internal static readonly FloatRange XRange = new(50f, -50f);
         internal static readonly FloatRange YRange = new(50f, -50f);
         internal AspectPosition AspectPosition;

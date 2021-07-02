@@ -12,7 +12,7 @@ namespace PolusGG.Behaviours.Ino {
             Object.DontDestroyOnLoad(gameObject);
 
             PogusDeadBody polusDeadBody = gameObject.AddComponent<PogusDeadBody>();
-            gameObject.AddComponent<PogusNetTransform>();
+            gameObject.AddComponent<PolusNetworkTransform>();
 
             return polusDeadBody;
         }
