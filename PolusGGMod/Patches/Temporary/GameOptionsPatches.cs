@@ -8,6 +8,7 @@ using HarmonyLib;
 using Hazel;
 using PolusGG.Enums;
 using PolusGG.Extensions;
+using PolusGG.Patches.Permanent;
 using PolusGG.Utils;
 using TMPro;
 using UnhollowerBaseLib;
@@ -73,6 +74,7 @@ namespace PolusGG.Patches.Temporary {
                     List<Transform> options = new();
 
                     void GenerateGameOption(GameOption gameOption) {
+                        HostFixingPatches.PrepareAmHost();
                         switch (gameOption.Type) {
                             case OptionType.Number: {
                                 FloatValue value = (FloatValue) gameOption.Value;

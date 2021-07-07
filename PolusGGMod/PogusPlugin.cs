@@ -77,7 +77,12 @@ namespace PolusGG {
             // font = Bundle.LoadAsset("Assets/Fonts/Inter-SemiBold SDF.asset").Cast<TMP_FontAsset>();
             // FontMwenuwuPatches.Load();
             CatchHelper.TryCatch(CreditsMainMenuPatches.Load);
+            
             ModManager.PostLoad = true;
+
+            "".Log(5);
+            "Among Ass".Log();
+            "".Log(5);
         }
 
         public override bool Unload() {

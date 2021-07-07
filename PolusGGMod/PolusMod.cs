@@ -34,6 +34,8 @@ namespace PolusGG {
         public static PolusMod Instance;
         private GameObject maintnet;
         private static CoroutineManager coMan;
+        public static List<Action> Dispatcher = new();
+        private static List<Action> TempQueue = new();
 
         public override string Name => "PolusMod";
 
@@ -168,34 +170,36 @@ namespace PolusGG {
                     string location = reader.ReadString();
                     byte[] hash = reader.ReadBytes(32);
                     uint resourceType = reader.ReadByte();
-                    MessageWriter writer;
-                    if (Cache.IsCachedAndValid(resource, hash)) {
-                        Logger.LogInfo($"{resource} is already cached");
-                        writer = StartSendResourceResponse(resource, ResponseType.DownloadEnded);
-                        writer.Write(1);
-                        EndSend(writer);
-                        return;
-                    }
+                    AddDispatch(() => {
+                        MessageWriter writer;
+                        if (Cache.IsCachedAndValid(resource, hash)) {
+                            Logger.LogInfo($"{resource} is already cached");
+                            writer = StartSendResourceResponse(resource, ResponseType.DownloadEnded);
+                            writer.Write(1);
+                            EndSend(writer);
+                            return;
+                        }
 
-                    try {
-                        Logger.LogInfo($"Trying to download and cache {resource} ({location})");
-                        Cache.AddToCache(resource, location, hash,
-                            (ResourceType) resourceType);
-                        writer = StartSendResourceResponse(resource, ResponseType.DownloadEnded);
-                        writer.Write(0);
-                        EndSend(writer);
-                        Logger.LogInfo($"Cached {resource}!");
-                    } catch (Exception e) {
-                        Logger.LogError($"Failed to cache {resource} ({location})");
-                        Logger.LogError(e);
-                        writer = StartSendResourceResponse(resource, ResponseType.DownloadFailed);
-                        if (e is CacheRequestException exception)
-                            writer.WritePacked((uint) exception.Code);
-                        else
-                            writer.WritePacked(0x69420);
+                        try {
+                            Logger.LogInfo($"Trying to download and cache {resource} ({location})");
+                            Cache.AddToCache(resource, location, hash,
+                                (ResourceType) resourceType);
+                            writer = StartSendResourceResponse(resource, ResponseType.DownloadEnded);
+                            writer.Write(0);
+                            EndSend(writer);
+                            Logger.LogInfo($"Cached {resource}!");
+                        } catch (Exception e) {
+                            Logger.LogError($"Failed to cache {resource} ({location})");
+                            Logger.LogError(e);
+                            writer = StartSendResourceResponse(resource, ResponseType.DownloadFailed);
+                            if (e is CacheRequestException exception)
+                                writer.WritePacked((uint) exception.Code);
+                            else
+                                writer.WritePacked(0x69420);
 
-                        EndSend(writer);
-                    }
+                            EndSend(writer);
+                        }
+                    });
 
                     break;
                 }
@@ -229,38 +233,40 @@ namespace PolusGG {
                 case PolusRootPackets.SetString: {
                     string text = reader.ReadString();
                     StringLocations stringLocation = (StringLocations) reader.ReadByte();
-                    switch (stringLocation) {
-                        case StringLocations.GameCode: {
-                            GameStartManager.Instance.GameRoomName.text = text;
-                            break;
-                        }
-                        case StringLocations.GamePlayerCount: {
-                            GameStartManager.Instance.PlayerCounter.text = text;
-                            break;
-                        }
-                        case StringLocations.PingTracker: {
-                            PingTrackerTextPatch.PingText = text == "__unset" ? null : text;
-                            break;
-                        }
-                        case StringLocations.RoomTracker: {
-                            RoomTrackerTextPatch.RoomText = text == "__unset" ? null : text;
-                            break;
-                        }
-                        case StringLocations.TaskCompletion: {
-                            HudManager.Instance.TaskCompleteOverlay.GetComponent<TextMeshPro>().text = text;
-                            break;
-                        }
-                        case StringLocations.TaskText: {
-                            if (PlayerControl.LocalPlayer) {
-                                ImportantTextTask importantTextTask =
-                                    new GameObject("_Player").AddComponent<ImportantTextTask>();
-                                importantTextTask.Text = text;
-                                importantTextTask.transform.SetParent(PlayerControl.LocalPlayer.transform, false);
+                    AddDispatch(() => {
+                        switch (stringLocation) {
+                            case StringLocations.GameCode: {
+                                GameStartManager.Instance.GameRoomName.text = text;
+                                break;
                             }
+                            case StringLocations.GamePlayerCount: {
+                                GameStartManager.Instance.PlayerCounter.text = text;
+                                break;
+                            }
+                            case StringLocations.PingTracker: {
+                                PingTrackerTextPatch.PingText = text == "__unset" ? null : text;
+                                break;
+                            }
+                            case StringLocations.RoomTracker: {
+                                RoomTrackerTextPatch.RoomText = text == "__unset" ? null : text;
+                                break;
+                            }
+                            case StringLocations.TaskCompletion: {
+                                HudManager.Instance.TaskCompleteOverlay.GetComponent<TextMeshPro>().text = text;
+                                break;
+                            }
+                            case StringLocations.TaskText: {
+                                if (PlayerControl.LocalPlayer) {
+                                    ImportantTextTask importantTextTask =
+                                        new GameObject("_Player").AddComponent<ImportantTextTask>();
+                                    importantTextTask.Text = text;
+                                    importantTextTask.transform.SetParent(PlayerControl.LocalPlayer.transform, false);
+                                }
 
-                            break;
+                                break;
+                            }
                         }
-                    }
+                    });
 
                     break;
                 }
@@ -374,6 +380,15 @@ namespace PolusGG {
         }
 
         public override void Update() {
+            lock (Dispatcher) {
+                TempQueue.AddRange(Dispatcher);
+                Dispatcher.Clear();
+            }
+
+            foreach (Action t in TempQueue) {
+                t();
+            }
+            TempQueue.Clear();
             if (!optionsDirty) return;
             GameSettingMenu menu = Object.FindObjectOfType<GameSettingMenu>();
             if (menu) menu.OnEnable();
@@ -450,6 +465,10 @@ namespace PolusGG {
             writer.EndMessage();
             AmongUsClient.Instance.SendOrDisconnect(writer);
             writer.Recycle();
+        }
+
+        public static void AddDispatch(Action action) {
+            lock (Dispatcher) Dispatcher.Add(action);
         }
 
         public static IEnumerator StartCoroutine(IEnumerator coroutine) {

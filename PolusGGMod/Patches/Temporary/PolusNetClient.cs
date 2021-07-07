@@ -66,7 +66,7 @@ namespace PolusGG.Patches.Temporary {
                         uint netId = reader.ReadPackedUInt32();
                         if (objectManager.HasObject(netId, out PolusNetObject polusNetObject)) {
                             polusNetObject.NetId.Log(1, "for dataPOg");
-                            polusNetObject.Data(reader);
+                            PolusMod.AddDispatch(() => polusNetObject.Data(reader));
                             return false;
                         }
 
@@ -82,15 +82,15 @@ namespace PolusGG.Patches.Temporary {
                         uint netId = reader.ReadPackedUInt32();
                         //todo transfer all object management code to iobjectmanager
                         if (objectManager.HasObject(netId, out PolusNetObject polusNetObject)) {
-                            polusNetObject.HandleRpc(reader, reader.ReadByte());
+                            PolusMod.AddDispatch(() => polusNetObject.HandleRpc(reader, reader.ReadByte()));
                             return false;
                         }
 
                         if (instance.allObjectsFast.ContainsKey(netId)) {
                             byte call = reader.ReadByte();
                             if (call >= 0x80) {
-                                objectManager.HandleInnerRpc(instance.allObjectsFast[netId],
-                                    reader, call);
+                                PolusMod.AddDispatch(() => objectManager.HandleInnerRpc(instance.allObjectsFast[netId],
+                                    reader, call));
                                 return false;
                             }
 
@@ -116,7 +116,7 @@ namespace PolusGG.Patches.Temporary {
 
                         // num3.Log(3, "spawn id");
                         if (num3 >= 0x80) {
-                            CatchHelper.TryCatch(() => objectManager.HandleSpawn(num3, reader));
+                            PolusMod.AddDispatch(() => CatchHelper.TryCatch(() => objectManager.HandleSpawn(num3, reader)));
                             return false;
                         }
 
