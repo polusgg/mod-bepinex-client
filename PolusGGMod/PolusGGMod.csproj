@@ -18,8 +18,8 @@
         <Authors>Sanae6</Authors>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
-        <GameProvider>Static</GameProvider>
-        <GameVersion>$(AmongUs)</GameVersion>
+        <GameProvider>Github</GameProvider>
+        <GameVersion>2021.6.15s</GameVersion>
     </PropertyGroup>
 
     <ItemGroup>
