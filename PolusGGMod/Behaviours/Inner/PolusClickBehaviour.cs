@@ -22,7 +22,7 @@ namespace PolusGG.Behaviours.Inner {
         private PolusGraphic graphic;
         private PassiveButton button;
         private Color32 color;
-        private bool active;
+        private bool saturated;
         private bool isCountingDown;
         private bool lastCounting;
         private float currentTimer;
@@ -89,7 +89,7 @@ namespace PolusGG.Behaviours.Inner {
                 .Log();            maxTimer = reader.ReadSingle();
             currentTimer = reader.ReadSingle();
             isCountingDown = reader.ReadBoolean();
-            active = reader.ReadBoolean();
+            saturated = reader.ReadBoolean();
             color = new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
         }
 
@@ -98,8 +98,8 @@ namespace PolusGG.Behaviours.Inner {
             float num = Mathf.Clamp(currentTimer / maxTimer, 0f, 1f);
             graphic.renderer.material.SetFloat(Percent, num);
             bool isCoolingDown = num > 0f || isCountingDown || !PlayerControl.LocalPlayer.CanMove;
-            graphic.renderer.material.SetFloat(Desat, isCoolingDown || !active ? 1f : 0f);
-            if (isCoolingDown) {
+            if (isCoolingDown && !saturated) {
+                graphic.renderer.material.SetFloat(Desat, 1f);
                 graphic.renderer.color = Palette.DisabledClear;
                 timerText.gameObject.SetActive(currentTimer != 0);
                 if (currentTimer == 0) return;
@@ -108,6 +108,7 @@ namespace PolusGG.Behaviours.Inner {
                 return;
             }
 
+            graphic.renderer.material.SetFloat(Desat, 0f);
             timerText.gameObject.SetActive(false);
             graphic.renderer.color = Palette.EnabledColor;
         }
