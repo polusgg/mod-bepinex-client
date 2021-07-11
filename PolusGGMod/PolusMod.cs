@@ -61,7 +61,6 @@ namespace PolusGG {
             PogusPlugin.ObjectManager.Register(0x88, RegisterPnos.CreateCameraController());
             PogusPlugin.ObjectManager.Register(0x89, RegisterPnos.CreatePrefabHandle());
 
-            ResolutionManagerPlus.Resolution();
             Cache = PogusPlugin.Cache;
         }
 
