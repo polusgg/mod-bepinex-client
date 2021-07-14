@@ -80,5 +80,17 @@ namespace PolusGG.Patches.Temporary {
         }
     }
 
+    [HarmonyPatch(typeof(HudManager), nameof(HudManager.Update))]
+    public class HudUpdatePatch
+    {
+        public static string TaskText = null;
+
+        [HarmonyPostfix]
+        public static void Postfix(HudManager __instance)
+        {
+            __instance.TaskText.text += TaskText;
+        }
+    }
+
     // public class 
 }

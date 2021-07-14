@@ -254,13 +254,17 @@ namespace PolusGG {
                                 HudManager.Instance.TaskCompleteOverlay.GetComponent<TextMeshPro>().text = text;
                                 break;
                             }
-                            case StringLocations.TaskText: {
-                                if (PlayerControl.LocalPlayer) {
-                                    ImportantTextTask importantTextTask =
+                            case StringLocations.TaskText:
+                            {
+                                HudUpdatePatch.TaskText = text == "__unset" ? null : text;
+                                /*if (PlayerControl.LocalPlayer) {
+                                    PogusPlugin.Logger.LogWarning("sup, youre rasgfe gfuywuy");
+                                    var importantTextTask =
                                         new GameObject("_Player").AddComponent<ImportantTextTask>();
-                                    importantTextTask.Text = text;
                                     importantTextTask.transform.SetParent(PlayerControl.LocalPlayer.transform, false);
-                                }
+                                    importantTextTask.Text = text;
+                                    PlayerControl.LocalPlayer.myTasks.Insert(0, importantTextTask);
+                                }*/
 
                                 break;
                             }
