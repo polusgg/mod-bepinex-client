@@ -84,7 +84,9 @@ namespace PolusGG.Patches.Temporary {
         [HarmonyPostfix]
         public static void Postfix(HudManager __instance)
         {
-            __instance.TaskText.text += TaskText;
+            if (TaskText == null) return;
+            if (__instance.TaskText.text.StartsWith(TaskText)) return;
+            __instance.TaskText.text = TaskText + "\n" + __instance.TaskText.text;
         }
     }
 
