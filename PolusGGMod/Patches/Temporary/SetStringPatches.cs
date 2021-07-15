@@ -1,10 +1,6 @@
-﻿using System.Collections;
-using HarmonyLib;
-using PolusGG.Extensions;
+﻿using HarmonyLib;
 using TMPro;
-using UnhollowerBaseLib;
 using UnityEngine;
-using Object = Il2CppSystem.Object;
 
 namespace PolusGG.Patches.Temporary {
     [HarmonyPatch(typeof(PingTracker), nameof(PingTracker.Update))]
