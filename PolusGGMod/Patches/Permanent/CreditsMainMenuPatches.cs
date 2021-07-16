@@ -50,9 +50,13 @@ namespace PolusGG.Patches.Permanent {
                 GameObject right = creditsMenu.FindRecursive(obj => obj.name == "RightPane");
                 UIMethods.CreateButton(right, () => { }, false).Colliders = new Il2CppReferenceArray<Collider2D>(right.GetComponents<BoxCollider2D>());
                 GameObject bg = creditsMenu.FindRecursive(obj => obj.name == "BackgroundClickHandler");
-                bg.transform.localPosition += new Vector3(0, 0, -100f);
+                bg.transform.localPosition += new Vector3(0, 0, -50f);
                 menu.back = UIMethods.CreateButton(bg, () => menu.transition.Close(), false);
                 menu.back.Colliders = new Il2CppReferenceArray<Collider2D>(bg.GetComponents<BoxCollider2D>());
+                AspectSize aspec = creditsMenu.AddComponent<AspectSize>();
+                aspec.PercentWidth = .80f;
+                aspec.Background = bg.GetComponent<SpriteRenderer>().sprite;
+                aspec.OnEnable();
                 // Object.find
             });
             DotAligner da = Object.FindObjectOfType<DotAligner>();

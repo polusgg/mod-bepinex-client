@@ -53,8 +53,8 @@ namespace PolusGG.Behaviours.Inner {
                 _aspectPosition.enabled = false;
                 int parent = reader.ReadPackedInt32();
                 transform.parent = parent < 0 ? null : PogusPlugin.ObjectManager.GetNetObject((uint) parent);
-                // if (transform.parent) transform.parent.name.Log(5, "got it bbg");
-                // else $"no homies irl {parent}".Log(5);
+                if (transform.parent) transform.parent.name.Log(5, "got it bbg");
+                else $"no homies irl {parent}".Log(5);
                 transform.localPosition = new Vector3(pos.x, pos.y, z);
             }
         }

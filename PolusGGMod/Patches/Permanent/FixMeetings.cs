@@ -12,11 +12,7 @@ namespace PolusGG.Patches.Permanent {
                     GameData.PlayerInfo playerById = GameData.Instance.GetPlayerById(playerVoteArea.TargetPlayerId);
                     if (playerById == null || playerById.Disconnected)
                         playerVoteArea.SetDisabled();
-                    else {
-                        bool flag = playerById.Disconnected || playerById.IsDead;
-                        if (flag != playerVoteArea.AmDead)
-                            playerVoteArea.SetDead(__instance.reporterId == playerById.PlayerId, flag);
-                    }
+                    else if (playerById.IsDead != playerVoteArea.AmDead) playerVoteArea.SetDead(__instance.reporterId == playerById.PlayerId, playerVoteArea.AmDead = playerById.IsDead);
                 }
 
                 return false;

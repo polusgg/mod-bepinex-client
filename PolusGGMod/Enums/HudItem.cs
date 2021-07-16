@@ -1,7 +1,7 @@
 ﻿namespace PolusGG.Enums
 {
     public enum HudItem : byte {
-        // Disables a little thingy on top right below settings
+        // Disables access to normal map
         MapButton,
         // Disables all "sabotage" buttons in MapBehavior
         MapSabotageButtons,
@@ -15,7 +15,7 @@
         UseButton,
         // Disables task progress bar
         TaskProgressBar,
-        //Disables popup (or rather slide-out) with tasks list
+        // Disables popup (or rather slide-out) with tasks list
         TaskListPopup,
     }
 }

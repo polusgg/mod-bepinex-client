@@ -16,9 +16,11 @@ namespace PolusGG.Behaviours.Inner {
     public class PolusClickBehaviour : PnoBehaviour {
         private static readonly int Percent = Shader.PropertyToID("_Percent");
         private static readonly int Desat = Shader.PropertyToID("_Desat");
-        internal static readonly List<PolusClickBehaviour> Buttons = new();
+        private static bool[] locks = {false, false};
+        private bool anyLocked;
+        public static readonly List<PolusClickBehaviour> Buttons = new();
         private static Material funnyButtonMaterial;
-        internal PolusNetworkTransform netTransform;
+        public PolusNetworkTransform netTransform;
         private PolusGraphic graphic;
         private PassiveButton button;
         private Color32 color;
@@ -28,6 +30,9 @@ namespace PolusGG.Behaviours.Inner {
         private float currentTimer;
         private float maxTimer;
         private TMP_Text timerText;
+
+        public bool IsHudButton => netTransform._aspectPosition.Alignment != 0;
+        public bool IsLocked => IsHudButton && locks.Any(lck => lck);
 
         static PolusClickBehaviour() {
             ClassInjector.RegisterTypeInIl2Cpp<PolusClickBehaviour>();
@@ -59,11 +64,6 @@ namespace PolusGG.Behaviours.Inner {
                 CooldownHelpers.SetCooldownNormalizedUvs(graphic.renderer);
             }
 
-            if (netTransform._aspectPosition.Alignment == 0 && lastCounting != PlayerControl.LocalPlayer.CanMove) {
-                lastCounting = PlayerControl.LocalPlayer.CanMove;
-                SetCountingDown(lastCounting);
-            }
-
             if (isCountingDown) {
                 currentTimer -= Time.deltaTime;
                 if (currentTimer < 0) currentTimer = 0;
@@ -72,12 +72,32 @@ namespace PolusGG.Behaviours.Inner {
             SetCooldown();
         }
 
+        private void CheckLocks() {
+            $"yeah,,, {locks[0]} {locks[1]} {locks.Any(lck => lck)}".Log(3);
+            if (anyLocked == IsLocked) return;
+            anyLocked = locks.Any(lck => lck);
+                SetCountingDown(!anyLocked);
+        }
+
         private void OnEnable() {
-            SetCountingDown(true);
+            SetLock(ButtonLocks.SetHudActive, false);
         }
 
         private void OnDisable() {
-            SetCountingDown(false);
+            SetLock(ButtonLocks.SetHudActive, true);
+        }
+
+        private static void CheckAllLocks() {
+            foreach (PolusClickBehaviour polusClickBehaviour in Buttons.Where(btn => btn.IsHudButton)) {
+                polusClickBehaviour.CheckLocks();
+            }
+        }
+
+        public static void SetLock(ButtonLocks index, bool value) {
+            lock (locks) {
+                locks[(int) index] = value;
+                CheckAllLocks();
+            }
         }
 
         private void OnDestroy() {
@@ -85,48 +105,51 @@ namespace PolusGG.Behaviours.Inner {
         }
 
         private void Deserialize(MessageReader reader) {
-            "Button changed!!!!!"
-                .Log();            maxTimer = reader.ReadSingle();
+            maxTimer = reader.ReadSingle();
             currentTimer = reader.ReadSingle();
-            isCountingDown = reader.ReadBoolean();
+            isCountingDown = reader.ReadBoolean().Log(3, "now counting down");
             saturated = reader.ReadBoolean();
             color = new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
         }
 
         public void SetCooldown() {
-            // return;
             float num = Mathf.Clamp(currentTimer / maxTimer, 0f, 1f);
             graphic.renderer.material.SetFloat(Percent, num);
-            bool isCoolingDown = num > 0f || isCountingDown || !PlayerControl.LocalPlayer.CanMove;
-            if (isCoolingDown && !saturated) {
-                graphic.renderer.material.SetFloat(Desat, 1f);
-                graphic.renderer.color = Palette.DisabledClear;
-                timerText.gameObject.SetActive(currentTimer != 0);
+            graphic.renderer.material.SetFloat(Desat, saturated ? 0f : 1f);
+            graphic.renderer.color = saturated ? Palette.EnabledColor : Palette.DisabledClear;
+            timerText.gameObject.SetActive(currentTimer != 0);
+            bool isCoolingDown = num > 0f || isCountingDown;
+            if (isCoolingDown) {
                 if (currentTimer == 0) return;
                 timerText.text = Mathf.CeilToInt(currentTimer).ToString();
                 timerText.color = color;
-                return;
+                // return;
             }
 
-            graphic.renderer.material.SetFloat(Desat, 0f);
-            timerText.gameObject.SetActive(false);
-            graphic.renderer.color = Palette.EnabledColor;
+            // graphic.renderer.material.SetFloat(Desat, 0f);
+            // timerText.gameObject.SetActive(false);
+            // graphic.renderer.color = Palette.EnabledColor;
         }
 
-        public void SetCountingDown(bool isCountingDown) {
-            // TODO ANTI-CHEAT THIS USING CURRENT TIME DIFFERENCE OF 6ISH SECONDS
+        public void SetCountingDown(bool shouldCountDown) {
+            // TODO ANTI-CHEAT THIS USING CURRENT TIME DIFFERENCE OF AT MOST 6 SECONDS
             // TODO MAKE SURE THAT THIS IS LIMITED ON THE SERVER TO PREVENT EARLY COOLDOWN BYPASS
             // TODO DON'T BE STUPID DUMB IDIOT WHEN WRITING THAT ANTI-CHEAT CODE
 
-            isCountingDown.Log(comment: "YOU");
+            shouldCountDown.Log(comment: "button is counting down");
             
-            MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(pno.NetId, (byte) PolusRpcCalls.SetCountingDown, SendOption.Reliable);
+            MessageWriter writer = AmongUsClient.Instance.StartRpc(pno.NetId, (byte) PolusRpcCalls.SetCountingDown, SendOption.Reliable);
             // this.isCountingDown = isCountingDown;
-            writer.Write(isCountingDown);
+            writer.Write(shouldCountDown);
             writer.Write(currentTimer);
-            AmongUsClient.Instance.FinishRpcImmediately(writer);
+            writer.EndMessage();
+            // AmongUsClient.Instance.FinishRpcImmediately(writer);
+            
         }
 
-        public void OnClick() => AmongUsClient.Instance.SendRpcImmediately(pno.NetId, (byte) PolusRpcCalls.Click);
+        public void OnClick() {
+            if (IsLocked) return;
+            AmongUsClient.Instance.SendRpcImmediately(pno.NetId, (byte) PolusRpcCalls.Click);
+        }
     }
 }

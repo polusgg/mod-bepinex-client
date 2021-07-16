@@ -15,11 +15,12 @@ namespace PolusGG {
         public static string DownloadFolder {
             get {
                 if (_dlFolder != null) return _dlFolder;
-#if DEBUG
-                _dlFolder = Path.Join("Cache", "PolusCache" + Guid.NewGuid());
-#else
-                _dlFolder = Path.Join("Cache","PolusCache");
-#endif
+// #if DEBUG
+                // _dlFolder = Path.Join("Cache", "PolusCache" + Guid.NewGuid());
+// #else
+                // _dlFolder = Path.Join("Cache","PolusCache");
+                _dlFolder = "Cache";
+// #endif
                 return _dlFolder;
             }
         }

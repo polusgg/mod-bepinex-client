@@ -36,6 +36,7 @@ namespace PolusGG {
         private static CoroutineManager coMan;
         public static List<Action> Dispatcher = new();
         private static List<Action> TempQueue = new();
+        private bool cannotMove;
 
         public override string Name => "PolusMod";
 
@@ -378,11 +379,18 @@ namespace PolusGG {
             if (MeetingHud.Instance) {
                 PlayerControl.LocalPlayer.SetThickAssAndBigDumpy(true, true);
             }
-            
-            
         }
 
         public override void Update() {
+            if (PlayerControl.LocalPlayer) {
+                if (cannotMove != !PlayerControl.LocalPlayer.CanMove) {
+                    cannotMove = !PlayerControl.LocalPlayer.CanMove;
+                    cannotMove.Log(comment: "Cannot move changed !!!!");
+                    PolusClickBehaviour.SetLock(ButtonLocks.PlayerCanMove, cannotMove);
+                }
+            } else {
+                cannotMove = true;
+            }
             lock (Dispatcher) {
                 TempQueue.AddRange(Dispatcher);
                 Dispatcher.Clear();

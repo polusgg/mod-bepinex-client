@@ -14,6 +14,7 @@ namespace PolusGG.Behaviours.Inner {
     public class PolusCameraController : PnoBehaviour {
         private Camera camera;
         private FollowerCamera follower;
+        private SpriteRenderer fullScreen;
 
         static PolusCameraController() {
             ClassInjector.RegisterTypeInIl2Cpp<PolusCameraController>();
@@ -25,6 +26,8 @@ namespace PolusGG.Behaviours.Inner {
             follower = HudManager.Instance.PlayerCam;
             camera = follower.GetComponent<Camera>();
             pno = PogusPlugin.ObjectManager.LocateNetObject(this);
+            fullScreen = Instantiate(HudManager.Instance.FullScreen.gameObject, transform).GetComponent<SpriteRenderer>();
+            fullScreen.name = "FullScreen499";
         }
 
         private void FixedUpdate() {
@@ -44,7 +47,8 @@ namespace PolusGG.Behaviours.Inner {
                     message.ReadSingle(),
                     new Color32(message.ReadByte(), message.ReadByte(), message.ReadByte(), message.ReadByte()),
                     follower,
-                    camera
+                    camera,
+                    this
                 ));
             }
 
@@ -57,9 +61,10 @@ namespace PolusGG.Behaviours.Inner {
                 0,
                 follower.Offset,
                 Camera.main.transform.eulerAngles.z,
-                HudManager.Instance.FullScreen.color,
+                fullScreen.color,
                 follower,
-                camera
+                camera,
+                this
             );
         }
 
@@ -76,7 +81,7 @@ namespace PolusGG.Behaviours.Inner {
                     current.CameraOffset = Vector2.Lerp(previous.CameraOffset, current.CameraOffset, dt);
                     current.Angle = Mathf.Lerp(previous.Angle, current.Angle, dt);
                     Color color = Color.Lerp(previous.OverlayColor, current.OverlayColor, dt);
-                    HudManager.Instance.FullScreen.enabled = color.a != 0;
+                    fullScreen.enabled = color.a != 0;
                     current.OverlayColor = color;
                 }));
 
@@ -109,9 +114,10 @@ namespace PolusGG.Behaviours.Inner {
             public FollowerCamera FollowerCamera;
             public uint Offset;
             private readonly Color overlayColor;
+            private PolusCameraController controller;
 
             public CameraKeyframe(uint animOffset, uint duration, Vector2 cameraOffset, float angle, Color32 color,
-                FollowerCamera followerCamera, Camera camera) {
+                FollowerCamera followerCamera, Camera camera, PolusCameraController controller) {
                 Offset = animOffset;
                 Duration = duration;
                 this.cameraOffset = cameraOffset;
@@ -119,6 +125,7 @@ namespace PolusGG.Behaviours.Inner {
                 overlayColor = color;
                 FollowerCamera = followerCamera;
                 Camera = camera;
+                this.controller = controller;
             }
 
             public Vector2 CameraOffset {
@@ -138,7 +145,7 @@ namespace PolusGG.Behaviours.Inner {
 
             public Color OverlayColor {
                 get => overlayColor;
-                set => HudManager.Instance.FullScreen.color = value;
+                set => controller.fullScreen.color = value;
             }
 
             public override string ToString() {

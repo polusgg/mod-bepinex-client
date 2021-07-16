@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using TMPro;
+using UnhollowerBaseLib;
 using UnityEngine;
 
 namespace PolusGG.Patches.Temporary {
@@ -28,7 +29,7 @@ namespace PolusGG.Patches.Temporary {
                             $"<color=#{Palette.PlayerColors[player.ColorId].ToHexColor()}>{player.PlayerName}", false);
                         Append(ref textText,
                             TranslationController.Instance.GetString(Palette.ColorNames[player.ColorId],
-                                new Il2CppReferenceArray<Object>(0)), false);
+                                new Il2CppReferenceArray<Il2CppSystem.Object>(0)), false);
                         Append(ref textText, $"{player.PlayerId}", false);
                         Append(ref textText, $"{player.IsDead} {player.Disconnected}");
                     }

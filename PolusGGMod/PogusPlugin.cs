@@ -60,6 +60,10 @@ namespace PolusGG {
             ObjectManager = new PggObjectManager();
 
             try {
+                if (File.Exists(PggConstants.CacheLocation)) {
+                    using FileStream stream = PggCache.GetFileStream(PggConstants.CacheLocation, FileMode.Open, FileAccess.Read, FileShare.None);
+                    Cache.Deserialize(new BinaryReader(stream));
+                }
                 PermanentMod.LoadPatches("gg.polus.permanent",
                     Assembly.GetExecutingAssembly().GetTypes()
                         .Where(x => x.GetCustomAttribute(typeof(HarmonyPatch)) != null).ToArray());

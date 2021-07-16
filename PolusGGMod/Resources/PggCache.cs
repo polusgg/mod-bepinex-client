@@ -48,14 +48,14 @@ namespace PolusGG {
                 switch (type) {
                     case ResourceType.Assembly: {
                         data = responseMessage.Content.ReadAsByteArrayAsync().Result;
-                        File.WriteAllBytes(path, data);
+                        using (FileStream fs = GetFileStream(path, FileMode.Create, FileAccess.Write, FileShare.None)) fs.Write(data);
                         cacheFile.ExtraData = Assembly.ReflectionOnlyLoad(data).GetName().Name;
                         break;
                     }
                     case ResourceType.AssetBundle: {
                         data = responseMessage.Content.ReadAsByteArrayAsync().Result;
-                        File.WriteAllBytes(path, data);
-                        AssetBundle bundle = AssetBundle.LoadFromMemory(data);
+                        using (FileStream fs = GetFileStream(path, FileMode.Create, FileAccess.Write, FileShare.None)) fs.Write(data);
+                        AssetBundle bundle = AssetBundle.LoadFromFile(path);
                         cacheFile.InternalData = bundle;
 
                         Bundle bundone =
@@ -101,6 +101,17 @@ namespace PolusGG {
             return CachedFiles.ContainsKey(id) && CachedFiles[id].Hash.SequenceEqual(hash);
         }
 
+        public static FileStream GetFileStream(string path, FileMode mode, FileAccess access, FileShare share) {
+            while (true) {
+                try {
+                    return new FileStream(path, mode, access, share);
+                } catch {
+                    /* failed, wait for unlock*/
+                    Thread.Sleep(100);
+                }
+            }
+        }
+
         public void Serialize(BinaryWriter writer) {
             writer.Write(CachedFiles.Count);
             foreach ((uint x, CacheFile y) in CachedFiles) {
@@ -130,28 +141,6 @@ namespace PolusGG {
                     }
                 }
             }
-        }
-
-        public bool WaitForFile(string fullPath) {
-            int numTries = 0;
-            while (true) {
-                ++numTries;
-                try {
-                    // Attempt to open the file exclusively.
-                    using FileStream fs = File.OpenRead(fullPath);
-                    fs.ReadByte();
-
-                    // If we got this far the file is ready
-                    break;
-                } catch (Exception) {
-                    if (numTries > 20) return false;
-
-                    Thread.Sleep(250);
-                }
-            }
-
-            PogusPlugin.Logger.LogError($"WaitForFile {fullPath} returning true after {numTries} tries");
-            return true;
         }
 
         public void Deserialize(BinaryReader reader) {

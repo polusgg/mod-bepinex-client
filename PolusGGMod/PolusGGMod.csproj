@@ -29,7 +29,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <EmbeddedResource Include="bepinexresources" />
+      <None Remove="bepinexresources" />
+      <EmbeddedResource Include="bepinexresources" />
     </ItemGroup>
 
     <!--    <Target Name="Copy" AfterTargets="CoreCompile">-->
