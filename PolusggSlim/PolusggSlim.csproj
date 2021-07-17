@@ -17,7 +17,6 @@
     <ItemGroup>
         <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
         <PackageReference Include="Reactor.MSBuild" Version="0.1.5" />
-        <PackageReference Include="Reactor.MSBuild.Fusee" Version="0.1.0" />
     </ItemGroup>
     
     <ItemGroup>
