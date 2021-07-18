@@ -2,6 +2,7 @@
 using System.Linq;
 using HarmonyLib;
 using Hazel;
+using InnerNet;
 using PolusGG.Enums;
 using PolusGG.Extensions;
 using PolusGG.Net;
@@ -13,8 +14,12 @@ namespace PolusGG.Behaviours.Inner {
         internal static readonly FloatRange XRange = new(50f, -50f);
         internal static readonly FloatRange YRange = new(50f, -50f);
         internal AspectPosition _aspectPosition;
+        private int? parent;
+        private Vector3 position;
         // private Vector2 _start;
         // private Vector2 _target;
+
+        public bool IsHudButton => _aspectPosition.Alignment != 0;
 
         static PolusNetworkTransform() {
             ClassInjector.RegisterTypeInIl2Cpp<PolusNetworkTransform>();
@@ -30,9 +35,14 @@ namespace PolusGG.Behaviours.Inner {
             // _rigidbody2D.constraints = RigidbodyConstraints2D.FreezeAll;
         }
 
-        public void FixedUpdate() {
+        public void Update() {
             if (pno != null && pno.HasData()) Deserialize(pno.GetSpawnData());
             if (pno != null && pno.HasRpc()) HandleRpc(pno.GetRpcData());
+            
+            if (!IsHudButton && parent.HasValue && !transform.parent) {
+                transform.parent = PogusPlugin.ObjectManager.GetNetObject((uint) parent);
+                transform.localPosition = position;
+            }
         }
 
         public void HandleRpc(PolusNetObject.Rpc rpc) {
@@ -51,11 +61,8 @@ namespace PolusGG.Behaviours.Inner {
                 _aspectPosition.AdjustPosition();
             } else {
                 _aspectPosition.enabled = false;
-                int parent = reader.ReadPackedInt32();
-                transform.parent = parent < 0 ? null : PogusPlugin.ObjectManager.GetNetObject((uint) parent);
-                if (transform.parent) transform.parent.name.Log(5, "got it bbg");
-                else $"no homies irl {parent}".Log(5);
-                transform.localPosition = new Vector3(pos.x, pos.y, z);
+                parent = reader.ReadPackedInt32();
+                position = new Vector3(pos.x, pos.y, z);
             }
         }
     }

@@ -26,13 +26,16 @@ namespace PolusGG.Behaviours.Inner {
             follower = HudManager.Instance.PlayerCam;
             camera = follower.GetComponent<Camera>();
             pno = PogusPlugin.ObjectManager.LocateNetObject(this);
-            fullScreen = Instantiate(HudManager.Instance.FullScreen.gameObject, transform).GetComponent<SpriteRenderer>();
+            fullScreen = Instantiate(HudManager.Instance.FullScreen.gameObject, HudManager.Instance.transform, true).GetComponent<SpriteRenderer>();
             fullScreen.name = "FullScreen499";
         }
 
-        private void FixedUpdate() {
+        private void Update() {
             if (pno != null && pno.HasData()) Deserialize(pno.GetSpawnData());
             if (pno != null && pno.HasRpc()) HandleRpc(pno.GetRpcData());
+            if (fullScreen.transform.parent == null && HudManager.Instance) {
+                fullScreen.transform.parent = HudManager.Instance.transform;
+            }
         }
 
         private void HandleRpc(PolusNetObject.Rpc rpc) {

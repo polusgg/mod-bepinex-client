@@ -84,7 +84,7 @@ namespace PolusGG.Behaviours {
 
                 yield return new WaitForSeconds(current.Offset / 1000f);
                 yield return Effects.Lerp(current.Duration / 1000f, new Action<float>(dt => {
-                    $"amogn suu s {playerColor.a} {dt} {i}".Log();
+                    // $"amogn suu s {playerColor.a} {dt} {i}".Log();
                     if (field[0]) current.PlayerOpacity = Mathf.Lerp(previous.PlayerOpacity.Value, current.PlayerOpacity.Value, dt);
                     if (field[1]) current.HatOpacity = Mathf.Lerp(previous.HatOpacity.Value, current.HatOpacity.Value, dt);
                     if (field[2]) current.PetOpacity = Mathf.Lerp(previous.PetOpacity.Value, current.PetOpacity.Value, dt);

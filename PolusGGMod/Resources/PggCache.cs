@@ -15,6 +15,8 @@ namespace PolusGG {
         private readonly HttpClient _client = new();
         public Dictionary<uint, CacheFile> CachedFiles { get; private set; } = new();
 
+        internal HttpClient Client => _client;
+
         public CacheFile AddToCache(uint id, string location, byte[] hash, ResourceType type,
             uint parentId = uint.MaxValue) {
             string path = Path.Join(PggConstants.DownloadFolder, $"{id}");

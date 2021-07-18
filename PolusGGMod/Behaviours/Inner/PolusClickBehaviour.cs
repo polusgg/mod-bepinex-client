@@ -31,7 +31,7 @@ namespace PolusGG.Behaviours.Inner {
         private float maxTimer;
         private TMP_Text timerText;
 
-        public bool IsHudButton => netTransform._aspectPosition.Alignment != 0;
+        public bool IsHudButton => netTransform.IsHudButton;
         public bool IsLocked => IsHudButton && locks.Any(lck => lck);
 
         static PolusClickBehaviour() {
