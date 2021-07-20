@@ -86,7 +86,6 @@ namespace PolusGG.Patches.Temporary {
         {
             if (TaskText == null) return;
             if (__instance.taskDirtyTimer != 0f) return;
-            if (__instance.TaskText.text.StartsWith(TaskText)) return;
             __instance.TaskText.text = TaskText + "\n" + __instance.TaskText.text;
         }
     }
