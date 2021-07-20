@@ -154,7 +154,7 @@ namespace PolusggSlim.Utils
             public IEnumerator Coroutine;
         }
 
-        private class Il2CppEnumeratorWrapper : IEnumerator
+        public class Il2CppEnumeratorWrapper : IEnumerator
         {
             private readonly Il2CppSystem.Collections.IEnumerator _il2CPPEnumerator;
 

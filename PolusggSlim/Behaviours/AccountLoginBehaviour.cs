@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -16,6 +17,7 @@ using UnhollowerBaseLib.Attributes;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using Coroutine = PolusggSlim.Utils.Coroutine;
 using StringBuilder = Il2CppSystem.Text.StringBuilder;
 
 namespace PolusggSlim.Behaviours
@@ -78,6 +80,23 @@ namespace PolusggSlim.Behaviours
 
         public void Awake()
         {
+            SetupGUI();
+            
+            _loggedInMenu.active = _authContext.LoggedIn;
+            _topButtonBar.active = !_authContext.LoggedIn;
+            if (_authContext.LoggedIn)
+                UpdateGameSettingsWithName(_authContext.DisplayName);
+
+            CheckLogin();
+        }
+
+        private void SetupGUI()
+        {
+            GameObject.Find("NormalMenu/HostGameButton").transform.localPosition = new Vector3(0f, 1.2f, -1f);
+            GameObject.Find("NormalMenu/FindGameButton").transform.localPosition = new Vector3(0f, -0.4f, -1f);
+            GameObject.Find("NormalMenu/JoinGameButton").transform.localPosition = new Vector3(0f, -2f, -1f); 
+            
+            
             var bundle = ResourceManager.GetAssetBundle("accountsmenu");
 
             var topButtonBarPrefab = bundle.LoadAsset("Assets/Mods/LoginMenu/TopAccount.prefab").Cast<GameObject>();
@@ -98,61 +117,7 @@ namespace PolusggSlim.Behaviours
             {
                 try
                 {
-                    var menuObj = Instantiate(bundle
-                        .LoadAsset("Assets/Mods/LoginMenu/PolusggAccountMenu.prefab")).Cast<GameObject>();
-                    menuObj.transform.localPosition = new Vector3(0, 0, -500f);
-
-                    var emailObj = menuObj.FindRecursive(x => x.name.Contains("EmailTextBox"));
-                    var passwordObj = menuObj.FindRecursive(x => x.name.Contains("PasswordTextBox"));
-                    var loginButton = menuObj.FindRecursive(x => x.name.Contains("Login"));
-
-                    var background = menuObj.FindRecursive(x => x.name.Contains("Background"));
-                    var close = menuObj.FindRecursive(x => x.name.Contains("closeButton"));
-
-                    var emailField = CreateTextBoxTMP(emailObj);
-                    var password = CreateTextBoxTMP(passwordObj);
-
-                    emailField.AllowEmail = true;
-                    emailField.AllowPaste = true;
-
-                    password.allowAllCharacters = true;
-                    password.AllowPaste = true;
-                    password.AllowSymbols = true;
-                    password.AllowEmail = true;
-
-                    password.OnChange.AddListener(new Action(() =>
-                    {
-                        var starText = string.Join("", Enumerable.Repeat("*", password.text.Length));
-                        password.outputText.text = starText + "<color=#FF0000>" + password.compoText + "</color>";
-                        password.outputText.ForceMeshUpdate(true, true);
-                    }));
-
-                    void LoginAction()
-                    {
-                        AsyncCoroutine
-                            .CoContinueTaskWith(Task.Run(async () =>
-                            {
-                                return await Login(emailField.text, password.text);
-                            }), () =>
-                            {
-                                _loggedInMenu.active = true;
-                                _topButtonBar.active = false;
-
-                                UpdateGameSettingsWithName(_authContext.DisplayName);
-                                Destroy(menuObj);
-                            })
-                            .StartAsCoroutine();
-                    }
-
-                    emailField.OnEnter.AddListener((Action) LoginAction);
-                    password.OnEnter.AddListener((Action) LoginAction);
-                    loginButton.MakePassiveButton(LoginAction);
-
-                    background.MakePassiveButton(() => { }, false);
-
-                    close.MakePassiveButton(() => Destroy(menuObj));
-
-                    menuObj.AddComponent<TransitionOpen>().duration = 0.2f;
+                    CreateLoginMenu();
                 }
                 catch (Exception e)
                 {
@@ -163,11 +128,103 @@ namespace PolusggSlim.Behaviours
 
             _logOutButton = _loggedInMenu.FindRecursive(go => go.name.Contains("LogOut"));
             _logOutButton.MakePassiveButton(LogOut);
+        }
+
+        private void CreateLoginMenu()
+        {
+            var bundle = ResourceManager.GetAssetBundle("accountsmenu");
             
-            _loggedInMenu.active = _authContext.LoggedIn;
-            _topButtonBar.active = !_authContext.LoggedIn;
-            if (_authContext.LoggedIn)
-                UpdateGameSettingsWithName(_authContext.DisplayName);
+            var menuObj = Instantiate(
+                bundle.LoadAsset("Assets/Mods/LoginMenu/PolusggAccountMenu.prefab")
+            ).Cast<GameObject>();
+
+            menuObj.transform.localPosition = new Vector3(0, 0, -500f);
+
+            var emailObj = menuObj.FindRecursive(x => x.name.Contains("EmailTextBox"));
+            var passwordObj = menuObj.FindRecursive(x => x.name.Contains("PasswordTextBox"));
+            var loginButton = menuObj.FindRecursive(x => x.name.Contains("Login"));
+
+            var background = menuObj.FindRecursive(x => x.name.Contains("Background"));
+            var close = menuObj.FindRecursive(x => x.name.Contains("closeButton"));
+
+            var emailField = CreateTextBoxTMP(emailObj);
+            var password = CreateTextBoxTMP(passwordObj);
+
+            emailField.AllowEmail = true;
+            emailField.AllowPaste = true;
+
+            password.allowAllCharacters = true;
+            password.AllowPaste = true;
+            password.AllowSymbols = true;
+            password.AllowEmail = true;
+
+            password.OnChange.AddListener(new Action(() =>
+            {
+                var starText = string.Join("", Enumerable.Repeat("*", password.text.Length));
+                password.outputText.text = starText;
+                password.outputText.ForceMeshUpdate(true, true);
+            }));
+
+            void LoginAction()
+            {
+                var loginButtonRenderer = loginButton.GetComponent<SpriteRenderer>();
+                var textRenderer = loginButton.GetComponentInChildren<TextMeshPro>();
+                loginButtonRenderer.color = textRenderer.color = new Color(1f, 1f, 1f, 0.5f);
+                
+                AsyncCoroutine
+                    .CoContinueTaskWith(Task.Run(async () =>
+                    {
+                        return await Login(emailField.text, password.text);
+                    }), loggedIn =>
+                    {
+                        loginButtonRenderer.color = textRenderer.color = new Color(1f, 1f, 1f, 1f);
+                        if (loggedIn)
+                        {
+                            _loggedInMenu.active = true;
+                            _topButtonBar.active = false;
+                            
+                            UpdateGameSettingsWithName(_authContext.DisplayName);
+                            Destroy(menuObj);
+                        }
+                        else
+                        {
+                            password.text = "";
+                            password.outputText.text = "";
+                            Coroutine.Start(new Coroutine.Il2CppEnumeratorWrapper(
+                                Effects.SwayX(loginButton.transform, 0.75f, 0.25f)
+                            ));
+                        }
+                    })
+                    .StartAsCoroutine();
+            }
+
+            emailField.OnEnter.AddListener((Action) LoginAction);
+            password.OnEnter.AddListener((Action) LoginAction);
+            loginButton.MakePassiveButton(LoginAction);
+
+            background.MakePassiveButton(() => { }, false);
+
+            close.MakePassiveButton(() => Destroy(menuObj));
+
+            menuObj.AddComponent<TransitionOpen>().duration = 0.2f;
+        }
+
+        private void CheckLogin()
+        {
+            AsyncCoroutine.CoContinueTaskWith(Task.Run(async () =>
+            {
+                var response = await _authContext.ApiClient.CheckToken(
+                    _authContext.ClientIdString,
+                    _authContext.ClientToken
+                );
+
+                return response == null;
+
+            }), result =>
+            {
+                if (result) 
+                    LogOut();
+            }).StartAsCoroutine();
         }
 
         private async Task<bool> Login(string email, string password)
@@ -187,7 +244,7 @@ namespace PolusggSlim.Behaviours
                     Convert.ToBase64String(Encoding.UTF8.GetBytes(
                         JsonConvert.SerializeObject(new SavedAuthModel
                         {
-                            ClientId = _authContext.ClientId,
+                            ClientIdString = _authContext.ClientIdString,
                             ClientToken = _authContext.ClientToken,
                             DisplayName = _authContext.DisplayName,
                             Perks = _authContext.Perks
@@ -202,8 +259,9 @@ namespace PolusggSlim.Behaviours
         private void LogOut()
         {
             _authContext.ClientId = new byte[0];
-            _authContext.ClientToken = "";
-            _authContext.DisplayName = "";
+            _authContext.ClientIdString = string.Empty;
+            _authContext.ClientToken = string.Empty;
+            _authContext.DisplayName = string.Empty;
             _authContext.Perks = new string[0];
             
             UpdateGameSettingsWithName("Guest");
@@ -224,9 +282,7 @@ namespace PolusggSlim.Behaviours
             SaveManager.lastPlayerName = displayName;
             
             var tmp = _loggedInMenu.GetComponentInChildren<TextMeshPro>();
-            tmp.m_text = $"Welcome, {displayName}";
-            
-            // TODO: AccountManager.Instance.accountTab.UpdateNameDisplay();
+            tmp.text = $"Welcome, {displayName}";
         }
 
 
@@ -248,19 +304,6 @@ namespace PolusggSlim.Behaviours
             box.tempTxt = new StringBuilder();
             main.MakePassiveButton(box.GiveFocus);
             return box;
-        }
-    }
-
-    [HarmonyPatch(typeof(SetNameText), nameof(SetNameText.Start))]
-    public static class SetNameText_Start
-    {
-        public static bool Prefix(SetNameText __instance)
-        {
-            var context = PluginSingleton<PolusggMod>.Instance.AuthContext;
-            if (context.LoggedIn && SceneManager.GetActiveScene().name == "MMOnline")
-                __instance.nameText.m_text = $"Logged in as: {context.DisplayName}";
-
-            return false;
         }
     }
 }

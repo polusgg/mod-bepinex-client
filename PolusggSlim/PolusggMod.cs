@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using BepInEx;
 using BepInEx.IL2CPP;
 using HarmonyLib;
@@ -11,6 +12,7 @@ using PolusggSlim.Configuration;
 using PolusggSlim.Patches.Misc;
 using PolusggSlim.Utils;
 using PolusggSlim.Utils.Attributes;
+using PolusggSlim.Utils.Extensions;
 
 namespace PolusggSlim
 {
@@ -45,9 +47,9 @@ namespace PolusggSlim
                 SigningHelper = new SigningHelper(AuthContext);
 
 
-                // Domain-Specific patches
+                // Permanent bootstrap patches
                 RegisterInIl2CppAttribute.Register();
-                PermanentPatches.PatchAll(PermanentHarmony);
+                PermanentHarmony.PatchAll(typeof(PermanentPatches));
                 CoroutineManagerInitializer.Load();
                 //TODO: SkipIntroSplash.Load();
 
@@ -55,7 +57,8 @@ namespace PolusggSlim
             }
             catch (Exception e)
             {
-                PggLog.Error($"Error {e.Message}, Stack trace: {e.StackTrace}");
+                PggLog.Error($"Error loading {Id}: {e.Message}");
+                PggLog.Error($"Stack Trace: {e.StackTrace}");
             }
         }
 
@@ -71,7 +74,7 @@ namespace PolusggSlim
             return base.Unload();
         }
 
-        internal void LocalLoad()
+        private void LocalLoad()
         {
             PggLog.Message("Loading Polusgg mod");
             PggLog.Message($"Polusgg Server at {Configuration.Server.IpAddress}");
@@ -84,7 +87,7 @@ namespace PolusggSlim
                 );
                 if (authModel is not null)
                 {
-                    AuthContext.ClientId = authModel.ClientId;
+                    AuthContext.ParseClientIdAsUuid(authModel.ClientIdString);
                     AuthContext.ClientToken = authModel.ClientToken;
                     AuthContext.DisplayName = authModel.DisplayName;
                     AuthContext.Perks = authModel.Perks;
@@ -93,11 +96,11 @@ namespace PolusggSlim
 
             AccountLoginBehaviour.Load();
 
-            Harmony.PatchAll();
+            Harmony.PatchAllExcept(typeof(PermanentPatches));
         }
 
 
-        internal void LocalUnload()
+        private void LocalUnload()
         {
             PggLog.Message("Unloading Polusgg mod");
 

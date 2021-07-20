@@ -11,5 +11,10 @@ namespace PolusggSlim.Utils.Extensions
                 .Select(x => Convert.ToByte(hex.Substring(x * 2, 2), 16))
                 .ToArray();
         }
+        
+        public static string ByteArrayToHexString(this byte[] bytes)
+        {
+            return BitConverter.ToString(bytes).Replace("-", "");
+        }
     }
 }

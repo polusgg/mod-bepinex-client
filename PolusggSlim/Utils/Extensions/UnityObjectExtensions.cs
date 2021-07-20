@@ -26,7 +26,7 @@ namespace PolusggSlim.Utils.Extensions
             return component != null;
         }
 
-        public static void TryDestroyGameObject(this GameObject gameObject, bool immediate = false)
+        public static void Destroy(this GameObject gameObject, bool immediate = false)
         {
             if (immediate)
                 Object.DestroyImmediate(gameObject);

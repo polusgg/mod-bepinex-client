@@ -7,6 +7,8 @@ namespace PolusggSlim.Auth
     public class AuthContext : IDisposable
     {
         public byte[] ClientId { get; set; } = { };
+        
+        public string ClientIdString { get; set; } = string.Empty;
 
         // Base64 string Client Token, but used as UTF-8 encoded
         public string ClientToken { get; set; } = "";
@@ -25,6 +27,7 @@ namespace PolusggSlim.Auth
 
         public void ParseClientIdAsUuid(string uuid)
         {
+            ClientIdString = uuid;
             ClientId = uuid.Replace("-", "").HexStringToByteArray();
         }
     }

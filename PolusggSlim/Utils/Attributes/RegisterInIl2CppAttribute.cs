@@ -43,9 +43,7 @@ namespace PolusggSlim.Utils.Attributes
 
             try
             {
-                typeof(ClassInjector).GetMethod(nameof(ClassInjector.RegisterTypeInIl2Cpp))!
-                    .MakeGenericMethod(type)
-                    .Invoke(null, new object[0]);
+                ClassInjector.RegisterTypeInIl2Cpp(type);
             }
             catch (Exception e)
             {

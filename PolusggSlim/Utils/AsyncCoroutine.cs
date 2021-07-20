@@ -6,15 +6,12 @@ namespace PolusggSlim.Utils
 {
     public static class AsyncCoroutine
     {
-        public static IEnumerator CoContinueTaskWith(Task<bool> task, Action continueWith)
+        public static IEnumerator CoContinueTaskWith(Task<bool> task, Action<bool> continueWith)
         {
             while (!task.IsCompleted)
                 yield return null;
 
-            if (task.Result)
-            {
-                continueWith.Invoke();
-            }
+            continueWith.Invoke(task.Result);
         }
     }
 }

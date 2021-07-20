@@ -2,7 +2,7 @@ namespace PolusggSlim.Auth
 {
     public class SavedAuthModel
     {
-        public byte[] ClientId { get; set; } = { };
+        public string ClientIdString { get; set; } = string.Empty;
 
         // Base64 string Client Token, but used as UTF-8 encoded
         public string ClientToken { get; set; } = "";
