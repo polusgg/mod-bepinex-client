@@ -429,6 +429,8 @@ namespace PolusGG {
             Logger.LogInfo("Joined Lobby!");
             maintnet = new GameObject("maintent").DontDestroy();
             maintnet.AddComponent<MaintenanceBehaviour>();
+            PingTrackerTextPatch.PingText = null;
+            RoomTrackerTextPatch.RoomText = null;
         }
 
         public override void LobbyLeft() {
