@@ -1,6 +1,5 @@
 ﻿using HarmonyLib;
 using TMPro;
-using UnhollowerBaseLib;
 using UnityEngine;
 
 namespace PolusGG.Patches.Temporary {
@@ -86,6 +85,7 @@ namespace PolusGG.Patches.Temporary {
         public static void Postfix(HudManager __instance)
         {
             if (TaskText == null) return;
+            if (__instance.taskDirtyTimer != 0f) return;
             if (__instance.TaskText.text.StartsWith(TaskText)) return;
             __instance.TaskText.text = TaskText + "\n" + __instance.TaskText.text;
         }
