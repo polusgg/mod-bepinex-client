@@ -102,6 +102,8 @@ namespace PolusGG.Behaviours.Inner {
 
         private void OnDestroy() {
             Buttons.Remove(this);
+            if (!PlayerControl.LocalPlayer || PlayerControl.LocalPlayer.CanMove) SetLock(ButtonLocks.PlayerCanMove, false);
+            if (!HudManager.Instance || HudManager.Instance.UseButton.gameObject.active) SetLock(ButtonLocks.SetHudActive, false);
         }
 
         private void Deserialize(MessageReader reader) {

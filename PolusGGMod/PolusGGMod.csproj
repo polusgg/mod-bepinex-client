@@ -14,6 +14,8 @@
         <!--        <AmongAss>C:\Users\Sanae\Downloads\depotdownloader-2.3.6\depots\945361\6542129</AmongAss>-->
         <!--<AmongAss>$(AmongUs)</AmongAss>-->
 
+        <DebugType>full</DebugType>
+
         <Description>Polus.gg official mod</Description>
         <Authors>Sanae6</Authors>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>

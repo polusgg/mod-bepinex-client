@@ -14,6 +14,7 @@ using PolusGG.Mods;
 using PolusGG.Mods.Patching;
 using PolusGG.Patches.Temporary;
 using PolusGG.Resources;
+using PolusGG.Utils;
 using PowerTools;
 using TMPro;
 using UnhollowerBaseLib;
@@ -36,7 +37,7 @@ namespace PolusGG {
         private static CoroutineManager coMan;
         public static List<Action> Dispatcher = new();
         private static List<Action> TempQueue = new();
-        private bool cannotMove;
+        public bool CannotMove;
 
         public override string Name => "PolusMod";
 
@@ -383,13 +384,14 @@ namespace PolusGG {
 
         public override void Update() {
             if (PlayerControl.LocalPlayer) {
-                if (cannotMove != !PlayerControl.LocalPlayer.CanMove) {
-                    cannotMove = !PlayerControl.LocalPlayer.CanMove;
-                    cannotMove.Log(comment: "Cannot move changed !!!!");
-                    PolusClickBehaviour.SetLock(ButtonLocks.PlayerCanMove, cannotMove);
+                if (CannotMove != !PlayerControl.LocalPlayer.CanMove) {
+                    CannotMove = !PlayerControl.LocalPlayer.CanMove;
+                    CannotMove.Log(comment: "Cannot move changed !!!!");
+                    PolusClickBehaviour.SetLock(ButtonLocks.PlayerCanMove, CannotMove);
                 }
             } else {
-                cannotMove = true;
+                CannotMove = false;
+                PolusClickBehaviour.SetLock(ButtonLocks.PlayerCanMove, CannotMove);
             }
             lock (Dispatcher) {
                 TempQueue.AddRange(Dispatcher);
@@ -397,7 +399,7 @@ namespace PolusGG {
             }
 
             foreach (Action t in TempQueue) {
-                t();
+                CatchHelper.TryCatch(() => t());
             }
             TempQueue.Clear();
             if (!optionsDirty) return;
@@ -431,6 +433,7 @@ namespace PolusGG {
             maintnet.AddComponent<MaintenanceBehaviour>();
             PingTrackerTextPatch.PingText = null;
             RoomTrackerTextPatch.RoomText = null;
+            ResizeHandlerPatch.SetResolution(Screen.width, Screen.height);
         }
 
         public override void LobbyLeft() {

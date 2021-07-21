@@ -1,6 +1,7 @@
 ﻿using System;
 using HarmonyLib;
 using TMPro;
+using UnhollowerBaseLib;
 using UnityEngine;
 
 namespace PolusGG.Patches.Temporary {
