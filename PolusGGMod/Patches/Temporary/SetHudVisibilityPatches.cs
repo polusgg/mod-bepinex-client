@@ -74,10 +74,10 @@ namespace PolusGG.Patches.Temporary
         }
 
         public static void DisplayButton(UseButtonManager instance, bool enabled, ImageNames image, float percent = 0f) {
-            instance.UseButton.sprite = DestroyableSingleton<TranslationController>.Instance.GetImage(image);
-            CooldownHelpers.SetCooldownNormalizedUvs(instance.UseButton);
-            instance.UseButton.material.SetFloat("_Percent", percent);
-            instance.UseButton.color = enabled ? UseButtonManager.EnabledColor : UseButtonManager.DisabledColor;
+            instance.currentButtonShown.graphic.sprite = DestroyableSingleton<TranslationController>.Instance.GetImage(image);
+            CooldownHelpers.SetCooldownNormalizedUvs(instance.currentButtonShown.graphic);
+            instance.currentButtonShown.graphic.material.SetFloat("_Percent", percent);
+            instance.currentButtonShown.graphic.color = enabled ? UseButtonManager.EnabledColor : UseButtonManager.DisabledColor;
         }
     }
 

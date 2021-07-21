@@ -1,0 +1,5 @@
+<Project>
+	<PropertyGroup>
+		<AmongUs>Point this to your among us path ()</AmongUs>
+	</PropertyGroup>
+</Project> 

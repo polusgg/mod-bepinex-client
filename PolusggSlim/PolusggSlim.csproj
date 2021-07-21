@@ -1,25 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
     <PropertyGroup>
         <TargetFramework>netstandard2.1</TargetFramework>
-        <AssemblyName>PolusggSlim</AssemblyName>
         <LangVersion>latest</LangVersion>
         <DebugType>embedded</DebugType>
-    </PropertyGroup>
-    
-    <PropertyGroup>
-        <GameProvider>Github</GameProvider>
-        <GameVersion>2021.6.15s</GameVersion>
-        
-        <CopyModDependencies>true</CopyModDependencies>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-        <PackageReference Include="Reactor.MSBuild" Version="0.1.5" />
-    </ItemGroup>
+    </ItemGroup>    
     
     <ItemGroup>
       <EmbeddedResource Include="Resources\**" />
     </ItemGroup>
+
+    <Import Project="../ReactorBuildConfig.props" />
 </Project>
