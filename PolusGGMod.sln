@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PolusGGMod", "PolusGGMod\PolusGGMod.csproj", "{22F88CA4-9316-4E27-A28E-99E78EF6D1D1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Polus", "Polus\Polus.csproj", "{22F88CA4-9316-4E27-A28E-99E78EF6D1D1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PolusggSlim", "PolusggSlim\PolusggSlim.csproj", "{31BDE005-C467-475C-9750-7949DAB8AD8A}"
 EndProject
