@@ -13,9 +13,11 @@
 	<ItemGroup>
 		<PackageReference Include="Reactor.MSBuild" Version="0.1.5" />
 	</ItemGroup>
-
+	
 	<Target Name="Copy" AfterTargets="Build">
-        <Copy 
+		<Error Condition="'$(AmongUs)' == ''"
+			   Text="Couldn't find game path, make sure to set AmongUs property in AmongUsPath.props" />
+        <Copy
         	SourceFiles="$(OutputPath)$(AssemblyName).dll" 
         	DestinationFolder="$(AmongUs)/BepInEx/plugins/" />
     </Target>
