@@ -6,7 +6,7 @@ namespace PolusggSlim.Auth
 {
     public class SigningHelper
     {
-        private const byte AuthByte = 0x80;
+        public const byte AuthByte = 0x80;
         private const byte UuidSize = 16;
         private const byte HashSize = 20;
 
