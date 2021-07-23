@@ -64,6 +64,8 @@ namespace Polus {
             PogusPlugin.ObjectManager.Register(0x89, RegisterPnos.CreatePrefabHandle());
 
             Cache = PogusPlugin.Cache;
+            
+            ModManager.Instance.ShowModStamp();
         }
 
         public override void Stop() {
