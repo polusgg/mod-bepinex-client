@@ -158,6 +158,12 @@ namespace Polus {
                     killer.MyPhysics.StartCoroutine(DisplayKillAnimation(killer, target, targetPosition, killOverlayEnabled));
                     break;
                 }
+                case PolusRpcCalls.SetSpeedModifier: {
+                    PlayerControl player = netObject.Cast<PlayerControl>();
+
+                    player.gameObject.EnsureComponent<SpeedModifierManager>().SpeedModifer = reader.ReadSingle();
+                    break;
+                }
                 default:
                     throw new ArgumentOutOfRangeException();
             }

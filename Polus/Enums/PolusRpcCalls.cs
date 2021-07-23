@@ -20,5 +20,6 @@
         ReportDeadBody = 0x90,
         SetAliveState = 0x92,
         DisplayKillAnimation = 0x93,
+        SetSpeedModifier = 0x94,
     }
 }
