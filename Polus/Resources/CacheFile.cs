@@ -14,6 +14,11 @@ namespace Polus.Resources {
         public string Location;
         public ResourceType Type;
 
+        public void Unload() {
+            "POIOOOIOIOIOIOIIOIOIOIIIOIOI".Log();
+            ((AssetBundle) InternalData)?.Unload(true);
+        }
+
         private AssetBundle LoadAssetBundle() {
             return (AssetBundle) (InternalData ??= AssetBundle.LoadFromFile(LocalLocation));
         }

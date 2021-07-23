@@ -173,20 +173,20 @@ namespace Polus {
                     uint resourceType = reader.ReadByte();
                     AddDispatch(() => {
                         MessageWriter writer;
-                        if (Cache.IsCachedAndValid(resource, hash)) {
-                            Logger.LogInfo($"{resource} is already cached");
-                            writer = StartSendResourceResponse(resource, ResponseType.DownloadEnded);
-                            writer.Write(1);
-                            EndSend(writer);
-                            return;
-                        }
+                        // if (Cache.IsCachedAndValid(resource, hash)) {
+                        //     Logger.LogInfo($"{resource} is already cached");
+                        //     writer = StartSendResourceResponse(resource, ResponseType.DownloadEnded);
+                        //     writer.Write(1);
+                        //     EndSend(writer);
+                        //     return;
+                        // }
 
                         try {
                             Logger.LogInfo($"Trying to download and cache {resource} ({location})");
                             Cache.AddToCache(resource, location, hash,
-                                (ResourceType) resourceType);
+                                (ResourceType) resourceType, out bool cached);
                             writer = StartSendResourceResponse(resource, ResponseType.DownloadEnded);
-                            writer.Write(0);
+                            writer.Write(cached);
                             EndSend(writer);
                             Logger.LogInfo($"Cached {resource}!");
                         } catch (Exception e) {
@@ -434,6 +434,7 @@ namespace Polus {
             PingTrackerTextPatch.PingText = null;
             RoomTrackerTextPatch.RoomText = null;
             ResizeHandlerPatch.SetResolution(Screen.width, Screen.height);
+            AmongUsClient.Instance.mode = MatchMakerModes.Client;
         }
 
         public override void LobbyLeft() {

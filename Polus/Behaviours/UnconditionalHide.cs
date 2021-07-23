@@ -10,12 +10,6 @@ namespace Polus.Behaviours {
         }
         public UnconditionalHide(IntPtr ptr) : base(ptr) { }
 
-        public GameObject WhatToHide;
-
-        private void Start() {
-            OnEnable();
-        }
-
         private void OnEnable() {
             gameObject.SetActive(false);
         }

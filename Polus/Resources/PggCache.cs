@@ -16,7 +16,7 @@ namespace Polus.Resources {
 
         internal HttpClient Client => _client;
 
-        public CacheFile AddToCache(uint id, string location, byte[] hash, ResourceType type,
+        public CacheFile AddToCache(uint id, string location, byte[] hash, ResourceType type, out bool wasCached,
             uint parentId = uint.MaxValue) {
             string path = Path.Join(PggConstants.DownloadFolder, $"{id}");
 
@@ -54,6 +54,7 @@ namespace Polus.Resources {
                         break;
                     }
                     case ResourceType.AssetBundle: {
+                        if (CachedFiles[id] is {Type: ResourceType.AssetBundle} oldAssetBundle) oldAssetBundle.Unload();
                         data = responseMessage.Content.ReadAsByteArrayAsync().Result;
                         using (FileStream fs = GetFileStream(path, FileMode.Create, FileAccess.Write, FileShare.None)) fs.Write(data);
                         AssetBundle bundle = AssetBundle.LoadFromFile(path);
@@ -65,7 +66,7 @@ namespace Polus.Resources {
 
                         uint assetId = bundone.BaseId;
                         foreach (string bundoneAsset in bundone.Assets)
-                            AddToCache(++assetId, bundoneAsset, hash, ResourceType.Asset, id);
+                            AddToCache(++assetId, bundoneAsset, hash, ResourceType.Asset, out bool _, id);
                         cacheFile.ExtraData = bundone.Assets;
                         break;
                     }
@@ -89,12 +90,15 @@ namespace Polus.Resources {
                     }
                 }
 
-                PogusPlugin.Logger.LogMessage($"Downloaded file at {location} ({id}, {hash})");
+                PogusPlugin.Logger.LogMessage($"Downloaded file at {location} ({id}, {hash.Hex()})");
+                wasCached = false;
                 return cacheFile;
             }
 
             CacheFile cached = CachedFiles[id];
-            PogusPlugin.Logger.LogInfo($"Using cached file {cached.LocalLocation} ({cached.Location})");
+            PogusPlugin.Logger.LogInfo($"Using cached file {cached.LocalLocation} ({cached.LocalLocation} {cached.Hash.Hex()})");
+            PogusPlugin.Logger.LogInfo($"Over {location} ({cached.Hash.Hex()})");
+            wasCached = true;
             return cached;
         }
 

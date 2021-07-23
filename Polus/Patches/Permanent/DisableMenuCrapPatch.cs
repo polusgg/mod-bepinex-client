@@ -22,7 +22,7 @@ namespace Polus.Patches.Permanent {
         [PermanentPatch]
         [HarmonyPrefix]
         public static void Start(RegionTextMonitor __instance) {
-            __instance.gameObject.EnsureComponent<UnconditionalHide>().WhatToHide = __instance.transform.parent.gameObject;
+            __instance.transform.parent.gameObject.EnsureComponent<UnconditionalHide>();
         }
     }
 }

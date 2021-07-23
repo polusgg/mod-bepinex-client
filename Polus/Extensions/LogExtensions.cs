@@ -24,17 +24,14 @@ namespace Polus.Extensions {
         }
 
         public static byte[] Log(this byte[] value, int times = 1, string comment = "", LogLevel level = LogLevel.Info) {
-            value.Select(x => x.ToString("X2")).Join(delimiter: "").Log(times, comment, level);
+            value.Hex().Log(times, comment, level);
 
             return value;
         }
 
         public static Il2CppStructArray<byte> Log(this Il2CppStructArray<byte> value, int times = 1,
-            string comment = "", LogLevel level = LogLevel.Info) {
-            value.Select(x => x.ToString("X2")).Join(delimiter: "").Log(times, comment, level);
-
-            return value;
-        }
+            string comment = "", LogLevel level = LogLevel.Info) =>
+            value.ToArray().Log(times, comment, level);
 #endif
     }
 }
