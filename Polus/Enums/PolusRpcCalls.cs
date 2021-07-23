@@ -21,5 +21,6 @@
         SetAliveState = 0x92,
         DisplayKillAnimation = 0x93,
         SetSpeedModifier = 0x94,
+        SetVisionModifier = 0x95,
     }
 }

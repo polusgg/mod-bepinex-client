@@ -12,9 +12,17 @@ namespace Polus.Patches.Temporary {
             __instance.HandleAnimation(flag);
             if (__instance.AmOwner && __instance.myPlayer.CanMove && GameData.Instance)
             {
-                __instance.body.velocity = __instance.gameObject.EnsureComponent<SpeedModifierManager>().SpeedModifer * DestroyableSingleton<HudManager>.Instance.joystick.Delta * (flag ? __instance.TrueGhostSpeed : __instance.TrueSpeed);
+                __instance.body.velocity = __instance.gameObject.EnsureComponent<IndividualModifierManager>().SpeedModifer * DestroyableSingleton<HudManager>.Instance.joystick.Delta * (flag ? __instance.TrueGhostSpeed : __instance.TrueSpeed);
             }
             return false;
+        }
+    }
+
+    [HarmonyPatch(typeof(ShipStatus), nameof(ShipStatus.CalculateLightRadius))]
+    public class CalculateLightPatch {
+        [HarmonyPostfix]
+        public static void Postfix(ShipStatus __instance, ref float __result) {
+            __result *= PlayerControl.LocalPlayer.gameObject.EnsureComponent<IndividualModifierManager>().VisionModifier;
         }
     }
 }

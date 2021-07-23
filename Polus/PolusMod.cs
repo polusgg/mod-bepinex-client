@@ -163,7 +163,13 @@ namespace Polus {
                 case PolusRpcCalls.SetSpeedModifier: {
                     PlayerControl player = netObject.Cast<PlayerControl>();
 
-                    player.gameObject.EnsureComponent<SpeedModifierManager>().SpeedModifer = reader.ReadSingle();
+                    player.gameObject.EnsureComponent<IndividualModifierManager>().SpeedModifer = reader.ReadSingle();
+                    break;
+                }
+                case PolusRpcCalls.SetVisionModifier: {
+                    PlayerControl player = netObject.Cast<PlayerControl>();
+
+                    player.gameObject.EnsureComponent<IndividualModifierManager>().VisionModifier = reader.ReadSingle();
                     break;
                 }
                 default:
