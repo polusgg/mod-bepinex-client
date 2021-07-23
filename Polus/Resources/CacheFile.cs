@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Polus.Extensions;
+using Polus.Utils;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -15,8 +16,7 @@ namespace Polus.Resources {
         public ResourceType Type;
 
         public void Unload() {
-            "POIOOOIOIOIOIOIIOIOIOIIIOIOI".Log();
-            ((AssetBundle) InternalData)?.Unload(true);
+            CatchHelper.TryCatch(()=>((AssetBundle) InternalData)?.Unload(false));
         }
 
         private AssetBundle LoadAssetBundle() {
