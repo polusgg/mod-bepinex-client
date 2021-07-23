@@ -89,9 +89,7 @@ namespace Polus {
                 }
                 case PolusRpcCalls.SetRole: {
                     playerControl = netObject.Cast<PlayerControl>();
-
-                    HudManager.Instance.KillButton.gameObject.active = false;
-
+                    
                     if (reader.ReadBoolean()) { 
                         if (PlayerControl.LocalPlayer.Data.IsImpostor) {
                             playerControl.Data.Object.nameText.color = Palette.ImpostorRed;
