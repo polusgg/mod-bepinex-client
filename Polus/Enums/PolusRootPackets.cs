@@ -10,6 +10,7 @@
         DeleteGameOption = 0x8A,
         LoadHat = 0x8B,
         SetHudVisibility = 0x8C,
+        AllowTaskInteraction = 0x8D,
         DisplaySystemAnnouncement = 0xFA
     }
 }

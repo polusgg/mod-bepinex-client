@@ -371,6 +371,10 @@ namespace Polus {
                     }
                     break;
                 }
+                case PolusRootPackets.AllowTaskInteraction: {
+                    AllowTaskInteractionPatch.TaskInteractionAllowed = reader.ReadBoolean();
+                    break;
+                }
                 default: {
                     Logger.LogError($"Invalid packet with id {reader.Tag}");
                     break;
@@ -439,6 +443,7 @@ namespace Polus {
             maintnet.AddComponent<MaintenanceBehaviour>();
             PingTrackerTextPatch.PingText = null;
             RoomTrackerTextPatch.RoomText = null;
+            AllowTaskInteractionPatch.TaskInteractionAllowed = true;
             ResizeHandlerPatch.SetResolution(Screen.width, Screen.height);
             AmongUsClient.Instance.mode = MatchMakerModes.Client;
         }
@@ -448,6 +453,7 @@ namespace Polus {
             maintnet = null;
             PingTrackerTextPatch.PingText = null;
             RoomTrackerTextPatch.RoomText = null;
+            AllowTaskInteractionPatch.TaskInteractionAllowed = true;
             GameOptionsPatches.OnEnablePatch.Reset();
         }
 
