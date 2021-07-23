@@ -77,7 +77,6 @@ namespace PolusggSlim
         private void LocalLoad()
         {
             PggLog.Message("Loading Polusgg mod");
-            PggLog.Message($"Polusgg Server at {Configuration.Server.IpAddress}");
 
             var filePath = Path.Combine(Paths.GameRootPath, "api.txt");
             if (File.Exists(filePath))
