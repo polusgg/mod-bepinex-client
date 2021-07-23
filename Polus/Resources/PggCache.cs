@@ -54,7 +54,7 @@ namespace Polus.Resources {
                         break;
                     }
                     case ResourceType.AssetBundle: {
-                        if (CachedFiles[id] is {Type: ResourceType.AssetBundle} oldAssetBundle) oldAssetBundle.Unload();
+                        if (CachedFiles.ContainsKey(id) && CachedFiles[id] is {Type: ResourceType.AssetBundle} oldAssetBundle) oldAssetBundle.Unload();
                         data = responseMessage.Content.ReadAsByteArrayAsync().Result;
                         using (FileStream fs = GetFileStream(path, FileMode.Create, FileAccess.Write, FileShare.None)) fs.Write(data);
                         AssetBundle bundle = AssetBundle.LoadFromFile(path);
