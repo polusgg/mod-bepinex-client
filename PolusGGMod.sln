@@ -4,6 +4,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Polus", "Polus\Polus.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PolusggSlim", "PolusggSlim\PolusggSlim.csproj", "{31BDE005-C467-475C-9750-7949DAB8AD8A}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "External Files", "External Files", "{2E7FB4FE-55F9-492F-9F89-C5D33B532C20}"
+ProjectSection(SolutionItems) = preProject
+	ReactorBuildConfig.props = ReactorBuildConfig.props
+	AmongUsPath.props = AmongUsPath.props
+EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

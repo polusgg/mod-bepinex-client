@@ -409,7 +409,7 @@ namespace Polus {
                 CannotMove = false;
                 PolusClickBehaviour.SetLock(ButtonLocks.PlayerCanMove, CannotMove);
             }
-            lock (Dispatcher) {
+            if (AmongUsClient.Instance && AmongUsClient.Instance.InOnlineScene) lock (Dispatcher) {
                 TempQueue.AddRange(Dispatcher);
                 Dispatcher.Clear();
             }

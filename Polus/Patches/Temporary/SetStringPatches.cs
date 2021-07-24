@@ -64,17 +64,17 @@ namespace Polus.Patches.Temporary {
                 return false;
             }
 
-            if (!Enum.IsDefined(typeof(SystemTypes), __instance.text.text))
-            {
-                if (__instance.LastRoom)
-                {
-                    int hitCount = __instance.LastRoom.roomArea.OverlapCollider(__instance.filter, __instance.buffer);
-                    if (RoomTracker.CheckHitsForPlayer(__instance.buffer, hitCount))
-                    {
-                        __instance.slideInRoutine = __instance.StartCoroutine(__instance.CoSlideIn(__instance.LastRoom.RoomId));
-                    }
-                }
-            }
+            // if (!Enum.IsDefined(typeof(SystemTypes), __instance.text.text))
+            // {
+            //     if (__instance.LastRoom)
+            //     {
+            //         int hitCount = __instance.LastRoom.roomArea.OverlapCollider(__instance.filter, __instance.buffer);
+            //         if (RoomTracker.CheckHitsForPlayer(__instance.buffer, hitCount))
+            //         {
+            //             __instance.slideInRoutine = __instance.StartCoroutine(__instance.CoSlideIn(__instance.LastRoom.RoomId));
+            //         }
+            //     }
+            // }
 
             return true;
         }
