@@ -18,11 +18,11 @@ namespace Polus.Patches.Temporary {
         }
     }
 
-    [HarmonyPatch(typeof(HudManager), nameof(HudManager.Start))]
+    [HarmonyPatch(typeof(HudManager), nameof(HudManager.Update))]
     public class HideKillButtonOnStart {
         [HarmonyPostfix]
         public static void Postfix(HudManager __instance) {
-            __instance.KillButton.gameObject.SetActive(false);
+            if (__instance.KillButton.gameObject.active) __instance.KillButton.gameObject.SetActive(false);
         }
     }
 }
