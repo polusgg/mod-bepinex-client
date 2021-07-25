@@ -8,6 +8,7 @@ namespace Polus.Behaviours.Inner {
         private static readonly int UILayer = LayerMask.NameToLayer("UI");
         private ArrowBehaviour arrow;
         private PolusNetworkTransform cnt;
+        private bool wasMissingParent = true;
 
         static PolusPoi() {
             ClassInjector.RegisterTypeInIl2Cpp<PolusPoi>();
@@ -18,6 +19,7 @@ namespace Polus.Behaviours.Inner {
         private void Start() {
             arrow = gameObject.AddComponent<ArrowBehaviour>();
             cnt = GetComponent<PolusNetworkTransform>();
+            cnt.ManuallyUsesPosition = true;
         }
 
         private void Update() {
@@ -27,9 +29,9 @@ namespace Polus.Behaviours.Inner {
 
             gameObject.layer = UILayer;
 
-            // if these stupid arrows aren't pointing to the point they should, they're pointing to the 
+            // if these stupid arrows aren't pointing to the point they should
             // arrow.image.enabled = cnt.MissingParent;
-            arrow.target = cnt.MissingParent ? cnt.Position : transform.position;
+            arrow.target = cnt.MissingParent || cnt.CannotParent ? cnt.Position : transform.parent.position;
         }
     }
 }

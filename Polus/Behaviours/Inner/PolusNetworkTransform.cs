@@ -3,6 +3,7 @@ using Hazel;
 using Polus.Enums;
 using Polus.Extensions;
 using Polus.Net.Objects;
+using UnhollowerBaseLib.Attributes;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 
@@ -16,11 +17,18 @@ namespace Polus.Behaviours.Inner {
         // private Vector2 _target;
 
         public bool IsHudButton => AspectPosition.Alignment != 0;
+        public bool CannotParent => !parent.HasValue;
         public bool MissingParent => parent.HasValue && !transform.parent;
 
+        [HideFromIl2Cpp]
         public Vector3 Position { get; set; }
 
+        [HideFromIl2Cpp]
         public AspectPosition AspectPosition { get; set; }
+        
+        [HideFromIl2Cpp]
+        public bool ManuallyUsesPosition { private get; set; }
+
 
         static PolusNetworkTransform() {
             ClassInjector.RegisterTypeInIl2Cpp<PolusNetworkTransform>();
@@ -41,8 +49,8 @@ namespace Polus.Behaviours.Inner {
             if (pno != null && pno.HasRpc()) HandleRpc(pno.GetRpcData());
             
             if (!IsHudButton && MissingParent) {
-                transform.parent = PogusPlugin.ObjectManager.GetNetObject((uint) parent);
-                transform.localPosition = Position;
+                transform.parent = PogusPlugin.ObjectManager.GetNetObject((uint) parent.Value);
+                if (!ManuallyUsesPosition) transform.localPosition = Position;
             }
         }
 
