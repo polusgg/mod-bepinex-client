@@ -8,15 +8,19 @@ using UnityEngine;
 
 namespace Polus.Behaviours.Inner {
     public class PolusNetworkTransform : PnoBehaviour {
-        internal static readonly FloatRange XRange = new(50f, -50f);
-        internal static readonly FloatRange YRange = new(50f, -50f);
-        internal AspectPosition _aspectPosition;
+        public static readonly FloatRange XRange = new(50f, -50f);
+        public static readonly FloatRange YRange = new(50f, -50f);
+
         private int? parent;
-        private Vector3 position;
         // private Vector2 _start;
         // private Vector2 _target;
 
-        public bool IsHudButton => _aspectPosition.Alignment != 0;
+        public bool IsHudButton => AspectPosition.Alignment != 0;
+        public bool MissingParent => parent.HasValue && !transform.parent;
+
+        public Vector3 Position { get; set; }
+
+        public AspectPosition AspectPosition { get; set; }
 
         static PolusNetworkTransform() {
             ClassInjector.RegisterTypeInIl2Cpp<PolusNetworkTransform>();
@@ -26,8 +30,8 @@ namespace Polus.Behaviours.Inner {
 
         public void Start() {
             pno = PogusPlugin.ObjectManager.LocateNetObject(this);
-            _aspectPosition = gameObject.AddComponent<AspectPosition>();
-            _aspectPosition.updateAlways = true;
+            AspectPosition = gameObject.AddComponent<AspectPosition>();
+            AspectPosition.updateAlways = true;
             // _rigidbody2D = GetComponent<Rigidbody2D>();
             // _rigidbody2D.constraints = RigidbodyConstraints2D.FreezeAll;
         }
@@ -36,9 +40,9 @@ namespace Polus.Behaviours.Inner {
             if (pno != null && pno.HasData()) Deserialize(pno.GetSpawnData());
             if (pno != null && pno.HasRpc()) HandleRpc(pno.GetRpcData());
             
-            if (!IsHudButton && parent.HasValue && !transform.parent) {
+            if (!IsHudButton && MissingParent) {
                 transform.parent = PogusPlugin.ObjectManager.GetNetObject((uint) parent);
-                transform.localPosition = position;
+                transform.localPosition = Position;
             }
         }
 
@@ -48,18 +52,18 @@ namespace Polus.Behaviours.Inner {
 
         public void Deserialize(MessageReader reader) {
             byte aln = reader.ReadByte();
-            _aspectPosition.Alignment = (AspectPosition.EdgeAlignments) aln;
+            AspectPosition.Alignment = (AspectPosition.EdgeAlignments) aln;
             Vector3 pos = reader.ReadVector2();
             float z = reader.ReadSingle();
             if (aln != 0) {
                 transform.parent = HudManager.Instance.gameObject.transform;
-                _aspectPosition.enabled = true;
-                _aspectPosition.DistanceFromEdge = new Vector3(0, 0, z) - pos;
-                _aspectPosition.AdjustPosition();
+                AspectPosition.enabled = true;
+                AspectPosition.DistanceFromEdge = new Vector3(0, 0, z) - pos;
+                AspectPosition.AdjustPosition();
             } else {
-                _aspectPosition.enabled = false;
+                AspectPosition.enabled = false;
                 parent = reader.ReadPackedInt32();
-                position = new Vector3(pos.x, pos.y, z);
+                Position = new Vector3(pos.x, pos.y, z);
             }
         }
     }

@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using Polus.Mods.Patching;
 using UnityEngine.SceneManagement;
 
 namespace Polus.Patches.Permanent
@@ -7,6 +8,7 @@ namespace Polus.Patches.Permanent
     {
         [HarmonyPatch(typeof(ChatBubble), nameof(ChatBubble.SetText))]
         public class DisableHudManagerOOGPatch {
+            [PermanentPatch]
             [HarmonyPostfix]
             public static void Update(ChatBubble __instance)
             {

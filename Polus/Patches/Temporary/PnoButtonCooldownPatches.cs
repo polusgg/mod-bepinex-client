@@ -8,7 +8,7 @@ namespace Polus.Patches.Temporary {
         [HarmonyPostfix]
         public static void SetHudActive([HarmonyArgument(0)] bool active) {
             HudManager.Instance.KillButton.gameObject.SetActive(false);
-            foreach (PolusClickBehaviour btn in PolusClickBehaviour.Buttons.Where(btn => btn.netTransform._aspectPosition.Alignment != 0)) {
+            foreach (PolusClickBehaviour btn in PolusClickBehaviour.Buttons.Where(btn => btn.netTransform.AspectPosition.Alignment != 0)) {
                 try {
                     btn.gameObject.SetActive(active);
                 } catch { /* lol */ }

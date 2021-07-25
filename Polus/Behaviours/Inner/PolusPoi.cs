@@ -27,8 +27,9 @@ namespace Polus.Behaviours.Inner {
 
             gameObject.layer = UILayer;
 
-            // if these stupid arrows aren't pointing to the point they should, they're pointing to 20, 20
-            arrow.target = transform.parent ? transform.parent.position : new Vector3(20, 20);
+            // if these stupid arrows aren't pointing to the point they should, they're pointing to the 
+            // arrow.image.enabled = cnt.MissingParent;
+            arrow.target = cnt.MissingParent ? cnt.Position : transform.position;
         }
     }
 }

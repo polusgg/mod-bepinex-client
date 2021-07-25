@@ -590,7 +590,7 @@ namespace Polus {
     }
 
     public class RoleData {
-        public Color IntroColor = Color.magenta;
+        public Color IntroColor = Color.white;
         public string IntroDesc = "Something went horribly wrong\nwhile displaying this intro!";
         public string IntroName = "uh oh";
         public List<byte> IntroPlayers = new();
