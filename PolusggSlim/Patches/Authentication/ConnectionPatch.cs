@@ -1,5 +1,6 @@
 using HarmonyLib;
 using Hazel.Udp;
+using InnerNet;
 using PolusggSlim.Auth;
 using PolusggSlim.Utils;
 using UnhollowerBaseLib;
@@ -29,7 +30,7 @@ namespace PolusggSlim.Patches.Authentication
             // if (ServerManager.Instance.CurrentRegion.PingServer ==
             //     PluginSingleton<PolusggMod>.Instance.Configuration.Server.IpAddress)
             // {
-            if (AmongUsClient.Instance.GameMode == GameModes.OnlineGame && bytes[0] != SigningHelper.AuthByte)
+            if (AmongUsClient.Instance.GameMode == GameModes.OnlineGame && bytes[0] != SigningHelper.AuthByte && bytes[0] != 10)
             {
                 PluginSingleton<PolusggMod>.Instance.SigningHelper.SignByteArray(ref bytes);
                 length = bytes.Length;
