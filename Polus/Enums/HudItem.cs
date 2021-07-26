@@ -17,5 +17,7 @@
         TaskProgressBar,
         // Disables popup (or rather slide-out) with tasks list
         TaskListPopup,
+        // Disables report button
+        ReportButton,
     }
 }

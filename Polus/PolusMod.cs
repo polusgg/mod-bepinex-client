@@ -374,6 +374,10 @@ namespace Polus {
                             ProgressTrackerUpdatePatch.enabled = enabled;
                             break;
                         }
+                        case HudItem.ReportButton: {
+                            ReportButtonDisablePatch.enabled = enabled;
+                            break;
+                        }
                     }
                     break;
                 }

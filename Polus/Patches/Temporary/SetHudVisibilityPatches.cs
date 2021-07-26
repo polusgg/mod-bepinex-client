@@ -16,6 +16,7 @@ namespace Polus.Patches.Temporary
             useButtonEnabled = true;
             ventButtonEnabled = true;
             TaskPanelUpdatePatch.enabled = true;
+            ReportButtonDisablePatch.enabled = true;
         }
     }
     
@@ -140,6 +141,16 @@ namespace Polus.Patches.Temporary
             foreach (var rend in srenderers) rend.enabled = enabled;
 
             return enabled;
+        }
+    }
+
+    [HarmonyPatch(typeof(HudManager), nameof(HudManager.Update))]
+    public static class ReportButtonDisablePatch {
+        public static bool enabled = true;
+
+        [HarmonyPostfix]
+        public static void Postfix(HudManager __instance) {
+            __instance.ReportButton.gameObject.SetActive(enabled);
         }
     }
 }
