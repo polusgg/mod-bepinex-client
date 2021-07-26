@@ -7,7 +7,9 @@ namespace Polus.Patches.Temporary {
         [HarmonyPrefix]
         public static bool Prefix(Console __instance, [HarmonyArgument(0)] GameData.PlayerInfo pc,
             [HarmonyArgument(1)] ref bool canUse, [HarmonyArgument(2)] ref bool couldUse, ref float __result) {
-            if (TaskInteractionAllowed) return true;
+            // EXPLANATION: AllowImpostor is set to true when Console is not a task console (pretty obvious, duh)
+            // That's why we're ignoring Consoles that have AllowImpostor on.
+            if (TaskInteractionAllowed || __instance.AllowImpostor) return true;
             couldUse = canUse = false;
             __result = float.MaxValue;
             return false;
