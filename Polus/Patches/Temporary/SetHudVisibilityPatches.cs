@@ -150,7 +150,8 @@ namespace Polus.Patches.Temporary
 
         [HarmonyPostfix]
         public static void Postfix(HudManager __instance) {
-            __instance.ReportButton.gameObject.SetActive(enabled);
+            if (__instance.ReportButton == null) return;
+            if (__instance.ReportButton.gameObject != null) __instance.ReportButton.gameObject.SetActive(enabled);
         }
     }
 }
