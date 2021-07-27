@@ -1,6 +1,14 @@
 ﻿using HarmonyLib;
 
 namespace Polus.Patches.Temporary {
+    [HarmonyPatch(typeof(HudManager), nameof(HudManager.Start))]
+    public class AllowTaskInteractionResetPatch {
+        [HarmonyPostfix]
+        public static void Postfix() {
+            AllowTaskInteractionPatch.TaskInteractionAllowed = true;
+        }
+    }
+    
     [HarmonyPatch(typeof(Console), nameof(Console.CanUse))]
     public class AllowTaskInteractionPatch {
         public static bool TaskInteractionAllowed = true;
