@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -11,8 +12,10 @@ using Polus.Patches.Permanent;
 using Polus.Resources;
 using Polus.Utils;
 using TMPro;
+using UnhollowerBaseLib;
 using UnityEngine;
 using Debug = System.Diagnostics.Debug;
+using Environment = Il2CppSystem.Environment;
 
 namespace Polus {
     [BepInPlugin(Id, "Polus.gg", "0.69")]
@@ -28,6 +31,7 @@ namespace Polus {
         private static AssetBundle _bundle;
 
         public static TMP_FontAsset font;
+        public static TMP_SpriteAsset spriteSheet;
 
         public static AssetBundle Bundle {
             get {
@@ -58,6 +62,20 @@ namespace Polus {
             Logger = Log;
             ObjectManager = new PggObjectManager();
 
+            string[] argv = Environment.GetCommandLineArgs();
+            // psi.Arguments.Log(20);
+            // psi.FileName.Log(20);
+            // psi.WindowStyle.Log(20);
+            // if (argv.Length > 1 && int.TryParse(argv[1], out int runs)) {
+            //     // if (runs > 1) {
+            //     //     Process.Start(new ProcessStartInfo {
+            //     //         FileName = argv[0], 
+            //     //         Arguments = (runs - 1).ToString(),
+            //     //         WorkingDirectory = Path.GetDirectoryName(argv[0])
+            //     //     });
+            //     // }
+            // }
+
             try {
                 if (File.Exists(PggConstants.CacheLocation)) {
                     using FileStream stream = PggCache.GetFileStream(PggConstants.CacheLocation, FileMode.Open, FileAccess.Read, FileShare.None);
@@ -77,6 +95,7 @@ namespace Polus {
 
             // font = Bundle.LoadAsset("Assets/Fonts/AmongUsButton2-Regular SDF.asset").Cast<TMP_FontAsset>();
             font = Bundle.LoadAsset("Assets/Fonts/ComicSansMs3 SDF.asset").Cast<TMP_FontAsset>();
+            spriteSheet = Bundle.LoadAsset("Assets/Mods/Emojis/Emotes.asset").Cast<TMP_SpriteAsset>();
             // font = Bundle.LoadAsset("Assets/Fonts/Inter-SemiBold SDF.asset").Cast<TMP_FontAsset>();
             // FontMwenuwuPatches.Load();
             CatchHelper.TryCatch(CreditsMainMenuPatches.Load);

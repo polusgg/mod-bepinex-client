@@ -48,17 +48,22 @@ namespace Polus.Patches.Temporary {
             }
         }
 
+        [HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.SetForegroundForDead))]
+        public static class DisableWeirdSetForegroundThing {
+            public static bool SetForegroundForDead() => false;
+        }
+
         [HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.UpdateButtons))]
         public class ForegroundSetter {
-            [HarmonyPrefix]
-            public static bool UpdateButtons(MeetingHud __instance) {
-                if (PlayerControl.LocalPlayer.Data.IsDead == __instance.amDead) return false;
+            [HarmonyPostfix]
+            public static void UpdateButtons(MeetingHud __instance) {
+                if (PlayerControl.LocalPlayer.Data.IsDead == __instance.amDead) return;
                 bool shouldBeDead = PlayerControl.LocalPlayer.Data.IsDead;
                 __instance.amDead = shouldBeDead;
                 __instance.SkipVoteButton.gameObject.SetActive(!shouldBeDead);
                 __instance.Glass.sprite = shouldBeDead ? __instance.CrackedGlass : GrabUncrackedGlassPatch.UncrackedGlass;
                 __instance.Glass.color = shouldBeDead ? Color.white : GrabUncrackedGlassPatch.UncrackedColor;
-                return false;
+                return;
             }
         }
     }

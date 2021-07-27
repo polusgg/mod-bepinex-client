@@ -62,6 +62,8 @@ namespace Polus {
             PogusPlugin.ObjectManager.Register(0x87, RegisterPnos.CreatePoi());
             PogusPlugin.ObjectManager.Register(0x88, RegisterPnos.CreateCameraController());
             PogusPlugin.ObjectManager.Register(0x89, RegisterPnos.CreatePrefabHandle());
+            
+            // TMP_Settings.instance.m_defaultSpriteAsset = 
 
             Cache = PogusPlugin.Cache;
             

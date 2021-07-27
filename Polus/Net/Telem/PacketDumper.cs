@@ -13,7 +13,7 @@ namespace Polus.Net.Telem {
         public static PacketDumper Instance {
             get {
                 if (_instance) return _instance;
-                return _instance = new GameObject("").AddComponent<PacketDumper>();
+                return _instance = new GameObject("hey cuties uwu how are youwu").AddComponent<PacketDumper>();
             }
         }
         private void Start() {

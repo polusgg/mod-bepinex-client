@@ -63,6 +63,8 @@ namespace Polus.Behaviours.Inner {
                 CooldownHelpers.SetCooldownNormalizedUvs(graphic.renderer);
             }
 
+            graphic.renderer.enabled = !locks[(int) ButtonLocks.SetHudActive];
+
             if (isCountingDown) {
                 currentTimer -= Time.deltaTime;
                 if (currentTimer < 0) currentTimer = 0;
@@ -76,14 +78,6 @@ namespace Polus.Behaviours.Inner {
             if (anyLocked == IsLocked) return;
             anyLocked = locks.Any(lck => lck);
                 SetCountingDown(!anyLocked);
-        }
-
-        private void OnEnable() {
-            SetLock(ButtonLocks.SetHudActive, false);
-        }
-
-        private void OnDisable() {
-            SetLock(ButtonLocks.SetHudActive, true);
         }
 
         private static void CheckAllLocks() {
@@ -118,8 +112,8 @@ namespace Polus.Behaviours.Inner {
             graphic.renderer.material.SetFloat(Percent, num);
             graphic.renderer.material.SetFloat(Desat, saturated ? 0f : 1f);
             graphic.renderer.color = saturated ? Palette.EnabledColor : Palette.DisabledClear;
-            timerText.gameObject.SetActive(currentTimer != 0);
-            bool isCoolingDown = num > 0f || isCountingDown;
+            bool isCoolingDown = currentTimer > 0f;
+            timerText.gameObject.SetActive(isCoolingDown && graphic.renderer.enabled);
             if (isCoolingDown) {
                 if (currentTimer == 0) return;
                 timerText.text = Mathf.CeilToInt(currentTimer).ToString();

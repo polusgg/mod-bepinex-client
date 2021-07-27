@@ -70,7 +70,10 @@ namespace Polus.Behaviours.Inner {
                 AspectPosition.AdjustPosition();
             } else {
                 AspectPosition.enabled = false;
-                parent = reader.ReadPackedInt32();
+                parent = reader.ReadPackedInt32() switch {
+                    -1 => null,
+                    int x => x
+                };
                 Position = new Vector3(pos.x, pos.y, z);
             }
         }
