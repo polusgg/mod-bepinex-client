@@ -96,6 +96,7 @@ namespace Polus {
             // font = Bundle.LoadAsset("Assets/Fonts/AmongUsButton2-Regular SDF.asset").Cast<TMP_FontAsset>();
             font = Bundle.LoadAsset("Assets/Fonts/ComicSansMs3 SDF.asset").Cast<TMP_FontAsset>();
             spriteSheet = Bundle.LoadAsset("Assets/Mods/Emojis/Emotes.asset").Cast<TMP_SpriteAsset>();
+            TMP_Settings.instance.m_defaultSpriteAsset = spriteSheet;
             // font = Bundle.LoadAsset("Assets/Fonts/Inter-SemiBold SDF.asset").Cast<TMP_FontAsset>();
             // FontMwenuwuPatches.Load();
             CatchHelper.TryCatch(CreditsMainMenuPatches.Load);

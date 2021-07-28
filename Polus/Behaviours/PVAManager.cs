@@ -29,12 +29,12 @@ namespace Polus.Behaviours {
             bool disable = dead || disabled || disabledState;
             if (disable) ControllerManager.Instance.RemoveSelectableUiElement(pva.PlayerButton);
             else ControllerManager.Instance.AddSelectableUiElement(pva.PlayerButton);
+            pva.AmDead = dead;
+            pva.DidReport = reported;
             if (pva.TargetPlayerId == PlayerVoteArea.SkippedVote)
                 renderer.enabled = !disabled;
             else {
                 pva.Flag.enabled = pva.DidVote && !pva.resultsShowing;
-                pva.AmDead = dead;
-                pva.DidReport = reported;
                 pva.Megaphone.enabled = reported;
                 // if (!disable) return;
                 pva.Overlay.gameObject.SetActive(disable);

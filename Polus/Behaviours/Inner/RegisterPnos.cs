@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace Polus.Behaviours.Inner {
     public class RegisterPnos {
-        public static PnoBehaviour CreateDeadBodyPrefab() {
+        public static PnoBehaviour CreateDeadBodyPrefab(IObjectManager objectManager) {
             PlayerControl pc = AmongUsClient.Instance.PlayerPrefab;
             DeadBody prefab = Object.Instantiate(pc.KillAnimations[0].bodyPrefab);
             prefab.hideFlags = HideFlags.HideInHierarchy;
@@ -16,18 +16,23 @@ namespace Polus.Behaviours.Inner {
 
             PolusDeadBody polusDeadBody = gameObject.AddComponent<PolusDeadBody>();
             gameObject.AddComponent<PolusNetworkTransform>();
+            
+            objectManager.RegisterType<PolusDeadBody>();
+            objectManager.RegisterType<PolusNetworkTransform>();
 
             return polusDeadBody;
         }
 
-        public static PnoBehaviour CreateImage() {
+        public static PnoBehaviour CreateImage(IObjectManager objectManager) {
             GameObject imageObject = new("Image") {active = false};
             imageObject.DontDestroy();
+            objectManager.RegisterType<PolusGraphic>();
+            objectManager.RegisterType<PolusNetworkTransform>();
             imageObject.AddComponent<PolusGraphic>();
             return imageObject.AddComponent<PolusNetworkTransform>();
         }
 
-        public static PnoBehaviour CreateButton() {
+        public static PnoBehaviour CreateButton(IObjectManager objectManager) {
             GameObject buttonObject = new("Button") {active = false};
             buttonObject.DontDestroy();
 
@@ -39,45 +44,58 @@ namespace Polus.Behaviours.Inner {
             collider.size = new Vector2(1.15f, 1.15f);
             collider.isTrigger = true;
             buttonObject.AddComponent<PassiveButton>();
+            
+            objectManager.RegisterType<PolusNetworkTransform>();
+            objectManager.RegisterType<PolusGraphic>();
+            objectManager.RegisterType<PolusClickBehaviour>();
 
             return button;
         }
 
-        public static PnoBehaviour CreatePrefabHandle() {
+        public static PnoBehaviour CreatePrefabHandle(IObjectManager objectManager) {
             GameObject prefabObject = new("PrefabHandle") {active = false};
             prefabObject.DontDestroy();
 
+            objectManager.RegisterType<PolusPrefabHandle>();
+            objectManager.RegisterType<PolusNetworkTransform>();
             prefabObject.AddComponent<PolusPrefabHandle>();
             return prefabObject.AddComponent<PolusNetworkTransform>();
         }
 
-        public static PnoBehaviour CreatePoi() {
+        public static PnoBehaviour CreatePoi(IObjectManager objectManager) {
             GameObject pointyObject = new("PointOfInterest") {active = false};
             pointyObject.DontDestroy();
+
+            objectManager.RegisterType<PolusPoi>();
+            objectManager.RegisterType<PolusGraphic>();
+            objectManager.RegisterType<PolusNetworkTransform>();
             
             pointyObject.AddComponent<PolusPoi>();
             pointyObject.AddComponent<PolusGraphic>();
             return pointyObject.AddComponent<PolusNetworkTransform>();
         }
 
-        public static PnoBehaviour CreateConsole() {
+        public static PnoBehaviour CreateConsole(IObjectManager objectManager) {
             GameObject burger = new("Console") {active = false};
             burger.DontDestroy();
 
+            objectManager.RegisterType<PolusGraphic>();
+            objectManager.RegisterType<PolusNetworkTransform>();
             burger.AddComponent<PolusConsole>();
             return burger.AddComponent<PolusNetworkTransform>();
         }
 
-        public static PnoBehaviour CreateSoundSource() {
+        public static PnoBehaviour CreateSoundSource(IObjectManager objectManager) {
             GameObject wap = new("SoundSource") {active = false};
             wap.DontDestroy();
 
             wap.AddComponent<PolusSoundSource>();
             wap.AddComponent<AudioSource>();
+            objectManager.RegisterType<PolusCameraController>();
             return wap.AddComponent<PolusNetworkTransform>();
         }
 
-        public static PnoBehaviour CreateVent() {
+        public static PnoBehaviour CreateVent(IObjectManager objectManager) {
             GameObject pee = new("Venting") {active = false};
             pee.DontDestroy();
 
@@ -97,12 +115,14 @@ namespace Polus.Behaviours.Inner {
                 return buttonBehavior;
             }).ToArray();
 
+            objectManager.RegisterType<PolusVent>();
             return pee.AddComponent<PolusVent>();
         }
 
-        public static PnoBehaviour CreateCameraController() {
+        public static PnoBehaviour CreateCameraController(IObjectManager objectManager) {
             GameObject cameraController = new("uwuCameraManager") {active = false};
             cameraController.DontDestroy();
+            objectManager.RegisterType<PolusCameraController>();
             return cameraController.AddComponent<PolusCameraController>();
         }
     }

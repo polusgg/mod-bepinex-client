@@ -12,12 +12,8 @@ namespace Polus.Behaviours.Inner {
         // private float timer;
         public PolusConsole(IntPtr ptr) : base(ptr) { }
 
-        private void Start() {
-            pno = PogusPlugin.ObjectManager.LocateNetObject(this);
-        }
-
         private void Update() {
-            if (pno != null && pno.HasData()) Deserialize(pno.GetSpawnData());
+            if (pno.HasData()) Deserialize(pno.GetSpawnData());
         }
 
         private void Deserialize(MessageReader reader) { }

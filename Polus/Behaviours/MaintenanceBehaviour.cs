@@ -46,11 +46,11 @@ namespace Polus.Behaviours {
 
         [HideFromIl2Cpp]
         public IEnumerator CoStart(string text) {
-            while (!HudManager.Instance) yield return null;
+            while (!HudManager.InstanceExists) yield return null;
             GameObject toast = Instantiate(DisguisedToast);
             toast.active = true;
             Transform toastransform = toast.transform;
-            toastransform.parent = HudManager.Instance.transform;
+            if (HudManager.InstanceExists) toastransform.parent = HudManager.Instance.transform;
             toastransform.localPosition =
                 AspectPosition.ComputePosition(AspectPosition.EdgeAlignments.Top, new Vector3(0, -distance, 0));
             toastransform.localScale = new Vector3(0.5f, 0.5f, 1f);

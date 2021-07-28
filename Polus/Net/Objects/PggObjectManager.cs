@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Hazel;
 using InnerNet;
 using Polus.Extensions;
 using Polus.Net.Objects;
+using UnhollowerRuntimeLib;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -13,14 +15,16 @@ namespace Polus {
         private Dictionary<uint, PolusNetObject> _allObjectsFast = new();
         private HashSet<uint> _destroyedObjects = new();
         private Dictionary<uint, PnoBehaviour> _spawnObjects = new();
+        private Dictionary<string, Type> _typeMappings = new();
 
         public void Register(uint index, PnoBehaviour netObject) {
             PogusPlugin.Logger.LogInfo($"Registered {netObject.GetType().Name} at index {index} with {_spawnObjects.Count}");
             _spawnObjects[index] = netObject;
         }
 
-        public PolusNetObject LocateNetObject(PnoBehaviour netBehaviour) {
-            return _allObjects.Find(x => x.PnoBehaviour.Pointer == netBehaviour.Pointer);
+        public void RegisterType<T>() {
+            Type type = typeof(T);
+            _typeMappings[type.Name] = type;
         }
 
         public event Action<InnerNetObject, MessageReader, byte> InnerRpcReceived;
@@ -35,7 +39,7 @@ namespace Polus {
                 return;
             }
 
-            //owner id
+            //owner id 🙄
             reader.ReadPackedInt32();
 
             PnoBehaviour pnoBehaviour =
@@ -43,7 +47,7 @@ namespace Polus {
             reader.ReadByte();
             int num5 = reader.ReadPackedInt32();
             PnoBehaviour[] componentsInChildren =
-                pnoBehaviour.GetComponentsInChildren<PnoBehaviour>();
+                pnoBehaviour.GetComponentsInChildren<PnoBehaviour>().Select(pno => pno.TryTypedCast<PnoBehaviour>(_typeMappings[pno.GetScriptClassName()])).ToArray();
             if (num5 != componentsInChildren.Length) {
                 Debug.LogError("Children didn't match for polus spawnable " + num5);
                 Object.Destroy(pnoBehaviour.gameObject);
@@ -52,7 +56,8 @@ namespace Polus {
 
             for (int i = 0; i < num5; i++) {
                 PnoBehaviour childNetObject = componentsInChildren[i];
-                PolusNetObject polusNetObject = new() {
+                childNetObject.setByPnob = true;
+                PolusNetObject polusNetObject = childNetObject.pno = new PolusNetObject {
                     NetId = reader.ReadPackedUInt32(),
                     PnoBehaviour = childNetObject
                 };
@@ -71,8 +76,8 @@ namespace Polus {
                     Object.Destroy(polusNetObject.PnoBehaviour.gameObject);
                     return;
                 }
-                
-                childNetObject.name.Log(1, "has been spawned");
+
+                childNetObject.GetScriptClassName().Log(1, "has been spawned");
 
                 MessageReader messageReader = reader.ReadMessage();
                 if (messageReader.Length > 0)
@@ -115,10 +120,6 @@ namespace Polus {
             }
 
             return null;
-        }
-
-        public PolusNetObject FindNetObject(uint netId) {
-            return _allObjectsFast[netId];
         }
 
         private bool AddNetObject(PolusNetObject polusNetObject) {

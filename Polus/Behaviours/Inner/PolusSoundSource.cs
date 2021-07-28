@@ -18,12 +18,11 @@ namespace Polus.Behaviours.Inner {
         public PolusSoundSource(IntPtr ptr) : base(ptr) { }
 
         private void Start() {
-            pno = PogusPlugin.ObjectManager.LocateNetObject(this);
             source = GetComponent<AudioSource>();
         }
 
         private void FixedUpdate() {
-            if (pno != null && pno.HasData()) Deserialize(pno.GetSpawnData());
+            if (pno.HasData()) Deserialize(pno.GetSpawnData());
 
             if (PlayerControl.LocalPlayer) {
                 source.rolloffMode = AudioRolloffMode.Linear;

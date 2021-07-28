@@ -18,14 +18,13 @@ namespace Polus.Behaviours.Inner {
         private static bool[] locks = {false, false};
         private bool anyLocked;
         public static readonly List<PolusClickBehaviour> Buttons = new();
-        private static Material funnyButtonMaterial;
+        private static Material _funnyButtonMaterial;
         public PolusNetworkTransform netTransform;
         private PolusGraphic graphic;
         private PassiveButton button;
         private Color32 color;
         private bool saturated;
         private bool isCountingDown;
-        private bool lastCounting;
         private float currentTimer;
         private float maxTimer;
         private TMP_Text timerText;
@@ -40,7 +39,6 @@ namespace Polus.Behaviours.Inner {
         public PolusClickBehaviour(IntPtr ptr) : base(ptr) { }
 
         private void Start() {
-            pno = PogusPlugin.ObjectManager.LocateNetObject(this);
             Buttons.Add(this);
             button = GetComponent<PassiveButton>();
             netTransform = GetComponent<PolusNetworkTransform>();
@@ -49,11 +47,11 @@ namespace Polus.Behaviours.Inner {
             button.Colliders = button.Colliders.AddItem(GetComponent<BoxCollider2D>()).ToArray();
             graphic = GetComponent<PolusGraphic>();
             KillButtonManager kb = HudManager.Instance.KillButton;
-            if (!funnyButtonMaterial) {
-                funnyButtonMaterial = Instantiate(kb.renderer.GetMaterial()).DontDestroy();
-                funnyButtonMaterial.name.Log();
+            if (!_funnyButtonMaterial) {
+                _funnyButtonMaterial = Instantiate(kb.renderer.GetMaterial()).DontDestroy();
+                _funnyButtonMaterial.name.Log();
             }
-            graphic.renderer.SetMaterial(funnyButtonMaterial);
+            graphic.renderer.SetMaterial(_funnyButtonMaterial);
             timerText = Instantiate(kb.TimerText, transform);
         }
 
@@ -96,7 +94,7 @@ namespace Polus.Behaviours.Inner {
         private void OnDestroy() {
             Buttons.Remove(this);
             if (!PlayerControl.LocalPlayer || PlayerControl.LocalPlayer.CanMove) SetLock(ButtonLocks.PlayerCanMove, false);
-            if (!HudManager.Instance || HudManager.Instance.UseButton.gameObject.active) SetLock(ButtonLocks.SetHudActive, false);
+            if (!HudManager.InstanceExists || HudManager.Instance.UseButton.gameObject.active) SetLock(ButtonLocks.SetHudActive, false);
         }
 
         private void Deserialize(MessageReader reader) {

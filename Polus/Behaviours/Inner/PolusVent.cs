@@ -15,11 +15,10 @@ namespace Polus.Behaviours.Inner {
 
         private void Start() {
             vent = GetComponent<Vent>();
-            pno = PogusPlugin.ObjectManager.LocateNetObject(this);
         }
 
         private void FixedUpdate() {
-            if (pno != null && pno.HasData()) Deserialize(pno.GetSpawnData());
+            if (pno.HasData()) Deserialize(pno.GetSpawnData());
         }
 
         private void Deserialize(MessageReader reader) {

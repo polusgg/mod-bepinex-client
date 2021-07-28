@@ -11,8 +11,7 @@ namespace Polus.Net.Objects {
         /// <param name="index">The index/spawn type of the object.</param>
         /// <param name="netObject"></param>
         public void Register(uint index, PnoBehaviour netObject);
-
-        public PolusNetObject LocateNetObject(PnoBehaviour netBehaviour);
+        public void RegisterType<T>();
         public event Action<InnerNetObject, MessageReader, byte> InnerRpcReceived;
         public void HandleInnerRpc(InnerNetObject netObject, MessageReader reader, byte callId);
         public void HandleSpawn(uint spawnType, MessageReader reader);

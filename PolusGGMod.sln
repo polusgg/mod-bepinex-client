@@ -8,6 +8,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "External Files", "External 
 ProjectSection(SolutionItems) = preProject
 	ReactorBuildConfig.props = ReactorBuildConfig.props
 	AmongUsPath.props = AmongUsPath.props
+	dream.md = dream.md
 EndProjectSection
 EndProject
 Global

@@ -37,7 +37,6 @@ namespace Polus.Behaviours.Inner {
         public PolusNetworkTransform(IntPtr ptr) : base(ptr) { }
 
         public void Start() {
-            pno = PogusPlugin.ObjectManager.LocateNetObject(this);
             AspectPosition = gameObject.AddComponent<AspectPosition>();
             AspectPosition.updateAlways = true;
             // _rigidbody2D = GetComponent<Rigidbody2D>();
@@ -45,8 +44,8 @@ namespace Polus.Behaviours.Inner {
         }
 
         public void Update() {
-            if (pno != null && pno.HasData()) Deserialize(pno.GetSpawnData());
-            if (pno != null && pno.HasRpc()) HandleRpc(pno.GetRpcData());
+            if (pno.HasData()) Deserialize(pno.GetSpawnData());
+            if (pno.HasRpc()) HandleRpc(pno.GetRpcData());
             
             if (!IsHudButton && MissingParent) {
                 transform.parent = PogusPlugin.ObjectManager.GetNetObject((uint) parent.Value);

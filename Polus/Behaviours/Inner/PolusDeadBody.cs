@@ -26,18 +26,16 @@ namespace Polus.Behaviours.Inner {
         public PolusDeadBody(IntPtr ptr) : base(ptr) { }
 
         private void Start() {
-            pno = PogusPlugin.ObjectManager.LocateNetObject(this);
             deadBody = GetComponent<DeadBody>();
             rend = deadBody.bodyRenderer;
             anim = deadBody.bodyRenderer.gameObject.GetComponent<SpriteAnim>();
             deadBody.ParentId = 255;
             netTransform = GetComponent<PolusNetworkTransform>();
             clickBehaviour = GetComponent<PolusClickBehaviour>();
-            if (pno.HasData()) Deserialize(pno.GetSpawnData());
         }
 
         private void FixedUpdate() {
-            if (pno != null && pno.HasData()) Deserialize(pno.GetSpawnData());
+            if (pno.HasData()) Deserialize(pno.GetSpawnData());
         }
 
         public void Deserialize(MessageReader reader) {

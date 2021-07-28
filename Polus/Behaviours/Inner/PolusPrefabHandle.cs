@@ -1,4 +1,6 @@
 ﻿using System;
+using Hazel;
+using Polus.Enums;
 using Polus.Net.Objects;
 using UnhollowerRuntimeLib;
 using UnityEngine;
@@ -11,11 +13,11 @@ namespace Polus.Behaviours.Inner {
 
         public PolusPrefabHandle(IntPtr ptr) : base(ptr) { }
 
-        private void Start() {
-            pno = PogusPlugin.ObjectManager.LocateNetObject(this);
-            if (pno.HasRpc())
-                Instantiate(PogusPlugin.Cache.CachedFiles[pno.GetSpawnData().ReadPackedUInt32()].Get<GameObject>(),
+        private void Update() {
+            if (pno.GetSpawnData() is MessageReader reader) {
+                Instantiate(PogusPlugin.Cache.CachedFiles[reader.ReadPackedUInt32()].Get<GameObject>(),
                     transform);
+            }
         }
     }
 }

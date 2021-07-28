@@ -16,12 +16,15 @@ namespace Polus.Behaviours.Inner {
         public PolusGraphic(IntPtr ptr) : base(ptr) { }
 
         private void Start() {
-            pno = PogusPlugin.ObjectManager.LocateNetObject(this);
             renderer = gameObject.EnsureComponent<SpriteRenderer>();
         }
 
         private void FixedUpdate() {
-            if (pno != null && pno.HasData()) Deserialize(pno.GetSpawnData());
+            if (pno.HasData()) Deserialize(pno.GetSpawnData());
+        }
+
+        public override void TestVirtual() {
+            "NEW".Log();
         }
 
         private void Deserialize(MessageReader reader) {

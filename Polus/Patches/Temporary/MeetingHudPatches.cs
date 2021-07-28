@@ -57,13 +57,13 @@ namespace Polus.Patches.Temporary {
         public class ForegroundSetter {
             [HarmonyPostfix]
             public static void UpdateButtons(MeetingHud __instance) {
+                __instance.SortButtons();
                 if (PlayerControl.LocalPlayer.Data.IsDead == __instance.amDead) return;
                 bool shouldBeDead = PlayerControl.LocalPlayer.Data.IsDead;
                 __instance.amDead = shouldBeDead;
                 __instance.SkipVoteButton.gameObject.SetActive(!shouldBeDead);
                 __instance.Glass.sprite = shouldBeDead ? __instance.CrackedGlass : GrabUncrackedGlassPatch.UncrackedGlass;
                 __instance.Glass.color = shouldBeDead ? Color.white : GrabUncrackedGlassPatch.UncrackedColor;
-                return;
             }
         }
     }
