@@ -32,15 +32,18 @@ namespace Polus.Behaviours.Inner {
             deadBody.ParentId = 255;
             netTransform = GetComponent<PolusNetworkTransform>();
             clickBehaviour = GetComponent<PolusClickBehaviour>();
+            netTransform.ManuallyUsesPosition = true;
         }
 
         private void FixedUpdate() {
             if (pno.HasData()) Deserialize(pno.GetSpawnData());
+            this.gameObject.transform.position = netTransform.Position;
         }
 
         public void Deserialize(MessageReader reader) {
             anim.SetNormalizedTime(reader.ReadBoolean() ? 1 : 0);
             rend.flipX = reader.ReadBoolean();
+            this.deadBody.ParentId = reader.ReadByte();
             Color32 mainColor = new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
             Color32 secondColor =
                 new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
