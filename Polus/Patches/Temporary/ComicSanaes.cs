@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using Polus.Mods.Patching;
 using TMPro;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace Polus.Patches.Temporary {
@@ -18,7 +19,9 @@ namespace Polus.Patches.Temporary {
             // __instance.font = PogusPlugin.font;
             // __instance.LoadFontAsset();
 
-            __instance.spriteAsset = PogusPlugin.spriteSheet;
+            string name = SceneManager.GetActiveScene().name;
+            if (name is "OnlineGame" or "EndGame")
+                __instance.spriteAsset = PogusPlugin.spriteSheet;
         }
     }
 // #endif
