@@ -5,6 +5,15 @@ using UnhollowerBaseLib;
 using UnityEngine;
 
 namespace Polus.Patches.Temporary {
+    [HarmonyPatch(typeof(HudManager), nameof(HudManager.Start))]
+    public class SetStringResetPatch {
+        [HarmonyPostfix]
+        public static void Postfix() {
+            PingTrackerTextPatch.PingText = null;
+            RoomTrackerTextPatch.RoomText = null;
+            HudUpdatePatch.TaskText = null;
+        }
+    }
     [HarmonyPatch(typeof(PingTracker), nameof(PingTracker.Update))]
     public static class PingTrackerTextPatch {
         public static string PingText;
