@@ -81,7 +81,7 @@ namespace Polus.Resources {
                 //     throw new Exception("Failed to get unlocked cache file!");
                 // }
 
-                using (BinaryWriter writer = new(File.Create(PggConstants.CacheLocation))) {
+                using (BinaryWriter writer = new(GetFileStream(PggConstants.CacheLocation, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None))) {
                     try {
                         Serialize(writer);
                     } catch (Exception ex) {

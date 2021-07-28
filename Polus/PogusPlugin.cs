@@ -78,8 +78,8 @@ namespace Polus {
 
             try {
                 if (File.Exists(PggConstants.CacheLocation)) {
-                    using FileStream stream = PggCache.GetFileStream(PggConstants.CacheLocation, FileMode.Open, FileAccess.Read, FileShare.None);
-                    Cache.Deserialize(new BinaryReader(stream));
+                    using (FileStream stream = PggCache.GetFileStream(PggConstants.CacheLocation, FileMode.Open, FileAccess.Read, FileShare.None))
+                        Cache.Deserialize(new BinaryReader(stream));
                 }
                 PermanentMod.LoadPatches("gg.polus.permanent",
                     Assembly.GetExecutingAssembly().GetTypes()

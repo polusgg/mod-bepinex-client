@@ -16,6 +16,7 @@ namespace Polus.Resources {
         public ResourceType Type;
 
         public void Unload() {
+            $"Unload {Location}".Log();
             CatchHelper.TryCatch(()=>((AssetBundle) InternalData)?.Unload(false));
         }
 
