@@ -64,6 +64,8 @@ namespace Polus.Patches.Temporary {
                 return false;
             }
 
+            __instance.text.text = __instance.LastRoom ? __instance.LastRoom.name : "";
+
             // if (!Enum.IsDefined(typeof(SystemTypes), __instance.text.text))
             // {
             //     if (__instance.LastRoom)
