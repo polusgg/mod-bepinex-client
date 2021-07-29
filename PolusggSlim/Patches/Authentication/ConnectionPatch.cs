@@ -32,8 +32,7 @@ namespace PolusggSlim.Patches.Authentication
             // {
             if (AmongUsClient.Instance.GameMode == GameModes.OnlineGame && bytes[0] != SigningHelper.AuthByte && bytes[0] != 10)
             {
-                PluginSingleton<PolusggMod>.Instance.SigningHelper.SignByteArray(ref bytes);
-                length = bytes.Length;
+                PluginSingleton<PolusggMod>.Instance.SigningHelper.SignByteArray(ref bytes, ref length);
             }
             // }
         }

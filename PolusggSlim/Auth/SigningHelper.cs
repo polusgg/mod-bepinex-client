@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using UnhollowerBaseLib;
@@ -19,7 +21,7 @@ namespace PolusggSlim.Auth
             _authContext = authContext;
         }
 
-        public void SignByteArray(ref Il2CppStructArray<byte> bytes)
+        public void SignByteArray(ref Il2CppStructArray<byte> bytes, ref int length)
         {
             var clientToken = Encoding.UTF8.GetBytes(_authContext.ClientToken);
             if (_hmac.Key != clientToken)
@@ -30,14 +32,15 @@ namespace PolusggSlim.Auth
 
             var hash = _hmac.ComputeHash(bytes);
 
-            var output = new byte[1 + UuidSize + HashSize + bytes.Length];
+            var output = new byte[1 + UuidSize + HashSize + length];
 
             output[0] = AuthByte;
             _authContext.ClientId.CopyTo(output, 1);
             hash.CopyTo(output, 1 + UuidSize);
-            bytes.CopyTo(output, 1 + UuidSize + HashSize);
+            bytes.ToArray()[..length].CopyTo(output, 1 + UuidSize + HashSize);
 
             bytes = output;
+            length = output.Length;
         }
     }
 }
