@@ -300,8 +300,17 @@ namespace Polus {
                     break;
                 }
                 case PolusRootPackets.LoadHat: {
-                    HatManager.Instance.AllHats.Insert((int) reader.ReadPackedUInt32(),
-                        Cache.CachedFiles[reader.ReadPackedUInt32()].Get<HatBehaviour>());
+                    int hatId = (int) reader.ReadPackedUInt32();
+                    HatBehaviour hat = Cache.CachedFiles[reader.ReadPackedUInt32()].Get<HatBehaviour>();
+                    HatManager.Instance.AllHats.Insert(hatId, hat);
+                    if (reader.ReadBoolean()) hat.LimitedMonth = 0;
+                    break;
+                }
+                case PolusRootPackets.LoadPet: {
+                    int petId = (int) reader.ReadPackedUInt32();
+                    PetBehaviour pet = Cache.CachedFiles[reader.ReadPackedUInt32()].Get<PetBehaviour>();
+                    HatManager.Instance.AllPets.Insert(petId, pet);
+                    pet.Free = reader.ReadBoolean();
                     break;
                 }
                 case PolusRootPackets.SetHudVisibility: {
