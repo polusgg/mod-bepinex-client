@@ -244,6 +244,7 @@ namespace Polus.Patches.Temporary {
                     if (!_gotVeryFirst) {
                         _nextSequenceReceived = (ushort) (sequenceId + 1);
                         _gotVeryFirst = true;
+                        CatchHelper.TryCatch(() => HandlePacket(_packetQueue[_nextSequenceReceived]));
                     } else {
                         _packetQueue.Add(sequenceId, packet);
                         if (_nextSequenceReceived != sequenceId) return;
