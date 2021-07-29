@@ -302,15 +302,26 @@ namespace Polus {
                 case PolusRootPackets.LoadHat: {
                     int hatId = (int) reader.ReadPackedUInt32();
                     HatBehaviour hat = Cache.CachedFiles[reader.ReadPackedUInt32()].Get<HatBehaviour>();
-                    HatManager.Instance.AllHats.Insert(hatId, hat);
+                    HatManager.Instance.AllHats[(Index) hatId] = hat;
                     if (reader.ReadBoolean()) hat.LimitedMonth = 0;
+                    foreach (PlayerControl playerControl in PlayerControl.AllPlayerControls.ToArray().Where(x => x.Data != null && x.Data.HatId == hatId)) {
+                        playerControl.HatRenderer.SetHat(hat, playerControl.Data.ColorId);
+                        playerControl.nameText.transform.localPosition = new Vector3(0f, (hatId == 0 ? 0.7f : 1.05f) * 2f, -0.5f);
+                    }
                     break;
                 }
                 case PolusRootPackets.LoadPet: {
                     int petId = (int) reader.ReadPackedUInt32();
                     PetBehaviour pet = Cache.CachedFiles[reader.ReadPackedUInt32()].Get<PetBehaviour>();
-                    HatManager.Instance.AllPets.Insert(petId, pet);
+                    HatManager.Instance.AllPets[(Index) petId] = pet;
                     pet.Free = reader.ReadBoolean();
+                    foreach (PlayerControl playerControl in PlayerControl.AllPlayerControls.ToArray().Where(x => x.Data != null && x.Data.HatId == petId)) {
+                        if (playerControl.CurrentPet) Object.Destroy(playerControl.CurrentPet.gameObject);
+                        playerControl.CurrentPet = Object.Instantiate(pet);
+                        playerControl.CurrentPet.transform.position = playerControl.transform.position;
+                        playerControl.CurrentPet.Source = playerControl;
+                        if (playerControl.Data != null) PlayerControl.SetPlayerMaterialColors(playerControl.Data.ColorId, playerControl.CurrentPet.rend);
+                    }
                     break;
                 }
                 case PolusRootPackets.SetHudVisibility: {
