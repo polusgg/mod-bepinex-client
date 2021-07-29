@@ -5,29 +5,30 @@ using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Polus.Extensions;
 using UnityEngine;
 
 namespace Polus.Resources {
     public class PggCache : ICache {
-        private readonly HttpClient _client = new();
         public Dictionary<uint, CacheFile> CachedFiles { get; private set; } = new();
 
-        internal HttpClient Client => _client;
+        internal HttpClient Client { get; } = new();
 
-        public CacheFile AddToCache(uint id, string location, byte[] hash, ResourceType type, out bool wasCached,
+        public IEnumerator<ICache.CacheAddResult> AddToCache(uint id, string location, byte[] hash, ResourceType type,
             uint parentId = uint.MaxValue) {
             string path = Path.Join(PggConstants.DownloadFolder, $"{id}");
 
             if (!IsCachedAndValid(id, hash)) {
-                HttpResponseMessage responseMessage =
-                    null;
+                HttpResponseMessage responseMessage = null;
                 if (type == ResourceType.Asset) goto AssetOnly;
 
-                responseMessage =
-                    _client.GetAsync(PggConstants.DownloadServer + location,
-                        HttpCompletionOption.ResponseHeadersRead).Result;
+                Task<HttpResponseMessage> responseTask =
+                    Client.GetAsync(PggConstants.DownloadServer + location,
+                        HttpCompletionOption.ResponseHeadersRead);
+                while (!responseTask.IsCompleted) yield return null;
+                responseMessage = responseTask.Result;
                 if (!responseMessage.IsSuccessStatusCode) {
                     PlayerControl.LocalPlayer.SetThickAssAndBigDumpy(true, true);
                     PogusPlugin.Logger.LogFatal($"Failed with: {responseMessage.StatusCode}");
@@ -65,8 +66,10 @@ namespace Polus.Resources {
                                 .Cast<TextAsset>().text);
 
                         uint assetId = bundone.BaseId;
-                        foreach (string bundoneAsset in bundone.Assets)
-                            AddToCache(++assetId, bundoneAsset, hash, ResourceType.Asset, out bool _, id);
+                        foreach (string bundoneAsset in bundone.Assets) {
+                            IEnumerator<ICache.CacheAddResult> assetCache = AddToCache(++assetId, bundoneAsset, hash, ResourceType.Asset, id);
+                            while (assetCache.MoveNext()) yield return null;
+                        }
                         cacheFile.ExtraData = bundone.Assets;
                         break;
                     }
@@ -91,15 +94,13 @@ namespace Polus.Resources {
                 }
 
                 PogusPlugin.Logger.LogMessage($"Downloaded file at {location} ({id}, {hash.Hex()})");
-                wasCached = false;
-                return cacheFile;
+                yield return new ICache.CacheAddResult(cacheFile, false);
             }
 
             CacheFile cached = CachedFiles[id];
             PogusPlugin.Logger.LogInfo($"Using cached file {cached.LocalLocation} ({cached.LocalLocation} {cached.Hash.Hex()})");
             PogusPlugin.Logger.LogInfo($"Over {location} ({cached.Hash.Hex()})");
-            wasCached = true;
-            return cached;
+            yield return new ICache.CacheAddResult(cached, true);
         }
 
         public bool IsCachedAndValid(uint id, byte[] hash) {

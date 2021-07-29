@@ -179,8 +179,8 @@ namespace Polus.Patches.Temporary {
                 timer += Time.deltaTime;
                 if (timer > endTime) {
                     manager.FrontMost.gameObject.SetActive(false);
-                    if (PolusMod.RoleData.ShowPlayAgain) manager.PlayAgainButton.gameObject.SetActive(true);
-                    if (PolusMod.RoleData.ShowQuit) manager.ExitButton.gameObject.SetActive(true);
+                    manager.PlayAgainButton.gameObject.SetActive(PolusMod.RoleData.ShowPlayAgain);
+                    manager.ExitButton.gameObject.SetActive(PolusMod.RoleData.ShowQuit);
 
                     enabled = false;
                 }

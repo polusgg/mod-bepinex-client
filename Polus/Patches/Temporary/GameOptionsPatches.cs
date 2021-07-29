@@ -226,14 +226,14 @@ namespace Polus.Patches.Temporary {
                 PolusMod.EndSend(writer);
             }
 
-            // private static bool _gotVeryFirst;
-            // private static ushort _nextSequenceReceived;
-            // private static Dictionary<ushort, GameOptionPacket> _packetQueue = new();
+            private static bool _gotVeryFirst;
+            private static ushort _nextSequenceReceived;
+            private static Dictionary<ushort, GameOptionPacket> _packetQueue = new();
 
             public static void Reset() {
-                // _packetQueue = new Dictionary<ushort, GameOptionPacket>();
-                // _gotVeryFirst = false;
-                // _nextSequenceReceived = 0;
+                _packetQueue = new Dictionary<ushort, GameOptionPacket>();
+                _gotVeryFirst = false;
+                _nextSequenceReceived = 0;
                 Categories = new Dictionary<string, List<GameOption>>();
                 OptionMap = new Dictionary<string, GameOption>();
             }
@@ -241,13 +241,23 @@ namespace Polus.Patches.Temporary {
             public static void ReceivedGameOptionPacket(GameOptionPacket packet) {
                 ushort sequenceId = packet.SequenceId;
                 lock (Lockable) {
-                    ushort lastId = sequenceId;
-                    CatchHelper.TryCatch(() => HandlePacket(packet));
+                    if (!_gotVeryFirst) {
+                        _nextSequenceReceived = (ushort) (sequenceId + 1);
+                        _gotVeryFirst = true;
+                    } else {
+                        _packetQueue.Add(sequenceId, packet);
+                        if (_nextSequenceReceived != sequenceId) return;
+                        while (_packetQueue.ContainsKey(_nextSequenceReceived)) {
+                            CatchHelper.TryCatch(() => HandlePacket(_packetQueue[_nextSequenceReceived]));
+                            _packetQueue.Remove(_nextSequenceReceived);
+                            _nextSequenceReceived++;
+                        }
+                    }
                 }
             }
 
             private static void HandlePacket(GameOptionPacket packet) {
-                lock (Lockable) {
+                /*lock (Lockable)*/ {
                     MessageReader reader = MessageReader.GetSized(packet.Reader.Length);
                     reader.Buffer = packet.Reader;
                     reader.Length = packet.Reader.Length;
@@ -256,14 +266,17 @@ namespace Polus.Patches.Temporary {
                         case OptionPacketType.DeleteOption: {
                             string name = reader.ReadString();
                             // (string categoryName, List<GameOption> category) = NoCategory.Any(x => x.Title == name) ? ("", NoCategory) : ;
-                            (string categoryName, List<GameOption> category) =
-                                NoCategory.Any(x => x.Title == name)
-                                    ? new KeyValuePair<string, List<GameOption>>("", NoCategory)
-                                    : Categories.First(x => x.Value.Any(option => option.Title == name));
-                            category.RemoveAll(x => x.Title == name);
+                            KeyValuePair<string,List<GameOption>>[] allCategories = Categories.Append(new KeyValuePair<string, List<GameOption>>("", NoCategory)).ToArray();
+                            var options = allCategories
+                                .SelectMany(x => x.Value)
+                                .Where(x => x.Title == name)
+                                .ToList();
+                            if (!options.Any()) break;
+                            foreach (GameOption option in options)
+                            foreach (KeyValuePair<string, List<GameOption>> w in allCategories.Where(x => x.Value.Any(y => y == option)))
+                                w.Value.Remove(option);
                             OptionMap.Remove(name);
-                            if (category.Count == 0 && categoryName != "")
-                                Categories.Remove(Categories.First(y => y.Value == category).Key);
+                            Categories = Categories.Where(x => x.Value.Count != 0).ToDictionary(x => x.Key, y => y.Value);
 
                             PolusMod.Instance.DirtyOptions();
                             break;
@@ -445,12 +458,12 @@ namespace Polus.Patches.Temporary {
         public class StringButtonUpdatePatch {
             [HarmonyPrefix]
             public static bool Prefix(KeyValueOption __instance) {
-                if (__instance.oldValue != __instance.Selected) {
-                    __instance.oldValue = __instance.Selected;
-                    __instance.ValueText.text =
-                        ((EnumValue) OptionMap[__instance.TitleText.text].Value).Values[
-                            __instance.Selected];
-                }
+                //no lock 🙈
+                if (!OptionMap.TryGetValue(__instance.TitleText.text, out GameOption option) || __instance.oldValue == __instance.Selected) return false;
+                __instance.oldValue = __instance.Selected;
+                __instance.ValueText.text =
+                    ((EnumValue) option.Value).Values[
+                        __instance.Selected];
 
                 return false;
             }

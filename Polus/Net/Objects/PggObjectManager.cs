@@ -90,7 +90,7 @@ namespace Polus {
         }
 
         public void RemoveNetObject(PolusNetObject obj) {
-            Object.Destroy(obj.PnoBehaviour.gameObject);
+            if (!obj.PnoBehaviour.WasCollected) Object.Destroy(obj.PnoBehaviour.gameObject);
 
             _destroyedObjects.Add(obj.NetId);
         }
@@ -111,16 +111,7 @@ namespace Polus {
             _destroyedObjects = new HashSet<uint>();
         }
 
-        public Transform GetNetObject(uint netId) {
-            if (_allObjectsFast.TryGetValue(netId, out PolusNetObject polusNetObject))
-                return polusNetObject.PnoBehaviour.transform;
-
-            if (AmongUsClient.Instance.allObjectsFast.ContainsKey(netId)) {
-                return AmongUsClient.Instance.allObjectsFast[netId].transform;
-            }
-
-            return null;
-        }
+        public Transform GetNetObject(uint netId) => _allObjectsFast.TryGetValue(netId, out PolusNetObject polusNetObject) ? polusNetObject.PnoBehaviour.transform : AmongUsClient.Instance.allObjectsFast.ContainsKey(netId) ? AmongUsClient.Instance.allObjectsFast[netId].transform : null;
 
         private bool AddNetObject(PolusNetObject polusNetObject) {
             // uint num = polusNetObject.NetId + 1u;

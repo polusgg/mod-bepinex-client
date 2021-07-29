@@ -62,11 +62,11 @@ namespace Polus {
             PogusPlugin.ObjectManager.Register(0x87, RegisterPnos.CreatePoi(PogusPlugin.ObjectManager));
             PogusPlugin.ObjectManager.Register(0x88, RegisterPnos.CreateCameraController(PogusPlugin.ObjectManager));
             PogusPlugin.ObjectManager.Register(0x89, RegisterPnos.CreatePrefabHandle(PogusPlugin.ObjectManager));
-            
+
             // TMP_Settings.instance.m_defaultSpriteAsset = 
 
             Cache = PogusPlugin.Cache;
-            
+
             ModManager.Instance.ShowModStamp();
         }
 
@@ -77,7 +77,7 @@ namespace Polus {
 
         private void OnInnerRpcReceived(InnerNetObject netObject, MessageReader reader, byte callId) {
             PlayerControl playerControl;
-            switch ((PolusRpcCalls) callId) { 
+            switch ((PolusRpcCalls) callId) {
                 case PolusRpcCalls.ChatVisibility: {
                     bool lol = reader.ReadByte() > 0;
                     if (HudManager.Instance.Chat.gameObject.active != lol)
@@ -91,8 +91,8 @@ namespace Polus {
                 }
                 case PolusRpcCalls.SetRole: {
                     playerControl = netObject.Cast<PlayerControl>();
-                    
-                    if (reader.ReadBoolean()) { 
+
+                    if (reader.ReadBoolean()) {
                         if (PlayerControl.LocalPlayer.Data.IsImpostor) {
                             playerControl.Data.Object.nameText.color = Palette.ImpostorRed;
                         }
@@ -181,41 +181,7 @@ namespace Polus {
             // Logger.LogInfo($"LOL {reader.Tag}");
             switch ((PolusRootPackets) reader.Tag) {
                 case PolusRootPackets.FetchResource: {
-                    uint resource = reader.ReadPackedUInt32();
-                    string location = reader.ReadString();
-                    byte[] hash = reader.ReadBytes(32);
-                    uint resourceType = reader.ReadByte();
-                    AddDispatch(() => {
-                        MessageWriter writer;
-                        // if (Cache.IsCachedAndValid(resource, hash)) {
-                        //     Logger.LogInfo($"{resource} is already cached");
-                        //     writer = StartSendResourceResponse(resource, ResponseType.DownloadEnded);
-                        //     writer.Write(1);
-                        //     EndSend(writer);
-                        //     return;
-                        // }
-
-                        try {
-                            Logger.LogInfo($"Trying to download and cache {resource} ({location})");
-                            Cache.AddToCache(resource, location, hash,
-                                (ResourceType) resourceType, out bool cached);
-                            writer = StartSendResourceResponse(resource, ResponseType.DownloadEnded);
-                            writer.Write(cached);
-                            EndSend(writer);
-                            Logger.LogInfo($"Cached {resource}!");
-                        } catch (Exception e) {
-                            Logger.LogError($"Failed to cache {resource} ({location})");
-                            Logger.LogError(e);
-                            writer = StartSendResourceResponse(resource, ResponseType.DownloadFailed);
-                            if (e is CacheRequestException exception)
-                                writer.WritePacked((uint) exception.Code);
-                            else
-                                writer.WritePacked(0x69420);
-
-                            EndSend(writer);
-                        }
-                    });
-
+                    StartCoroutine(FetchResource(reader));
                     break;
                 }
                 case PolusRootPackets.Intro: {
@@ -270,8 +236,7 @@ namespace Polus {
                                 HudManager.Instance.TaskCompleteOverlay.GetComponent<TextMeshPro>().text = text;
                                 break;
                             }
-                            case StringLocations.TaskText:
-                            {
+                            case StringLocations.TaskText: {
                                 HudUpdatePatch.TaskText = text == "__unset" ? null : text;
                                 /*if (PlayerControl.LocalPlayer) {
                                     PogusPlugin.Logger.LogWarning("sup, youre rasgfe gfuywuy");
@@ -383,10 +348,20 @@ namespace Polus {
                         default:
                             throw new ArgumentOutOfRangeException($"Invalid hud item sent: {item}");
                     }
+
                     break;
                 }
                 case PolusRootPackets.AllowTaskInteraction: {
                     AllowTaskInteractionPatch.TaskInteractionAllowed = reader.ReadBoolean();
+                    break;
+                }
+                case PolusRootPackets.MarkAsBrown: {
+                    uint address = reader.ReadUInt32();
+                    ushort port = reader.ReadUInt16();
+                    AmongUsClient.Instance.SetEndpoint(InnerNetClient.AddressToString(address), port);
+                    Debug.Log($"Redirected to: {AmongUsClient.Instance.networkAddress}:{AmongUsClient.Instance.networkPort}");
+                    AmongUsClient.Instance.Connect(AmongUsClient.Instance.mode);
+                    ServerMigrationPatches.HostGamePacketChange.Migrated = true;
                     break;
                 }
                 default: {
@@ -417,14 +392,17 @@ namespace Polus {
                 CannotMove = false;
                 PolusClickBehaviour.SetLock(ButtonLocks.PlayerCanMove, CannotMove);
             }
-            if (AmongUsClient.Instance && AmongUsClient.Instance.InOnlineScene) lock (Dispatcher) {
-                TempQueue.AddRange(Dispatcher);
-                Dispatcher.Clear();
-            }
+
+            if (AmongUsClient.Instance && AmongUsClient.Instance.InOnlineScene)
+                lock (Dispatcher) {
+                    TempQueue.AddRange(Dispatcher);
+                    Dispatcher.Clear();
+                }
 
             foreach (Action t in TempQueue) {
                 CatchHelper.TryCatch(() => t());
             }
+
             TempQueue.Clear();
             if (!optionsDirty) return;
             GameSettingMenu menu = Object.FindObjectOfType<GameSettingMenu>();
@@ -485,12 +463,50 @@ namespace Polus {
             //     }, false));
         }
 
-        public override void PlayerDestroyed(PlayerControl player) {
-            
-        }
+        public override void PlayerDestroyed(PlayerControl player) { }
 
-        public override void GameEnded() {
-            
+        public override void GameEnded() { }
+
+        private IEnumerator FetchResource(MessageReader reader) {
+            uint resource = reader.ReadPackedUInt32();
+            string location = reader.ReadString();
+            byte[] hash = reader.ReadBytes(32);
+            uint resourceType = reader.ReadByte();
+            MessageWriter writer;
+            // if (Cache.IsCachedAndValid(resource, hash)) {
+            //     Logger.LogInfo($"{resource} is already cached");
+            //     writer = StartSendResourceResponse(resource, ResponseType.DownloadEnded);
+            //     writer.Write(1);
+            //     EndSend(writer);
+            //     return;
+            // }
+
+            Logger.LogInfo($"Trying to download and cache {resource} ({location})");
+            IEnumerator<ICache.CacheAddResult> addToCache = Cache.AddToCache(resource, location, hash,
+                (ResourceType) resourceType);
+            ICache.CacheAddResult result;
+            while (true) {
+                try {
+                    if (!addToCache.MoveNext()) break;
+                } catch (Exception e) {
+                    Logger.LogError($"Failed to cache {resource} ({location})");
+                    Logger.LogError(e);
+                    writer = StartSendResourceResponse(resource, ResponseType.DownloadFailed);
+                    if (e is CacheRequestException exception)
+                        writer.WritePacked((uint) exception.Code);
+                    else
+                        writer.WritePacked(0x69420);
+
+                    EndSend(writer);
+                }
+
+                yield return null;
+            }
+
+            writer = StartSendResourceResponse(resource, ResponseType.DownloadEnded);
+            writer.Write(addToCache.Current.Cached);
+            EndSend(writer);
+            Logger.LogInfo($"Cached {resource}!");
         }
 
         private MessageWriter StartSendResourceResponse(uint resource, ResponseType type) {
@@ -523,63 +539,54 @@ namespace Polus {
 
         private void SetAliveState(PlayerControl player, bool alive) {
             if (alive) player.Revive();
-            else
-            {
+            else {
                 player.Die(DeathReason.Kill);
                 ImportantTextTask importantTextTask = new GameObject("_Player").AddComponent<ImportantTextTask>();
                 importantTextTask.transform.SetParent(player.transform, false);
-                if (!PlayerControl.GameOptions.GhostsDoTasks)
-                {
+                if (!PlayerControl.GameOptions.GhostsDoTasks) {
                     player.ClearTasks();
                     importantTextTask.Text = DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.GhostIgnoreTasks, new Il2CppReferenceArray<Il2CppSystem.Object>(0));
-                }
-                else
-                {
+                } else {
                     importantTextTask.Text = DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.GhostDoTasks, new Il2CppReferenceArray<Il2CppSystem.Object>(0));
                 }
+
                 player.myTasks.Insert(0, importantTextTask);
             }
         }
 
         private IEnumerator DisplayKillAnimation(PlayerControl killer, PlayerControl target, Vector2 pos,
             bool killOverlayEnabled) {
-            if (Constants.ShouldPlaySfx() && killer.AmOwner)
-            {
+            if (Constants.ShouldPlaySfx() && killer.AmOwner) {
                 SoundManager.Instance.PlaySound(killer.KillSfx, false, 0.8f);
             }
 
-            if (target.AmOwner)
-            {
-                if (Minigame.Instance)
-                {
-                    try
-                    {
+            if (target.AmOwner) {
+                if (Minigame.Instance) {
+                    try {
                         Minigame.Instance.Close();
                         Minigame.Instance.Close();
-                    }
-                    catch {}
+                    } catch { }
                 }
 
-                if (killOverlayEnabled)
-                {
+                if (killOverlayEnabled) {
                     DestroyableSingleton<HudManager>.Instance.KillOverlay.ShowKillAnimation(killer.Data, target.Data);
                     DestroyableSingleton<HudManager>.Instance.ShadowQuad.gameObject.SetActive(false);
                 }
+
                 target.nameText.GetComponent<MeshRenderer>().material.SetInt("_Mask", 0);
                 target.RpcSetScanner(false);
             }
-            
+
             FollowerCamera cam = Camera.main.GetComponent<FollowerCamera>();
             bool isParticipant = PlayerControl.LocalPlayer == killer || PlayerControl.LocalPlayer == target;
             PlayerPhysics sourcePhys = killer.MyPhysics;
             KillAnimation.SetMovement(killer, false);
             KillAnimation.SetMovement(target, false);
             //target.SetPlayerMaterialColors(deadBody.bloodSplatter);
-            if (isParticipant)
-            {
+            if (isParticipant) {
                 cam.Locked = true;
                 ConsoleJoystick.SetMode_Task();
-                if (PlayerControl.LocalPlayer.AmOwner) { 
+                if (PlayerControl.LocalPlayer.AmOwner) {
                     PlayerControl.LocalPlayer.MyPhysics.inputHandler.enabled = true;
                 }
             }
@@ -591,7 +598,6 @@ namespace Polus {
             KillAnimation.SetMovement(killer, true);
             KillAnimation.SetMovement(target, true);
             cam.Locked = false;
-            yield break;
         }
     }
 
