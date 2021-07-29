@@ -15,7 +15,7 @@
         SetBody = 0x98,
         LoadSkin = 0x99,
         ChangeScene = 0x9A,
-        MarkAsBrown = 0x9B,
+        MarkAssBrown = 0x9B,
         DisplaySystemAnnouncement = 0xFA
     }
 }

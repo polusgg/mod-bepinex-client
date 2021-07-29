@@ -226,13 +226,11 @@ namespace Polus.Patches.Temporary {
                 PolusMod.EndSend(writer);
             }
 
-            private static bool _gotVeryFirst;
             private static ushort _nextSequenceReceived;
             private static Dictionary<ushort, GameOptionPacket> _packetQueue = new();
 
             public static void Reset() {
                 _packetQueue = new Dictionary<ushort, GameOptionPacket>();
-                _gotVeryFirst = false;
                 _nextSequenceReceived = 0;
                 Categories = new Dictionary<string, List<GameOption>>();
                 OptionMap = new Dictionary<string, GameOption>();
@@ -241,18 +239,15 @@ namespace Polus.Patches.Temporary {
             public static void ReceivedGameOptionPacket(GameOptionPacket packet) {
                 ushort sequenceId = packet.SequenceId;
                 lock (Lockable) {
-                    if (!_gotVeryFirst) {
-                        _nextSequenceReceived = (ushort) (sequenceId + 1);
-                        _gotVeryFirst = true;
+                    _packetQueue.Add(sequenceId, packet);
+                    if (_nextSequenceReceived != sequenceId) {
+                        $"Holding seqid {sequenceId}, currently on {_nextSequenceReceived}".Log();
+                        return;
+                    }
+                    while (_packetQueue.ContainsKey(_nextSequenceReceived)) {
                         CatchHelper.TryCatch(() => HandlePacket(_packetQueue[_nextSequenceReceived]));
-                    } else {
-                        _packetQueue.Add(sequenceId, packet);
-                        if (_nextSequenceReceived != sequenceId) return;
-                        while (_packetQueue.ContainsKey(_nextSequenceReceived)) {
-                            CatchHelper.TryCatch(() => HandlePacket(_packetQueue[_nextSequenceReceived]));
-                            _packetQueue.Remove(_nextSequenceReceived);
-                            _nextSequenceReceived++;
-                        }
+                        _packetQueue.Remove(_nextSequenceReceived);
+                        _nextSequenceReceived++;
                     }
                 }
             }

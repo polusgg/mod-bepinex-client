@@ -375,7 +375,7 @@ namespace Polus {
                     AllowTaskInteractionPatch.TaskInteractionAllowed = reader.ReadBoolean();
                     break;
                 }
-                case PolusRootPackets.MarkAsBrown: {
+                case PolusRootPackets.MarkAssBrown: {
                     uint address = reader.ReadUInt32();
                     ushort port = reader.ReadUInt16();
                     AmongUsClient.Instance.SetEndpoint(InnerNetClient.AddressToString(address), port);
