@@ -28,6 +28,8 @@ namespace PolusggSlim.Patches.Misc
                 TextBoxTMP.SymbolChars.Add('{');
                 TextBoxTMP.SymbolChars.Add('}');
                 TextBoxTMP.SymbolChars.Add('|');
+                TextBoxTMP.SymbolChars.Add('`');
+                TextBoxTMP.SymbolChars.Add('@');
 
                 _executed = true;
             }
