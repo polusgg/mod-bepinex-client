@@ -1,3 +1,5 @@
+using System;
+
 namespace PolusggSlim.Auth
 {
     public class SavedAuthModel
@@ -9,5 +11,7 @@ namespace PolusggSlim.Auth
         public string DisplayName { get; set; } = "";
 
         public string[] Perks { get; set; } = { };
+        
+        public DateTime LoggedInDateTime { get; set; }
     }
 }

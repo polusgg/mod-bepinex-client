@@ -211,6 +211,9 @@ namespace PolusggSlim.Behaviours
 
         private void CheckLogin()
         {
+            if (!_authContext.LoggedIn || _authContext.LoggedInDateTime > DateTime.Now.AddMinutes(-10))
+                return;
+
             AsyncCoroutine.CoContinueTaskWith(Task.Run(async () =>
             {
                 var response = await _authContext.ApiClient.CheckToken(
@@ -218,11 +221,20 @@ namespace PolusggSlim.Behaviours
                     _authContext.ClientToken
                 );
 
+                if (response != null)
+                {
+                    _authContext.DisplayName = response.Data.DisplayName;
+                    _authContext.Perks = response.Data.Perks;
+                    _authContext.LoggedInDateTime = DateTime.Now;
+
+                    _authContext.SaveToFile();
+                }
+
                 return response == null;
 
             }), result =>
             {
-                if (result) 
+                if (result)
                     LogOut();
             }).StartAsCoroutine();
         }
@@ -237,20 +249,9 @@ namespace PolusggSlim.Behaviours
                 _authContext.ClientToken = result.Data.ClientToken;
                 _authContext.DisplayName = result.Data.DisplayName;
                 _authContext.Perks = result.Data.Perks;
+                _authContext.LoggedInDateTime = DateTime.Now;
                 
-                // TODO: Reorganize code into auth context
-                var filePath = Path.Combine(Paths.GameRootPath, "api.txt");
-                await File.WriteAllTextAsync(filePath, 
-                    Convert.ToBase64String(Encoding.UTF8.GetBytes(
-                        JsonConvert.SerializeObject(new SavedAuthModel
-                        {
-                            ClientIdString = _authContext.ClientIdString,
-                            ClientToken = _authContext.ClientToken,
-                            DisplayName = _authContext.DisplayName,
-                            Perks = _authContext.Perks
-                        })
-                    ))
-                );
+                _authContext.SaveToFile();
             }
 
             return result != null;
@@ -266,13 +267,10 @@ namespace PolusggSlim.Behaviours
             
             UpdateGameSettingsWithName("Guest");
             
-            _loggedInMenu.active = false;
-            _topButtonBar.active = true;
+            _loggedInMenu.active = _authContext.LoggedIn;
+            _topButtonBar.active = _authContext.LoggedIn;
             
-            //TODO: Reorganize Code into auth context
-            var filePath = Path.Combine(Paths.GameRootPath, "api.txt");
-            if (File.Exists(filePath))
-                File.Delete(filePath);
+            _authContext.DeleteSaveFile();
         }
 
         [HideFromIl2Cpp]

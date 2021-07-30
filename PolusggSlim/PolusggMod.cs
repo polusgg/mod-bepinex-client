@@ -78,21 +78,7 @@ namespace PolusggSlim
         {
             PggLog.Message("Loading Polusgg mod");
 
-            var filePath = Path.Combine(Paths.GameRootPath, "api.txt");
-            if (File.Exists(filePath))
-            {
-                var authModel = JsonConvert.DeserializeObject<SavedAuthModel>(
-                    Encoding.UTF8.GetString(Convert.FromBase64String(File.ReadAllText(filePath)))
-                );
-                if (authModel is not null)
-                {
-                    AuthContext.ParseClientIdAsUuid(authModel.ClientIdString);
-                    AuthContext.ClientToken = authModel.ClientToken;
-                    AuthContext.DisplayName = authModel.DisplayName;
-                    AuthContext.Perks = authModel.Perks;
-                }
-            }
-
+            AuthContext.LoadFromFile();
             AccountLoginBehaviour.Load();
 
             Harmony.PatchAllExcept(typeof(PermanentPatches));
@@ -103,6 +89,7 @@ namespace PolusggSlim
         {
             PggLog.Message("Unloading Polusgg mod");
 
+            AuthContext.SaveToFile();
             AccountLoginBehaviour.Unload();
 
             Harmony.UnpatchSelf();
