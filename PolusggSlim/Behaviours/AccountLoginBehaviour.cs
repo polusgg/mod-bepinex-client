@@ -268,7 +268,7 @@ namespace PolusggSlim.Behaviours
             UpdateGameSettingsWithName("Guest");
             
             _loggedInMenu.active = _authContext.LoggedIn;
-            _topButtonBar.active = _authContext.LoggedIn;
+            _topButtonBar.active = !_authContext.LoggedIn;
             
             _authContext.DeleteSaveFile();
         }
