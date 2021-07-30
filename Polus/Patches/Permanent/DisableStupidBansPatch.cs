@@ -55,20 +55,6 @@ namespace Polus.Patches.Permanent {
         }
     }
 
-    [HarmonyPatch(typeof(MainMenuManager), nameof(MainMenuManager.Start))]
-    public static class MainMenuEnableOnline {
-        [PermanentPatch]
-        [HarmonyPostfix]
-        public static void Postfix() {
-            GameObject play = EOSManager.Instance.FindPlayOnlineButton();
-            play.GetComponent<SpriteRenderer>().color = Color.white;
-            play.GetComponent<PassiveButton>().enabled = true;
-            ButtonRolloverHandler rollo = play.GetComponent<ButtonRolloverHandler>();
-            rollo.OutColor = Color.white;
-            rollo.OverColor = Color.green;
-        }
-    }
-
     [HarmonyPatch(typeof(AccountManager), nameof(AccountManager.Awake))]
     public static class DisableAccountManager {
         [PermanentPatch]
@@ -93,6 +79,15 @@ namespace Polus.Patches.Permanent {
             __instance.platformInitialized = true;
             __instance.gameObject.SetActive(false);
             return false;
+        }
+    }
+
+    [HarmonyPatch(typeof(EOSManager), nameof(EOSManager.IsAllowedOnline))]
+    public static class EosManagerIsAllowedOnline {
+        [PermanentPatch]
+        [HarmonyPrefix]
+        public static void IsAllowedOnline([HarmonyArgument(0)] bool isOnline) {
+            isOnline = true;
         }
     }
 

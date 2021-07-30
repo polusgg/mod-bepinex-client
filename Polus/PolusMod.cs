@@ -378,6 +378,7 @@ namespace Polus {
                 case PolusRootPackets.MarkAssBrown: {
                     uint address = reader.ReadUInt32();
                     ushort port = reader.ReadUInt16();
+                    AmongUsClient.Instance.DisconnectInternal(DisconnectReasons.ExitGame);
                     AmongUsClient.Instance.SetEndpoint(InnerNetClient.AddressToString(address), port);
                     Debug.Log($"Redirected to: {AmongUsClient.Instance.networkAddress}:{AmongUsClient.Instance.networkPort}");
                     AmongUsClient.Instance.Connect(AmongUsClient.Instance.mode);

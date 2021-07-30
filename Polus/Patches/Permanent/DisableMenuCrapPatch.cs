@@ -10,7 +10,7 @@ namespace Polus.Patches.Permanent {
         [PermanentPatch]
         [HarmonyPostfix]
         public static void Start() {
-            EOSManager.Instance.FindPlayOnlineButton().transform.position = new Vector3(0, -0.95f, 0);
+            GameObject.Find("PlayOnlineButton").EnsureComponent<PlayOnlineButtonManager>();
             GameObject.Find("PlayLocalButton").active = false;
             GameObject.Find("HowToPlayButton").transform.position = new Vector3(0, -1.725f, 0);
             GameObject.Find("FreePlayButton").active = false;

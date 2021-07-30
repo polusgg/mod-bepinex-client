@@ -55,7 +55,7 @@ namespace Polus.Patches.Permanent {
                 menu.back.Colliders = new Il2CppReferenceArray<Collider2D>(bg.GetComponents<BoxCollider2D>());
                 AspectSize aspec = creditsMenu.AddComponent<AspectSize>();
                 aspec.PercentWidth = .80f;
-                aspec.Background = bg.GetComponent<SpriteRenderer>().sprite;
+                aspec.Background = creditsMenu.GetComponent<SpriteRenderer>().sprite;
                 aspec.OnEnable();
                 // Object.find
             });
