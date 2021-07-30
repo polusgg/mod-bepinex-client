@@ -106,9 +106,8 @@ namespace Polus.Patches.Temporary {
                     float num5 = i == 0 ? -8 : -1;
                     PoolablePlayer poolablePlayer = Object.Instantiate(__instance.PlayerPrefab, __instance.transform);
                     poolablePlayer.transform.localPosition = new Vector3(0.8f * num * num2 * num4,
-                        EndGameManager.BaseY - 0.25f + num2 * 0.1f, num5 + num2 * 0.01f) * 1.25f;
-                    Vector3 vector = new Vector3(num3, num3, num3) * 1.25f;
-                    poolablePlayer.transform.localScale = vector;
+                        EndGameManager.BaseY - 0.25f + num2 * 0.1f, num5 + num2 * 0.01f) * 0.9f;
+                    poolablePlayer.transform.localScale = new Vector3(num3, num3, num3) * 0.9f;
                     if (winningPlayerData2.IsDead) {
                         poolablePlayer.Body.sprite = __instance.GhostSprite;
                         poolablePlayer.SetDeadFlipX(i % 2 != 0);
@@ -132,7 +131,7 @@ namespace Polus.Patches.Temporary {
                         poolablePlayer.NameText.color = Palette.ImpostorRed;
                     }
 
-                    poolablePlayer.NameText.transform.localScale = global::Extensions.Inv(vector);
+                    poolablePlayer.NameText.transform.localScale = new Vector3(num3, num3, num3) * 1.25f;
                 }
 
                 StatsManager.Instance.GamesFinished++;
