@@ -103,9 +103,7 @@ namespace Polus {
             
             ModManager.PostLoad = true;
 
-            "".Log(5);
-            "Among Ass".Log();
-            "".Log(5);
+            "This is the end of PogusPlugin.Load()".Log(1);
         }
 
         public override bool Unload() {
