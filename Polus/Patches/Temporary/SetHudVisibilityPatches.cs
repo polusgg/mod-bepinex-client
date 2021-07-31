@@ -88,6 +88,7 @@ namespace Polus.Patches.Temporary
     public static class UseButtonClickPatch {
         [HarmonyPrefix]
         public static bool Prefix(UseButtonManager __instance) {
+            if (__instance == null) return false;
             if (!__instance.isActiveAndEnabled)
             {
                 return false;
@@ -99,9 +100,24 @@ namespace Polus.Patches.Temporary
             GameData.PlayerInfo data = PlayerControl.LocalPlayer.Data;
             if (__instance.currentTarget != null)
             {
-                if(__instance.currentTarget.UseIcon == ImageNames.VentButton && ventButtonEnabled) PlayerControl.LocalPlayer.UseClosest();
-                if(__instance.currentTarget.UseIcon == ImageNames.VentButton && !ventButtonEnabled) HudManager.Instance.ShowMap(new Action<MapBehaviour>(m => m.ShowInfectedMap()));
-                if(__instance.currentTarget.UseIcon != ImageNames.VentButton && useButtonEnabled) PlayerControl.LocalPlayer.UseClosest();
+                if (__instance.currentTarget.UseIcon == ImageNames.VentButton && ventButtonEnabled)
+                {
+                    PlayerControl.LocalPlayer.UseClosest();
+                    return false;
+                }
+
+                if (__instance.currentTarget.UseIcon == ImageNames.VentButton && !ventButtonEnabled)
+                {
+                    HudManager.Instance.ShowMap(new Action<MapBehaviour>(m => m.ShowInfectedMap()));
+                    return false;
+                }
+
+                if (__instance.currentTarget.UseIcon != ImageNames.VentButton && useButtonEnabled)
+                {
+                    PlayerControl.LocalPlayer.UseClosest();
+                    return false;
+                }
+
                 return false;
             }
             if (data != null && data.IsImpostor && sabotageButtonEnabled)
