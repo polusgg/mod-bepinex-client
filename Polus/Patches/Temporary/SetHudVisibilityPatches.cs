@@ -20,6 +20,18 @@ namespace Polus.Patches.Temporary
             ReportButtonDisablePatch.enabled = true;
         }
     }
+
+    [HarmonyPatch(typeof(Vent), nameof(Vent.SetOutline))]
+    public static class VentDisablePatch {
+        [HarmonyPrefix]
+        public static void Prefix(Vent __instance, [HarmonyArgument(0)] ref bool on, [HarmonyArgument(1)] ref bool mainTarget) {
+            if (on && !ventButtonEnabled)
+            {
+                on = false;
+                mainTarget = false;
+            }
+        }
+    }
     
     [HarmonyPatch(typeof(InfectedOverlay), nameof(InfectedOverlay.FixedUpdate))]
     public static class HudShowMapPatch {
