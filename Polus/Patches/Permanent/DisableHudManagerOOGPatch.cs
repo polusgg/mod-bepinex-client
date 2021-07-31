@@ -4,13 +4,13 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace Polus.Patches.Permanent {
-    // prevent hudmanager 
+    // prevent hudmanager from being in a non online scene
     [HarmonyPatch(typeof(HudManager), nameof(HudManager.Update))]
     public class DisableHudManagerOOGPatch {
         [PermanentPatch]
         [HarmonyPrefix]
         public static void Update(HudManager __instance) {
-            if (SceneManager.GetActiveScene().name != "OnlineGame") Object.Destroy(__instance.gameObject);
+            if (!AmongUsClient.Instance.InOnlineScene) Object.Destroy(__instance.gameObject);
         }
     }
 }

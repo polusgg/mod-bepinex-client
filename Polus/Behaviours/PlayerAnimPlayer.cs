@@ -41,9 +41,9 @@ namespace Polus.Behaviours {
         }
 
         public void HandleMessage(MessageReader reader) {
-            //todo handle player messages reading like camera controller
             List<PlayerKeyframe> playerKeyframes = new();
             bool[] field = BitfieldParser(reader.ReadUInt16(), 10);
+            if (Player == null) Player = GetComponent<PlayerControl>();
             while (reader.Position < reader.Length - 1) {
                 MessageReader message = reader.ReadMessage();
                 uint offset = message.ReadPackedUInt32();
@@ -108,7 +108,7 @@ namespace Polus.Behaviours {
             if (field[1]) resetTo.HatOpacity = resetTo.HatOpacity;
             if (field[2]) resetTo.PetOpacity = resetTo.PetOpacity;
             if (field[3]) resetTo.SkinOpacity = resetTo.SkinOpacity;
-            resetTo.SetPlayerColors(field[4] ? resetTo.MainColor : null, field[5] ? resetTo.MainColor : null, field[6] ? resetTo.MainColor : null);
+            resetTo.SetPlayerColors(field[4] ? resetTo.MainColor : null, field[5] ? resetTo.ShadowColor : null, field[6] ? resetTo.VisorColor : null);
             if (field[7]) resetTo.Scale = resetTo.Scale;
             // if (field[8]) resetTo.Position = resetTo.Position;
             if (field[9]) resetTo.Angle = resetTo.Angle;
@@ -239,7 +239,9 @@ namespace Polus.Behaviours {
 
             public void SetPlayerColors(Color? playerColor, Color? shadowColor, Color? visorColor) {
                 if (playerColor.HasValue) _playerControl.myRend.material.SetColor(BackColorID, playerColor.Value);
+
                 if (shadowColor.HasValue) _playerControl.myRend.material.SetColor(BodyColorID, shadowColor.Value);
+
                 if (visorColor.HasValue) _playerControl.myRend.material.SetColor(VisorColorID, visorColor.Value);
             }
         }
