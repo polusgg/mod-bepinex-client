@@ -1,5 +1,6 @@
 ﻿using System;
 using HarmonyLib;
+using Polus.Extensions;
 using TMPro;
 using UnityEngine;
 using static Polus.Patches.Temporary.UseButtonTargetPatch;
@@ -44,8 +45,8 @@ namespace Polus.Patches.Temporary
         public static bool useButtonEnabled = true;
         [HarmonyPrefix]
         public static bool Prefix(UseButtonManager __instance, IUsable target) {
-            return true;
             __instance.currentTarget = target;
+            __instance.RefreshButtons();
             if (target != null) // Has target? yes
             {
                 if(target.UseIcon == ImageNames.VentButton) // Is target a vent? yes
@@ -75,10 +76,11 @@ namespace Polus.Patches.Temporary
         }
 
         public static void DisplayButton(UseButtonManager instance, bool enabled, ImageNames image, float percent = 0f) {
-            instance.currentButtonShown.graphic.sprite = DestroyableSingleton<TranslationController>.Instance.GetImage(image);
-            CooldownHelpers.SetCooldownNormalizedUvs(instance.currentButtonShown.graphic);
-            instance.currentButtonShown.graphic.material.SetFloat("_Percent", percent);
+            instance.currentButtonShown = instance.otherButtons[image];
+            //CooldownHelpers.SetCooldownNormalizedUvs(instance.currentButtonShown.graphic);
             instance.currentButtonShown.graphic.color = enabled ? UseButtonManager.EnabledColor : UseButtonManager.DisabledColor;
+            instance.currentButtonShown.text.color = enabled ? UseButtonManager.EnabledColor : UseButtonManager.DisabledColor;
+            instance.currentButtonShown.Show(percent);
         }
     }
 
