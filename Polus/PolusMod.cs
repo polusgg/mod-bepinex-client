@@ -12,6 +12,7 @@ using Polus.Enums;
 using Polus.Extensions;
 using Polus.Mods;
 using Polus.Mods.Patching;
+using Polus.Patches.Permanent;
 using Polus.Patches.Temporary;
 using Polus.Resources;
 using Polus.Utils;
@@ -132,7 +133,7 @@ namespace Polus {
                 case PolusRpcCalls.SetOutline: {
                     PlayerControl control = netObject.Cast<PlayerControl>();
                     control.myRend.material.SetFloat(Outline, reader.ReadByte());
-                    control.myRend.material.SetColor(OutlineColor, new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte()));
+                    control.myRend.material.SetColor(OutlineColor, reader.ReadColor());
                     break;
                 }
                 case PolusRpcCalls.DespawnAllVents: {
@@ -187,18 +188,16 @@ namespace Polus {
                 case PolusRootPackets.Intro: {
                     RoleData.IntroName = reader.ReadString();
                     RoleData.IntroDesc = reader.ReadString();
-                    RoleData.IntroColor = new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(),
-                        reader.ReadByte());
+                    RoleData.IntroColor = reader.ReadColor();
                     RoleData.IntroPlayers = Enumerable.Repeat(15, reader.Length - reader.Position)
                         .Select(_ => reader.ReadByte()).ToList();
-                    //todo finish this and outro
+                    StupidModStampPatches.TextColor ??= RoleData.IntroColor;
                     break;
                 }
                 case PolusRootPackets.EndGame: {
                     RoleData.OutroName = reader.ReadString();
                     RoleData.OutroDesc = reader.ReadString();
-                    RoleData.OutroColor = new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(),
-                        reader.ReadByte());
+                    RoleData.OutroColor = reader.ReadColor();
                     RoleData.OutroPlayers = Enumerable.Repeat(15, reader.ReadByte())
                         .Select(_ => new WinningPlayerData(GameData.Instance.GetPlayerById(reader.ReadByte())))
                         .ToList();
@@ -308,6 +307,7 @@ namespace Polus {
                         playerControl.HatRenderer.SetHat(hat, playerControl.Data.ColorId);
                         playerControl.nameText.transform.localPosition = new Vector3(0f, (hatId == 0 ? 0.7f : 1.05f) * 2f, -0.5f);
                     }
+
                     break;
                 }
                 case PolusRootPackets.LoadPet: {
@@ -322,6 +322,7 @@ namespace Polus {
                         playerControl.CurrentPet.Source = playerControl;
                         if (playerControl.Data != null) PlayerControl.SetPlayerMaterialColors(playerControl.Data.ColorId, playerControl.CurrentPet.rend);
                     }
+
                     break;
                 }
                 case PolusRootPackets.SetHudVisibility: {
@@ -378,11 +379,15 @@ namespace Polus {
                 case PolusRootPackets.MarkAssBrown: {
                     uint address = reader.ReadUInt32();
                     ushort port = reader.ReadUInt16();
-                    AmongUsClient.Instance.DisconnectInternal(DisconnectReasons.ExitGame);
                     AmongUsClient.Instance.SetEndpoint(InnerNetClient.AddressToString(address), port);
                     Debug.Log($"Redirected to: {AmongUsClient.Instance.networkAddress}:{AmongUsClient.Instance.networkPort}");
                     AmongUsClient.Instance.Connect(AmongUsClient.Instance.mode);
                     ServerMigrationPatches.HostGamePacketChange.Migrated = true;
+                    break;
+                }
+                case PolusRootPackets.ModstampSetString: {
+                    StupidModStampPatches.TextColor = reader.ReadColor();
+                    StupidModStampPatches.Suffix = reader.ReadString();
                     break;
                 }
                 default: {
@@ -469,19 +474,7 @@ namespace Polus {
         }
 
         public override void PlayerSpawned(PlayerControl player) {
-            StartCoroutine(CoPlayFunny(player));
-        }
-
-        public IEnumerator CoPlayFunny(PlayerControl player) {
-            yield break;
-            // yield return new WaitForSeconds(3f);
-            // PlayerAnimPlayer pap = player.gameObject.EnsureComponent<PlayerAnimPlayer>();
-            // player.StartCoroutine(pap.CoPlayAnimation(
-            //     new[] {true, true, true, true, false, false, false, false, false, false, false},
-            //     new PlayerAnimPlayer.PlayerKeyframe[] {
-            //         new(0, 1000, 0, 0, 0, 0, null, null, null, null, null, null, player, pap),
-            //         new(5000, 1000, 1, 1, 1, 0, null, null, null, null, null, null, player, pap),
-            //     }, false));
+            
         }
 
         public override void PlayerDestroyed(PlayerControl player) { }
@@ -625,7 +618,7 @@ namespace Polus {
     public class RoleData {
         public Color IntroColor = Color.white;
         public string IntroDesc = "Something went horribly wrong\nwhile displaying this intro!";
-        public string IntroName = "uh oh";
+        public string IntroName = "☹";
         public List<byte> IntroPlayers = new();
         public Color OutroColor = Color.green;
         public string OutroDesc = "Failed to set ending correctly!";

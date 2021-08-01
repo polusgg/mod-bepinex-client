@@ -5,6 +5,6 @@
         TaskText = 2,
         RoomTracker = 3,
         PingTracker = 4,
-        TaskCompletion = 5
+        TaskCompletion = 5,
     }
 }

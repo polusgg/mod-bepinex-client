@@ -14,6 +14,9 @@ namespace Polus.Patches.Permanent {
     // #if RELEASE
     public class StupidModStampPatches {
         private static TextMeshPro textObj;
+        public static Color? TextColor;
+        public static string Suffix;
+
         [HarmonyPatch(typeof(ModManager), nameof(ModManager.ShowModStamp))]
         public static class ShowThatStupidStampPatch {
             [PermanentPatch]
@@ -82,7 +85,8 @@ namespace Polus.Patches.Permanent {
                 textObj.gameObject.SetActive(inGame);
                 if (inGame) {
                     __instance.ModStamp.transform.position = AspectPosition.ComputeWorldPosition(__instance.localCamera, AspectPosition.EdgeAlignments.LeftTop, new Vector3(0.4f, 0.85f, __instance.localCamera.nearClipPlane + 0.1f));
-                    textObj.color = PolusMod.RoleData.IntroColor;
+                    textObj.color = TextColor ?? Color.white;
+                    textObj.text = $"Playing on Polus.gg {Suffix}";
                 } else {
                     (Vector2 position, AspectPosition.EdgeAlignments alignment) = StampPositions.Count(scene => scene.Key == SceneManager.GetActiveScene().name) == 1 ? StampPositions.Single(scene => scene.Key == SceneManager.GetActiveScene().name).Value : defaultLocation;
                     __instance.ModStamp.transform.position = AspectPosition.ComputeWorldPosition(__instance.localCamera, alignment, new Vector3(position.x, position.y, __instance.localCamera.nearClipPlane + 0.1f));
