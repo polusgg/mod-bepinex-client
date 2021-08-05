@@ -17,6 +17,7 @@
         ChangeScene = 0x9A,
         MarkAssBrown = 0x9B,
         ModstampSetString = 0x9C,
-        DisplaySystemAnnouncement = 0xFA
+        DisplaySystemAnnouncement = 0xFA,
+        UpdateDiscordRichPresence = 0xFB,
     }
 }

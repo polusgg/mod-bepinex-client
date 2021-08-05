@@ -20,6 +20,7 @@ using PowerTools;
 using TMPro;
 using UnhollowerBaseLib;
 using UnityEngine;
+using DiscordPatches = Polus.Patches.Permanent.DiscordPatches;
 using Object = UnityEngine.Object;
 
 namespace Polus {
@@ -181,6 +182,11 @@ namespace Polus {
         public override void RootPacketReceived(MessageReader reader) {
             // Logger.LogInfo($"LOL {reader.Tag}");
             switch ((PolusRootPackets) reader.Tag) {
+                case PolusRootPackets.UpdateDiscordRichPresence:
+                {
+                    DiscordPatches.UpdateRichPresence(reader);
+                    break;
+                }
                 case PolusRootPackets.FetchResource: {
                     StartCoroutine(FetchResource(reader));
                     break;
