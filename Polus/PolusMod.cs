@@ -303,6 +303,7 @@ namespace Polus {
                     HatBehaviour hat = Cache.CachedFiles[reader.ReadPackedUInt32()].Get<HatBehaviour>();
                     HatManager.Instance.AllHats[(Index) hatId] = hat;
                     if (reader.ReadBoolean()) hat.LimitedMonth = 0;
+                    RefreshCpmTab();
                     foreach (PlayerControl playerControl in PlayerControl.AllPlayerControls.ToArray().Where(x => x.Data != null && x.Data.HatId == hatId)) {
                         playerControl.HatRenderer.SetHat(hat, playerControl.Data.ColorId);
                         playerControl.nameText.transform.localPosition = new Vector3(0f, (hatId == 0 ? 0.7f : 1.05f) * 2f, -0.5f);
@@ -315,6 +316,7 @@ namespace Polus {
                     PetBehaviour pet = Cache.CachedFiles[reader.ReadPackedUInt32()].Get<PetBehaviour>();
                     HatManager.Instance.AllPets[(Index) petId] = pet;
                     pet.Free = reader.ReadBoolean();
+                    RefreshCpmTab();
                     foreach (PlayerControl playerControl in PlayerControl.AllPlayerControls.ToArray().Where(x => x.Data != null && x.Data.HatId == petId)) {
                         if (playerControl.CurrentPet) Object.Destroy(playerControl.CurrentPet.gameObject);
                         playerControl.CurrentPet = Object.Instantiate(pet);
@@ -397,6 +399,32 @@ namespace Polus {
             }
         }
 
+        public void RefreshCpmTab() {
+            PlayerTab player = Object.FindObjectOfType<PlayerTab>();
+            if (player != null) {
+                player.OnDisable();
+                player.OnEnable();
+            }
+
+            PetsTab pets = Object.FindObjectOfType<PetsTab>();
+            if (pets != null) {
+                pets.OnDisable();
+                pets.OnEnable();
+            }
+
+            HatsTab hats = Object.FindObjectOfType<HatsTab>();
+            if (hats != null) {
+                hats.OnDisable();
+                hats.OnEnable();
+            }
+
+            SkinsTab skins = Object.FindObjectOfType<SkinsTab>();
+            if (skins != null) {
+                skins.OnDisable();
+                skins.OnEnable();
+            }
+        }
+
         public void DirtyOptions() {
             optionsDirty = true;
         }
@@ -473,9 +501,7 @@ namespace Polus {
             GameOptionsPatches.OnEnablePatch.Reset();
         }
 
-        public override void PlayerSpawned(PlayerControl player) {
-            
-        }
+        public override void PlayerSpawned(PlayerControl player) { }
 
         public override void PlayerDestroyed(PlayerControl player) { }
 
@@ -498,7 +524,7 @@ namespace Polus {
             Logger.LogInfo($"Trying to download and cache {resource} ({location})");
             IEnumerator<ICache.CacheAddResult> addToCache = Cache.AddToCache(resource, location, hash,
                 (ResourceType) resourceType);
-            ICache.CacheAddResult result;
+
             while (true) {
                 try {
                     if (!addToCache.MoveNext()) break;
