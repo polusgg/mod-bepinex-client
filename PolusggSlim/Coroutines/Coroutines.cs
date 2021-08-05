@@ -2,19 +2,20 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using PolusggSlim.Utils;
 using UnhollowerBaseLib;
 using UnityEngine;
 
-namespace PolusggSlim.Utils
+namespace PolusggSlim.Coroutines
 {
     public static class Coroutine
     {
-        public static readonly List<CoroutineTuple> coroutinesStore = new();
-        public static readonly List<IEnumerator> nextFrameCoroutines = new();
+        public static readonly List<CoroutineTuple> CoroutinesStore = new();
+        private static readonly List<IEnumerator> NextFrameCoroutines = new();
 
-        public static readonly List<IEnumerator> tempList = new();
-        public static readonly List<IEnumerator> waitForEndOfFrameCoroutines = new();
-        public static readonly List<IEnumerator> waitForFixedUpdateCoroutines = new();
+        private static readonly List<IEnumerator> TempList = new();
+        private static readonly List<IEnumerator> WaitForEndOfFrameCoroutines = new();
+        private static readonly List<IEnumerator> WaitForFixedUpdateCoroutines = new();
 
         public static IEnumerator Start(IEnumerator routine)
         {
@@ -24,18 +25,18 @@ namespace PolusggSlim.Utils
 
         public static void Stop(IEnumerator enumerator)
         {
-            if (nextFrameCoroutines.Contains(enumerator)) // the coroutine is running itself
+            if (NextFrameCoroutines.Contains(enumerator)) // the coroutine is running itself
             {
-                nextFrameCoroutines.Remove(enumerator);
+                NextFrameCoroutines.Remove(enumerator);
             }
             else
             {
-                var coroutineTupleIndex = coroutinesStore.FindIndex(c => c.Coroutine == enumerator);
+                var coroutineTupleIndex = CoroutinesStore.FindIndex(c => c.Coroutine == enumerator);
                 if (coroutineTupleIndex == -1) return;
-                var waitCondition = coroutinesStore[coroutineTupleIndex].WaitCondition;
+                var waitCondition = CoroutinesStore[coroutineTupleIndex].WaitCondition;
                 if (waitCondition is IEnumerator waitEnumerator) Stop(waitEnumerator);
 
-                coroutinesStore.RemoveAt(coroutineTupleIndex);
+                CoroutinesStore.RemoveAt(coroutineTupleIndex);
             }
         }
 
@@ -45,34 +46,34 @@ namespace PolusggSlim.Utils
 
             // use a temp list to make sure waits made during processing are not handled by same processing invocation
             // additionally, a temp list reduces allocations compared to an array
-            tempList.AddRange(target);
+            TempList.AddRange(target);
             target.Clear();
-            foreach (var enumerator in tempList) ProcessNextOfCoroutine(enumerator);
-            tempList.Clear();
+            foreach (var enumerator in TempList) ProcessNextOfCoroutine(enumerator);
+            TempList.Clear();
         }
 
         public static void Process()
         {
-            for (var i = coroutinesStore.Count - 1; i >= 0; i--)
+            for (var i = CoroutinesStore.Count - 1; i >= 0; i--)
             {
-                var tuple = coroutinesStore[i];
+                var tuple = CoroutinesStore[i];
                 if (!(tuple.WaitCondition is WaitForSeconds waitForSeconds)) continue;
                 if ((waitForSeconds.m_Seconds -= Time.deltaTime) > 0) continue;
-                coroutinesStore.RemoveAt(i);
+                CoroutinesStore.RemoveAt(i);
                 ProcessNextOfCoroutine(tuple.Coroutine);
             }
 
-            ProcessCoroutineList(nextFrameCoroutines);
+            ProcessCoroutineList(NextFrameCoroutines);
         }
 
         internal static void ProcessWaitForFixedUpdate()
         {
-            ProcessCoroutineList(waitForFixedUpdateCoroutines);
+            ProcessCoroutineList(WaitForFixedUpdateCoroutines);
         }
 
         internal static void ProcessWaitForEndOfFrame()
         {
-            ProcessCoroutineList(waitForEndOfFrameCoroutines);
+            ProcessCoroutineList(WaitForEndOfFrameCoroutines);
         }
 
         private static void ProcessNextOfCoroutine(IEnumerator enumerator)
@@ -82,13 +83,13 @@ namespace PolusggSlim.Utils
                 if (!enumerator.MoveNext()
                 ) // Run the next step of the coroutine. If it's done, restore the parent routine
                 {
-                    var indices = coroutinesStore.Select((it, idx) => (idx, it))
+                    var indices = CoroutinesStore.Select((it, idx) => (idx, it))
                         .Where(it => it.it.WaitCondition == enumerator).Select(it => it.idx).ToList();
                     for (var i = indices.Count - 1; i >= 0; i--)
                     {
                         var index = indices[i];
-                        nextFrameCoroutines.Add(coroutinesStore[index].Coroutine);
-                        coroutinesStore.RemoveAt(index);
+                        NextFrameCoroutines.Add(CoroutinesStore[index].Coroutine);
+                        CoroutinesStore.RemoveAt(index);
                     }
 
                     return;
@@ -106,17 +107,17 @@ namespace PolusggSlim.Utils
             {
                 case null:
                 {
-                    nextFrameCoroutines.Add(enumerator);
+                    NextFrameCoroutines.Add(enumerator);
                     return;
                 }
                 case WaitForFixedUpdate:
                 {
-                    waitForFixedUpdateCoroutines.Add(enumerator);
+                    WaitForFixedUpdateCoroutines.Add(enumerator);
                     return;
                 }
                 case WaitForEndOfFrame:
                 {
-                    waitForEndOfFrameCoroutines.Add(enumerator);
+                    WaitForEndOfFrameCoroutines.Add(enumerator);
                     return;
                 }
                 case WaitForSeconds:
@@ -136,7 +137,7 @@ namespace PolusggSlim.Utils
                 }
             }
 
-            coroutinesStore.Add(new CoroutineTuple {WaitCondition = next, Coroutine = enumerator});
+            CoroutinesStore.Add(new CoroutineTuple {WaitCondition = next, Coroutine = enumerator});
 
             if (next is IEnumerator nextCoroutine)
                 ProcessNextOfCoroutine(nextCoroutine);
@@ -144,8 +145,8 @@ namespace PolusggSlim.Utils
 
         private static IEnumerator FindOriginalCoroutine(IEnumerator enumerator)
         {
-            var index = coroutinesStore.FindIndex(ct => ct.WaitCondition == enumerator);
-            return index == -1 ? enumerator : FindOriginalCoroutine(coroutinesStore[index].Coroutine);
+            var index = CoroutinesStore.FindIndex(ct => ct.WaitCondition == enumerator);
+            return index == -1 ? enumerator : FindOriginalCoroutine(CoroutinesStore[index].Coroutine);
         }
 
         public struct CoroutineTuple

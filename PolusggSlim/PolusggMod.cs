@@ -1,14 +1,12 @@
 using System;
-using System.IO;
-using System.Text;
-using System.Threading.Tasks;
 using BepInEx;
 using BepInEx.IL2CPP;
 using HarmonyLib;
-using Newtonsoft.Json;
 using PolusggSlim.Auth;
-using PolusggSlim.Behaviours;
+using PolusggSlim.Auth.Behaviours;
 using PolusggSlim.Configuration;
+using PolusggSlim.Coroutines;
+using PolusggSlim.PacketLogger;
 using PolusggSlim.Patches.Misc;
 using PolusggSlim.Utils;
 using PolusggSlim.Utils.Attributes;
@@ -16,10 +14,10 @@ using PolusggSlim.Utils.Extensions;
 
 namespace PolusggSlim
 {
-    [BepInPlugin(Id, "Polus.gg", "0.1.0")]
+    [BepInPlugin(ID, "Polus.gg", "0.1.0")]
     public class PolusggMod : BasePlugin
     {
-        public const string Id = "gg.polus.bepinexmod";
+        public const string ID = "gg.polus.bepinexmod";
 
         private Harmony PermanentHarmony { get; set; }
         private Harmony Harmony { get; set; }
@@ -29,6 +27,7 @@ namespace PolusggSlim
         // Domain-Specific objects
         internal AuthContext AuthContext { get; private set; }
         internal SigningHelper SigningHelper { get; private set; }
+        internal PacketLoggerService PacketLogger { get; private set; }
 
         public override void Load()
         {
@@ -36,8 +35,8 @@ namespace PolusggSlim
             try
             {
                 // Harmony
-                PermanentHarmony = new Harmony(Id + ".permanent");
-                Harmony = new Harmony(Id);
+                PermanentHarmony = new Harmony(ID + ".permanent");
+                Harmony = new Harmony(ID);
 
                 // Configuration
                 Configuration = new PggConfiguration();
@@ -45,19 +44,21 @@ namespace PolusggSlim
                 // Services
                 AuthContext = new AuthContext();
                 SigningHelper = new SigningHelper(AuthContext);
+                PacketLogger = new PacketLoggerService();
 
 
                 // Permanent bootstrap patches
                 RegisterInIl2CppAttribute.Register();
                 PermanentHarmony.PatchAll(typeof(PermanentPatches));
                 CoroutineManagerInitializer.Load();
+                PacketLogger.Start();
                 //TODO: SkipIntroSplash.Load();
 
                 LocalLoad();
             }
             catch (Exception e)
             {
-                PggLog.Error($"Error loading {Id}: {e.Message}");
+                PggLog.Error($"Error loading {ID}: {e.Message}");
                 PggLog.Error($"Stack Trace: {e.StackTrace}");
             }
         }
@@ -66,6 +67,7 @@ namespace PolusggSlim
         {
             LocalUnload();
 
+            PacketLogger.Dispose();
             //TODO: SkipIntroSplash.Unload();
             CoroutineManagerInitializer.Unload();
             PermanentHarmony.UnpatchSelf();

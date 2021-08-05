@@ -8,11 +8,6 @@ namespace PolusggSlim.Utils.Extensions
     {
         public static PassiveButton MakePassiveButton(this GameObject gameObject, Action onClick, bool rollover = true)
         {
-            if (gameObject.GetComponent<SpriteRenderer>() == null)
-                throw new InvalidOperationException(
-                    "Cannot add PassiveButton to gameObject, as it doesn't have a SpriteRenderer"
-                );
-
             var button = gameObject.AddComponent<PassiveButton>();
             button.OnClick = new Button.ButtonClickedEvent();
             button.OnMouseOut = new Button.ButtonClickedEvent();
@@ -22,6 +17,10 @@ namespace PolusggSlim.Utils.Extensions
 
             if (rollover)
             {
+                if (gameObject.GetComponent<SpriteRenderer>() == null)
+                    throw new InvalidOperationException(
+                        "Cannot add ButtonRolloverHandler to gameObject, as it doesn't have a SpriteRenderer"
+                    );
                 var rolloverHandler = gameObject.AddComponent<ButtonRolloverHandler>();
                 rolloverHandler.Target = gameObject.GetComponent<SpriteRenderer>();
                 rolloverHandler.OutColor = Color.white;

@@ -13,5 +13,7 @@ namespace PolusggSlim.Configuration
             Path.Combine(Paths.PluginPath, "PolusggCache", Guid.NewGuid().ToString());
 
         public ServerConfig Server { get; } = new();
+        
+        public PacketLoggerConfig PacketLogger { get; } = new();
     }
 }

@@ -8,7 +8,7 @@ namespace PolusggSlim.Utils.Extensions
     {
         public static bool LoadImage(this Texture2D tex, byte[] data, bool markNonReadable = false)
         {
-            var iCallLoadImage = ICallHelper.GetICall<d_LoadImage>("UnityEngine.ImageConversion::LoadImage");
+            var iCallLoadImage = InternalCallHelper.GetICall<DLoadImage>("UnityEngine.ImageConversion::LoadImage");
 
             var il2CppArray = (Il2CppStructArray<byte>) data;
 
@@ -18,7 +18,7 @@ namespace PolusggSlim.Utils.Extensions
         public static Sprite CreateSprite(this Texture texture, Rect rect, Vector2 pivot, float pixelsPerUnit,
             uint extrude, Vector4 border)
         {
-            var iCallCreateSprite = ICallHelper.GetICall<d_CreateSprite>("UnityEngine.Sprite::CreateSprite_Injected");
+            var iCallCreateSprite = InternalCallHelper.GetICall<DCreateSprite>("UnityEngine.Sprite::CreateSprite_Injected");
 
             var ptr = iCallCreateSprite.Invoke(texture.Pointer, ref rect, ref pivot, pixelsPerUnit, extrude, 1,
                 ref border, false);
@@ -34,9 +34,9 @@ namespace PolusggSlim.Utils.Extensions
                 100f, 0u, Vector4.zero);
         }
 
-        private delegate bool d_LoadImage(IntPtr tex, IntPtr data, bool markNonReadable);
+        private delegate bool DLoadImage(IntPtr tex, IntPtr data, bool markNonReadable);
 
-        private delegate IntPtr d_CreateSprite(
+        private delegate IntPtr DCreateSprite(
             IntPtr texture, ref Rect rect, ref Vector2 pivot, float pixelsPerUnit,
             uint extrude, int meshType, ref Vector4 border, bool generateFallbackPhysicsShape);
     }

@@ -1,13 +1,7 @@
 using System;
-using System.Collections;
-using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using BepInEx;
-using HarmonyLib;
-using Newtonsoft.Json;
-using PolusggSlim.Auth;
+using Il2CppSystem.Text;
 using PolusggSlim.Utils;
 using PolusggSlim.Utils.Attributes;
 using PolusggSlim.Utils.Extensions;
@@ -17,10 +11,9 @@ using UnhollowerBaseLib.Attributes;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using Coroutine = PolusggSlim.Utils.Coroutine;
-using StringBuilder = Il2CppSystem.Text.StringBuilder;
+using Coroutine = PolusggSlim.Coroutines.Coroutine;
 
-namespace PolusggSlim.Behaviours
+namespace PolusggSlim.Auth.Behaviours
 {
     [RegisterInIl2Cpp]
     public class AccountLoginBehaviour : MonoBehaviour

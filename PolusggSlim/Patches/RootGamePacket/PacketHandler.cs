@@ -127,32 +127,26 @@ namespace PolusggSlim.Patches.RootGamePacket
                     case RootPacketTypes.DeclarePet:
                     {
                         throw new NotImplementedException();
-                        break;
                     }
                     case RootPacketTypes.DeclareSkin:
                     {
                         throw new NotImplementedException();
-                        break;
                     }
                     case RootPacketTypes.DeclareKillAnim:
                     {
                         throw new NotImplementedException();
-                        break;
                     }
                     case RootPacketTypes.SetGameOption:
                     {
                         throw new NotImplementedException();
-                        break;
                     }
                     case RootPacketTypes.DeleteGameOption:
                     {
                         throw new NotImplementedException();
-                        break;
                     }
                     case RootPacketTypes.DisplaySystemAlert:
                     {
                         throw new NotImplementedException();
-                        break;
                     }
                     default:
                         throw new ArgumentOutOfRangeException();

@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -8,9 +7,9 @@ namespace PolusggSlim.Auth
 {
     public class SigningHelper
     {
-        public const byte AuthByte = 0x80;
-        private const byte UuidSize = 16;
-        private const byte HashSize = 20;
+        public const byte AUTH_BYTE = 0x80;
+        private const byte UUID_SIZE = 16;
+        private const byte HASH_SIZE = 20;
 
         private readonly AuthContext _authContext;
         private HMAC _hmac;
@@ -32,12 +31,12 @@ namespace PolusggSlim.Auth
 
             var hash = _hmac.ComputeHash(bytes);
 
-            var output = new byte[1 + UuidSize + HashSize + length];
+            var output = new byte[1 + UUID_SIZE + HASH_SIZE + length];
 
-            output[0] = AuthByte;
+            output[0] = AUTH_BYTE;
             _authContext.ClientId.CopyTo(output, 1);
-            hash.CopyTo(output, 1 + UuidSize);
-            bytes.ToArray()[..length].CopyTo(output, 1 + UuidSize + HashSize);
+            hash.CopyTo(output, 1 + UUID_SIZE);
+            bytes.ToArray()[..length].CopyTo(output, 1 + UUID_SIZE + HASH_SIZE);
 
             bytes = output;
             length = output.Length;

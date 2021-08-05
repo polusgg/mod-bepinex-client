@@ -1,9 +1,8 @@
 using System;
-using PolusggSlim.Utils;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace PolusggSlim.Patches.Misc
+namespace PolusggSlim.Coroutines
 {
     public class CoroutineManagerInitializer
     {

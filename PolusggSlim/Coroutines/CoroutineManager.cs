@@ -1,8 +1,9 @@
 using System;
 using PolusggSlim.Utils.Attributes;
 using UnityEngine;
+using Coroutine = PolusggSlim.Coroutines.Coroutine;
 
-namespace PolusggSlim.Utils
+namespace PolusggSlim.Coroutines
 {
     [RegisterInIl2Cpp]
     public class CoroutineProcessor : MonoBehaviour
@@ -28,7 +29,7 @@ namespace PolusggSlim.Utils
 
         public void OnDestroy()
         {
-            foreach (var coroTuple in Coroutine.coroutinesStore) Coroutine.Stop(coroTuple.Coroutine);
+            foreach (var coroTuple in Coroutine.CoroutinesStore) Coroutine.Stop(coroTuple.Coroutine);
         }
     }
 }

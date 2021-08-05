@@ -1,4 +1,3 @@
-using HarmonyLib;
 using PolusggSlim.Utils;
 
 namespace PolusggSlim

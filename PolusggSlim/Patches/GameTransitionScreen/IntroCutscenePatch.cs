@@ -9,7 +9,7 @@ namespace PolusggSlim.Patches.GameTransitionScreen
     {
         public static CutsceneData Data = new();
 
-        public static void IntroCutscenePrefix(ref Il2CppReferenceArray<PlayerControl> yourTeam)
+        public static void IntroCutscenePrefix(out Il2CppReferenceArray<PlayerControl> yourTeam)
         {
             yourTeam = Data.YourTeam
                 .Select(x => GameData.Instance.GetPlayerById(x).Object)
@@ -31,9 +31,9 @@ namespace PolusggSlim.Patches.GameTransitionScreen
         // [HarmonyPatch(typeof(IntroCutscene), nameof(IntroCutscene.BeginCrewmate))]
         public static class IntroCutscene_BeginCrewmate
         {
-            public static void Prefix([HarmonyArgument(0)] ref Il2CppReferenceArray<PlayerControl> yourTeam)
+            public static void Prefix([HarmonyArgument(0)] out Il2CppReferenceArray<PlayerControl> yourTeam)
             {
-                IntroCutscenePrefix(ref yourTeam);
+                IntroCutscenePrefix(out yourTeam);
             }
 
             public static void Postfix([HarmonyArgument(0)] ref IntroCutscene __instance)
@@ -45,9 +45,9 @@ namespace PolusggSlim.Patches.GameTransitionScreen
         // [HarmonyPatch(typeof(IntroCutscene), nameof(IntroCutscene.BeginImpostor))]
         public static class IntroCutscene_BeginImpostor
         {
-            public static void Prefix([HarmonyArgument(0)] ref Il2CppReferenceArray<PlayerControl> yourTeam)
+            public static void Prefix([HarmonyArgument(0)] out Il2CppReferenceArray<PlayerControl> yourTeam)
             {
-                IntroCutscenePrefix(ref yourTeam);
+                IntroCutscenePrefix(out yourTeam);
             }
 
             public static void Postfix([HarmonyArgument(0)] ref IntroCutscene __instance)

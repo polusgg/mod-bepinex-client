@@ -1,14 +1,14 @@
 using InnerNet;
 using UnityEngine;
 
-namespace PolusggSlim.Patches.Authentication
+namespace PolusggSlim.Auth.Patches
 {
     public static class RemoveAuthentication
     {
         // [HarmonyPatch(typeof(StatsManager), nameof(StatsManager.AmBanned), MethodType.Getter)]
-        public static class StatsManager_getAmBanned
+        public static class StatsManager_GetAmBanned
         {
-            public static bool Prefix(ref bool __result)
+            public static bool Prefix(out bool __result)
             {
                 return __result = false;
             }
@@ -17,7 +17,7 @@ namespace PolusggSlim.Patches.Authentication
         // [HarmonyPatch(typeof(AuthManager._CoConnect_d__4), nameof(AuthManager._CoConnect_d__4.MoveNext))]
         public static class AuthManager_CoConnect
         {
-            public static bool Prefix(ref bool __result)
+            public static bool Prefix(out bool __result)
             {
                 return __result = false;
             }
@@ -26,7 +26,7 @@ namespace PolusggSlim.Patches.Authentication
         // [HarmonyPatch(typeof(AuthManager._CoWaitForNonce_d__5), nameof(AuthManager._CoWaitForNonce_d__5.MoveNext))]
         public static class AuthManager_CoWaitForNonce
         {
-            public static bool Prefix(ref bool __result)
+            public static bool Prefix(out bool __result)
             {
                 return __result = false;
             }
@@ -47,7 +47,7 @@ namespace PolusggSlim.Patches.Authentication
         }
 
         // [HarmonyPatch(typeof(EOSManager), nameof(EOSManager.InitializePlatformInterface))]
-        public static class EOSManager_InitializePlatformInterfacePatch
+        public static class EosManager_InitializePlatformInterface
         {
             public static bool Prefix(EOSManager __instance)
             {

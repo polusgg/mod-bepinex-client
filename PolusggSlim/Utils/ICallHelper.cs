@@ -4,21 +4,21 @@ using UnhollowerBaseLib;
 
 namespace PolusggSlim.Utils
 {
-    public static class ICallHelper
+    public static class InternalCallHelper
     {
-        private static readonly Dictionary<string, Delegate> ICallCache = new();
+        private static readonly Dictionary<string, Delegate> InternalCallCache = new();
 
         public static T GetICall<T>(string iCallName) where T : Delegate
         {
-            if (ICallCache.ContainsKey(iCallName))
-                return (T) ICallCache[iCallName];
+            if (InternalCallCache.ContainsKey(iCallName))
+                return (T) InternalCallCache[iCallName];
 
             var del = IL2CPP.ResolveICall<T>(iCallName);
 
             if (del == null)
                 throw new MissingMethodException($"Could not resolve internal call by name '{iCallName}'!");
 
-            ICallCache.Add(iCallName, del);
+            InternalCallCache.Add(iCallName, del);
 
             return del;
         }

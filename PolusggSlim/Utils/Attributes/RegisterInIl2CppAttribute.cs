@@ -8,15 +8,15 @@ namespace PolusggSlim.Utils.Attributes
 {
     /// <summary>
     ///     Utility attribute for automatically calling
-    ///     <see cref="UnhollowerRuntimeLib.ClassInjector.RegisterTypeInIl2Cpp{T}" />
+    ///     <see cref="ClassInjector.RegisterTypeInIl2Cpp(System.Type)" />
     /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
     public class RegisterInIl2CppAttribute : Attribute
     {
-        private static readonly AccessTools.FieldRef<object, HashSet<string>> _injectedTypes
+        private static readonly AccessTools.FieldRef<object, HashSet<string>> InjectedTypes
             = AccessTools.FieldRefAccess<HashSet<string>>(typeof(ClassInjector), "InjectedTypes");
 
-        private static readonly Func<Type, IntPtr> _readClassPointerForType =
+        private static readonly Func<Type, IntPtr> ReadClassPointerForType =
             AccessTools.MethodDelegate<Func<Type, IntPtr>>(
                 AccessTools.Method(typeof(ClassInjector), "ReadClassPointerForType")
             );
@@ -53,10 +53,10 @@ namespace PolusggSlim.Utils.Attributes
 
         private static bool IsInjected(Type type)
         {
-            if (_readClassPointerForType(type) != IntPtr.Zero)
+            if (ReadClassPointerForType(type) != IntPtr.Zero)
                 return true;
 
-            var injectedTypes = _injectedTypes();
+            var injectedTypes = InjectedTypes();
 
             lock (injectedTypes)
             {
