@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using BepInEx.Logging;
 using HarmonyLib;
 using Il2CppSystem;
 using Polus.Behaviours;
@@ -33,6 +34,15 @@ namespace Polus.Patches.Temporary {
 		[HarmonyPrefix]
 		public static bool Prefix(PbExileController._HandleText_d__7 __instance, ref bool __result) {
 			__instance.__4__this.gameObject.EnsureComponent<CoroutineManager>().Start(PolusCoroutines.HandleText(__instance.__4__this));
+			return false;
+		}
+	}
+	
+	[HarmonyPatch(typeof(PbExileController._Animate_d__6), nameof(PbExileController._Animate_d__6.MoveNext))]
+	public class PolusControllerReplacePatchTwo {
+		[HarmonyPrefix]
+		public static bool Prefix(PbExileController._Animate_d__6 __instance, ref bool __result) {
+			__instance.__4__this.gameObject.EnsureComponent<CoroutineManager>().Start(PolusCoroutines.Animate(__instance.__4__this));
 			return false;
 		}
 	}
@@ -206,6 +216,26 @@ namespace Polus.Patches.Temporary {
 	}
 
 	public static class PolusCoroutines {
+		public static IEnumerator Animate(PbExileController instance) {
+			yield return DestroyableSingleton<HudManager>.Instance.CoFadeFullScreen(Color.black, Color.clear, 0.2f);
+			yield return Effects.Wait(0.75f);
+			instance.StartCoroutine(Effects.All(new []
+			{
+				instance.PlayerFall(),
+				instance.PlayerSpin(),
+				instance.HandleText()
+			}));
+			yield return Effects.Wait(instance.Duration);
+			if (PlayerControl.GameOptions.ConfirmImpostor)
+			{
+				instance.ImpostorText.gameObject.SetActive(true);
+			}
+			yield return Effects.Bloop(0f, instance.ImpostorText.transform, 1f, 0.5f);
+			yield return Effects.Wait(1f);
+			yield return DestroyableSingleton<HudManager>.Instance.CoFadeFullScreen(Color.clear, Color.black, 0.2f);
+			instance.WrapUp();
+			yield break;
+		}
 		public static IEnumerator HandleText(PbExileController instance) {
 			yield return Effects.Wait(instance.Duration * 0.5f);
 			float newDur = instance.Duration * 0.5f;
