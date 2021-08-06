@@ -1,16 +1,17 @@
 ﻿using System;
 using HarmonyLib;
+using Steamworks;
 
 namespace Polus.Patches.Permanent {
-    [HarmonyPatch(typeof(SaveManager), nameof(SaveManager.LastLanguage), MethodType.Getter)]
+    [HarmonyPatch(typeof(TranslationController), nameof(TranslationController.SelectDefaultLanguage), MethodType.Getter)]
     public static class LastLanguageFixPatch {
         [HarmonyPrefix]
         public static bool Awake(out uint __result) {
             try {
-                SaveManager.LoadPlayerPrefs();
-                if (SaveManager.lastLanguage > 13) SaveManager.lastLanguage = TranslationController.SelectDefaultLanguage();
-
-                __result = SaveManager.lastLanguage;
+                if (Enum.TryParse(SteamApps.GetCurrentGameLanguage(), true, out SupportedLangs result))
+                    __result = (uint) result;
+                else
+                    __result = 0;
             } catch {
                 __result = 0;
             }
