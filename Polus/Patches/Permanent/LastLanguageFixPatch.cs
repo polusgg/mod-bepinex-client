@@ -1,10 +1,12 @@
 ﻿using System;
 using HarmonyLib;
+using Polus.Mods.Patching;
 using Steamworks;
 
 namespace Polus.Patches.Permanent {
-    [HarmonyPatch(typeof(TranslationController), nameof(TranslationController.SelectDefaultLanguage), MethodType.Getter)]
-    public static class LastLanguageFixPatch {
+    [HarmonyPatch(typeof(TranslationController), nameof(TranslationController.SelectDefaultLanguage))]
+    public class LastLanguageFixPatch {
+        [PermanentPatch]
         [HarmonyPrefix]
         public static bool Awake(out uint __result) {
             try {
