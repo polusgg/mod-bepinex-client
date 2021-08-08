@@ -9,7 +9,7 @@
         MapDoorButtons,
         // Disables Sabotage button (which is included into Use Button)
         SabotageButton,
-        // Disables Vent button (which is included into vent Button)
+        // Disables Vent button (which is included into Use Button)
         VentButton,
         // Disables whole Use button (includes Vent, Sabotage, Admin etc.)
         UseButton,
@@ -19,5 +19,7 @@
         TaskListPopup,
         // Disables report button
         ReportButton,
+        // Disables Meeting button (which is included into Use button)
+        CallMeetingButton,
     }
 }

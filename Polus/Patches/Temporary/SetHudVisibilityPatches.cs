@@ -16,6 +16,7 @@ namespace Polus.Patches.Temporary
             sabotageButtonEnabled = true;
             useButtonEnabled = true;
             ventButtonEnabled = true;
+            meetingButtonEnabled = true;
             TaskPanelUpdatePatch.enabled = true;
             ReportButtonDisablePatch.enabled = true;
         }
@@ -55,6 +56,7 @@ namespace Polus.Patches.Temporary
         public static bool ventButtonEnabled = true;
         public static bool sabotageButtonEnabled = true;
         public static bool useButtonEnabled = true;
+        public static bool meetingButtonEnabled = true;
         [HarmonyPrefix]
         public static bool Prefix(UseButtonManager __instance, IUsable target) {
             __instance.currentTarget = target;
@@ -73,7 +75,16 @@ namespace Polus.Patches.Temporary
                 }
                 else // Is target a vent? no
                 {
-                    DisplayButton(__instance, useButtonEnabled, target.UseIcon, target.PercentCool);
+                    if (target.TryCast<SystemConsole>() != null &&
+                        target.TryCast<SystemConsole>()?.MinigamePrefab.TryCast<EmergencyMinigame>() != null &&
+                        true)
+                    {
+                        DisplayButton(__instance, false, ImageNames.UseButton);
+                    }
+                    else
+                    {
+                        DisplayButton(__instance, useButtonEnabled, target.UseIcon, target.PercentCool);
+                    }
                     return false;
                 }
             }// Has target? no
@@ -126,6 +137,12 @@ namespace Polus.Patches.Temporary
 
                 if (__instance.currentTarget.UseIcon != ImageNames.VentButton && useButtonEnabled)
                 {
+                    if (__instance.currentTarget.TryCast<SystemConsole>() != null &&
+                        __instance.currentTarget.TryCast<SystemConsole>()?.MinigamePrefab.TryCast<EmergencyMinigame>() != null &&
+                        true)
+                    {
+                        return false;
+                    }
                     PlayerControl.LocalPlayer.UseClosest();
                     return false;
                 }
@@ -137,6 +154,22 @@ namespace Polus.Patches.Temporary
                 HudManager.Instance.ShowMap(new Action<MapBehaviour>(m => m.ShowInfectedMap()));
             }
             return false;
+        }
+    }
+
+    [HarmonyPatch(typeof(SystemConsole), nameof(SystemConsole.SetOutline))]
+    public static class MeetingConsoleOutlinePatch {
+        [HarmonyPrefix]
+        public static bool Prefix(SystemConsole __instance) {
+            if (__instance.MinigamePrefab.TryCast<EmergencyMinigame>() != null && true && __instance.Image)
+            {
+                __instance.Image.material.SetFloat("_Outline", 0f);
+                __instance.Image.material.SetColor("_OutlineColor", Color.white);
+                __instance.Image.material.SetColor("_AddColor", Color.clear);
+                return false;
+            }
+
+            return true;
         }
     }
 
