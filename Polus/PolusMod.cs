@@ -174,6 +174,12 @@ namespace Polus {
                     player.gameObject.EnsureComponent<IndividualModifierManager>().VisionModifier = reader.ReadSingle();
                     break;
                 }
+                case PolusRpcCalls.SetRemainingEmergencies: {
+                    PlayerControl player = netObject.Cast<PlayerControl>();
+
+                    player.RemainingEmergencies = reader.ReadInt32();
+                    break;
+                }
                 default:
                     throw new ArgumentOutOfRangeException();
             }
