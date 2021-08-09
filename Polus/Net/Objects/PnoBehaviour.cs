@@ -1,4 +1,5 @@
 ﻿using System;
+using InnerNet;
 using Polus.Extensions;
 using UnhollowerRuntimeLib;
 using UnityEngine;
@@ -6,7 +7,6 @@ using UnityEngine;
 namespace Polus.Net.Objects {
     public class PnoBehaviour : MonoBehaviour {
         public PolusNetObject pno;
-        public bool setByPnob;
 
         static PnoBehaviour() {
             ClassInjector.RegisterTypeInIl2Cpp<PnoBehaviour>();

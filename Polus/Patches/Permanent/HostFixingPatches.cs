@@ -18,9 +18,7 @@ namespace Polus.Patches.Permanent {
             internal static bool AmHostReal => AmongUsClient.Instance.HostId == AmongUsClient.Instance.ClientId;
             [HarmonyPrefix]
             public static bool AmHost(AmongUsClient __instance, ref bool __result) {
-                if (BypassCall > 0) {
-                    __result = AmHostReal;
-                } else __result = false;
+                __result = BypassCall > 0 && AmHostReal;
                 return false;
             }
         }

@@ -15,7 +15,7 @@ namespace Polus.Patches.Permanent {
     public class StupidModStampPatches {
         private static TextMeshPro textObj;
         public static Color? TextColor;
-        public static string Suffix;
+        public static string Suffix = "";
 
         [HarmonyPatch(typeof(ModManager), nameof(ModManager.ShowModStamp))]
         public static class ShowThatStupidStampPatch {

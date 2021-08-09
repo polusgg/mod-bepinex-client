@@ -56,7 +56,6 @@ namespace Polus {
 
             for (int i = 0; i < num5; i++) {
                 PnoBehaviour childNetObject = componentsInChildren[i];
-                childNetObject.setByPnob = true;
                 PolusNetObject polusNetObject = childNetObject.pno = new PolusNetObject {
                     NetId = reader.ReadPackedUInt32(),
                     PnoBehaviour = childNetObject

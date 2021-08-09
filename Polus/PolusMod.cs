@@ -521,7 +521,10 @@ namespace Polus {
 
         public override void PlayerDestroyed(PlayerControl player) { }
 
-        public override void GameEnded() { }
+        public override void GameEnded() {
+            StupidModStampPatches.TextColor = null;
+            StupidModStampPatches.Suffix = "";
+        }
 
         private IEnumerator FetchResource(MessageReader reader) {
             uint resource = reader.ReadPackedUInt32();
