@@ -77,7 +77,7 @@ namespace Polus.Patches.Temporary
                 {
                     if (target.TryCast<SystemConsole>() != null &&
                         target.TryCast<SystemConsole>()?.MinigamePrefab.TryCast<EmergencyMinigame>() != null &&
-                        true)
+                        meetingButtonEnabled)
                     {
                         DisplayButton(__instance, false, ImageNames.UseButton);
                     }
@@ -139,7 +139,7 @@ namespace Polus.Patches.Temporary
                 {
                     if (__instance.currentTarget.TryCast<SystemConsole>() != null &&
                         __instance.currentTarget.TryCast<SystemConsole>()?.MinigamePrefab.TryCast<EmergencyMinigame>() != null &&
-                        true)
+                        meetingButtonEnabled)
                     {
                         return false;
                     }
@@ -161,7 +161,7 @@ namespace Polus.Patches.Temporary
     public static class MeetingConsoleOutlinePatch {
         [HarmonyPrefix]
         public static bool Prefix(SystemConsole __instance) {
-            if (__instance.MinigamePrefab.TryCast<EmergencyMinigame>() != null && true && __instance.Image)
+            if (__instance.MinigamePrefab.TryCast<EmergencyMinigame>() != null && meetingButtonEnabled && __instance.Image)
             {
                 __instance.Image.material.SetFloat("_Outline", 0f);
                 __instance.Image.material.SetColor("_OutlineColor", Color.white);
