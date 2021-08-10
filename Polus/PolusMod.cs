@@ -188,8 +188,7 @@ namespace Polus {
         public override void RootPacketReceived(MessageReader reader) {
             // Logger.LogInfo($"LOL {reader.Tag}");
             switch ((PolusRootPackets) reader.Tag) {
-                case PolusRootPackets.UpdateDiscordRichPresence:
-                {
+                case PolusRootPackets.UpdateDiscordRichPresence: {
                     DiscordPatches.UpdateRichPresence(reader);
                     break;
                 }
@@ -312,30 +311,40 @@ namespace Polus {
                 }
                 case PolusRootPackets.LoadHat: {
                     int hatId = (int) reader.ReadPackedUInt32();
-                    HatBehaviour hat = Cache.CachedFiles[reader.ReadPackedUInt32()].Get<HatBehaviour>();
-                    HatManager.Instance.AllHats[(Index) hatId] = hat;
-                    if (reader.ReadBoolean()) hat.LimitedMonth = 0;
-                    RefreshCpmTab();
-                    foreach (PlayerControl playerControl in PlayerControl.AllPlayerControls.ToArray().Where(x => x.Data != null && x.Data.HatId == hatId)) {
-                        playerControl.HatRenderer.SetHat(hat, playerControl.Data.ColorId);
-                        playerControl.nameText.transform.localPosition = new Vector3(0f, (hatId == 0 ? 0.7f : 1.05f) * 2f, -0.5f);
-                    }
+                    uint resourceId = reader.ReadPackedUInt32();
+                    bool isFree = reader.ReadBoolean();
+                    
+                    AddDispatch(() => {
+                        HatBehaviour hat = Cache.CachedFiles[resourceId].Get<HatBehaviour>();
+                        CosmeticManager.Instance.SetHat((uint) hatId, hat);
+                        if (isFree) hat.LimitedMonth = 0;
+                        RefreshCpmTab();
+                        foreach (PlayerControl playerControl in PlayerControl.AllPlayerControls.ToArray().Where(x => x.Data != null && x.Data.HatId == hatId)) {
+                            playerControl.HatRenderer.SetHat(hat, playerControl.Data.ColorId);
+                            playerControl.nameText.transform.localPosition = new Vector3(0f, (hatId == 0 ? 0.7f : 1.05f) * 2f, -0.5f);
+                        }
+                    });
 
                     break;
                 }
                 case PolusRootPackets.LoadPet: {
                     int petId = (int) reader.ReadPackedUInt32();
-                    PetBehaviour pet = Cache.CachedFiles[reader.ReadPackedUInt32()].Get<PetBehaviour>();
-                    HatManager.Instance.AllPets[(Index) petId] = pet;
-                    pet.Free = reader.ReadBoolean();
-                    RefreshCpmTab();
-                    foreach (PlayerControl playerControl in PlayerControl.AllPlayerControls.ToArray().Where(x => x.Data != null && x.Data.HatId == petId)) {
-                        if (playerControl.CurrentPet) Object.Destroy(playerControl.CurrentPet.gameObject);
-                        playerControl.CurrentPet = Object.Instantiate(pet);
-                        playerControl.CurrentPet.transform.position = playerControl.transform.position;
-                        playerControl.CurrentPet.Source = playerControl;
-                        if (playerControl.Data != null) PlayerControl.SetPlayerMaterialColors(playerControl.Data.ColorId, playerControl.CurrentPet.rend);
-                    }
+                    uint resourceId = reader.ReadPackedUInt32();
+                    bool isFree = reader.ReadBoolean();
+                    
+                    AddDispatch(() => {
+                        PetBehaviour pet = Object.Instantiate(Cache.CachedFiles[resourceId].Get<GameObject>()).GetComponent<PetBehaviour>();
+                        CosmeticManager.Instance.SetPet((uint) petId, pet);
+                        pet.Free = isFree;
+                        RefreshCpmTab();
+                        foreach (PlayerControl playerControl in PlayerControl.AllPlayerControls.ToArray().Where(x => x.Data != null && x.Data.HatId == petId)) {
+                            if (playerControl.CurrentPet) Object.Destroy(playerControl.CurrentPet.gameObject);
+                            playerControl.CurrentPet = Object.Instantiate(pet);
+                            playerControl.CurrentPet.transform.position = playerControl.transform.position;
+                            playerControl.CurrentPet.Source = playerControl;
+                            if (playerControl.Data != null) PlayerControl.SetPlayerMaterialColors(playerControl.Data.ColorId, playerControl.CurrentPet.rend);
+                        }
+                    });
 
                     break;
                 }
@@ -468,6 +477,7 @@ namespace Polus {
                     TempQueue.AddRange(Dispatcher);
                     Dispatcher.Clear();
                 }
+            else lock(Dispatcher) Dispatcher.Clear();
 
             foreach (Action t in TempQueue) {
                 CatchHelper.TryCatch(() => t());
