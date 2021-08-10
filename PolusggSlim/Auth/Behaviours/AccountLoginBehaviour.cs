@@ -141,21 +141,26 @@ namespace PolusggSlim.Auth.Behaviours
             var close = menuObj.FindRecursive(x => x.name.Contains("closeButton"));
 
             var emailField = CreateTextBoxTMP(emailObj);
-            var password = CreateTextBoxTMP(passwordObj);
+            var passwordField = CreateTextBoxTMP(passwordObj);
 
             emailField.AllowEmail = true;
             emailField.AllowPaste = true;
 
-            password.allowAllCharacters = true;
-            password.AllowPaste = true;
-            password.AllowSymbols = true;
-            password.AllowEmail = true;
+            passwordField.allowAllCharacters = true;
+            passwordField.AllowPaste = true;
+            passwordField.AllowSymbols = true;
+            passwordField.AllowEmail = true;
+            
+            
+            var focusSwitcher = menuObj.AddComponent<FocusSwitcher>();
+            focusSwitcher.TextBoxes.Add(emailField);
+            focusSwitcher.TextBoxes.Add(passwordField);
 
-            password.OnChange.AddListener(new Action(() =>
+            passwordField.OnChange.AddListener(new Action(() =>
             {
-                var starText = string.Join("", Enumerable.Repeat("*", password.text.Length));
-                password.outputText.text = starText;
-                password.outputText.ForceMeshUpdate(true, true);
+                var starText = string.Join("", Enumerable.Repeat("*", passwordField.text.Length));
+                passwordField.outputText.text = starText;
+                passwordField.outputText.ForceMeshUpdate(true, true);
             }));
 
             void LoginAction()
@@ -167,7 +172,7 @@ namespace PolusggSlim.Auth.Behaviours
                 AsyncCoroutine
                     .CoContinueTaskWith(Task.Run(async () =>
                     {
-                        return await Login(emailField.text, password.text);
+                        return await Login(emailField.text, passwordField.text);
                     }), loggedIn =>
                     {
                         loginButtonRenderer.color = textRenderer.color = new Color(1f, 1f, 1f, 1f);
@@ -181,8 +186,8 @@ namespace PolusggSlim.Auth.Behaviours
                         }
                         else
                         {
-                            password.text = "";
-                            password.outputText.text = "";
+                            passwordField.text = "";
+                            passwordField.outputText.text = "";
                             Coroutine.Start(new Coroutine.Il2CppEnumeratorWrapper(
                                 Effects.SwayX(loginButton.transform, 0.75f, 0.25f)
                             ));
@@ -192,7 +197,7 @@ namespace PolusggSlim.Auth.Behaviours
             }
 
             emailField.OnEnter.AddListener((Action) LoginAction);
-            password.OnEnter.AddListener((Action) LoginAction);
+            passwordField.OnEnter.AddListener((Action) LoginAction);
             loginButton.MakePassiveButton(LoginAction);
 
             background.MakePassiveButton(() => { }, false);
