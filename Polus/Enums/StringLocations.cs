@@ -6,5 +6,6 @@
         RoomTracker = 3,
         PingTracker = 4,
         TaskCompletion = 5,
+        MeetingButtonHudText = 6,
     }
 }

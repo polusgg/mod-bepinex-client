@@ -248,15 +248,10 @@ namespace Polus {
                             }
                             case StringLocations.TaskText: {
                                 HudUpdatePatch.TaskText = text == "__unset" ? null : text;
-                                /*if (PlayerControl.LocalPlayer) {
-                                    PogusPlugin.Logger.LogWarning("sup, youre rasgfe gfuywuy");
-                                    var importantTextTask =
-                                        new GameObject("_Player").AddComponent<ImportantTextTask>();
-                                    importantTextTask.transform.SetParent(PlayerControl.LocalPlayer.transform, false);
-                                    importantTextTask.Text = text;
-                                    PlayerControl.LocalPlayer.myTasks.Insert(0, importantTextTask);
-                                }*/
-
+                                break;
+                            }
+                            case StringLocations.MeetingButtonHudText: {
+                                EmergencyTextPatch.EmergencyText = text == "__unset" ? null : text;
                                 break;
                             }
                         }

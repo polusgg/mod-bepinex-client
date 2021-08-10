@@ -1,8 +1,10 @@
 ﻿using System;
 using HarmonyLib;
+using Polus.Extensions;
 using TMPro;
 using UnhollowerBaseLib;
 using UnityEngine;
+using LogLevel = BepInEx.Logging.LogLevel;
 
 namespace Polus.Patches.Temporary {
     [HarmonyPatch(typeof(HudManager), nameof(HudManager.Start))]
@@ -12,6 +14,7 @@ namespace Polus.Patches.Temporary {
             PingTrackerTextPatch.PingText = null;
             RoomTrackerTextPatch.RoomText = null;
             HudUpdatePatch.TaskText = null;
+            EmergencyTextPatch.EmergencyText = null;
         }
     }
     [HarmonyPatch(typeof(PingTracker), nameof(PingTracker.Update))]
@@ -116,5 +119,41 @@ namespace Polus.Patches.Temporary {
         }
     }
 
-    // public class 
+    [HarmonyPatch(typeof(EmergencyMinigame), nameof(EmergencyMinigame.Update))]
+    public class EmergencyTextPatch
+    {
+        public static string EmergencyText = null;
+        [HarmonyPostfix]
+        public static void Postfix(EmergencyMinigame __instance)
+        {
+            if (EmergencyText is not null)
+            {
+                var number = "";
+                number = PlayerControl.LocalPlayer.RemainingEmergencies.ToString();
+                if (ShipStatus.Instance.Timer < 15f || ShipStatus.Instance.EmergencyCooldown > 0f)
+                {
+                    int num = Mathf.CeilToInt(15f - ShipStatus.Instance.Timer);
+                    num = Mathf.Max(Mathf.CeilToInt(ShipStatus.Instance.EmergencyCooldown), num);
+                    num.Log(1, "", LogLevel.Fatal);
+                    number = DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.SecondsAbbv, new []
+                    {
+                        (Il2CppSystem.Object)num.ToString()
+                    });
+                }
+                
+                foreach (var pt in PlayerControl.LocalPlayer.myTasks)
+                {
+                    if (PlayerTask.TaskIsEmergency(pt))
+                    {
+                        number = "";
+                        break;
+                    }
+                }
+
+                number.Log(1, "", LogLevel.Fatal);
+                __instance.StatusText.text = String.Format(EmergencyText, number, PlayerControl.LocalPlayer.Data.PlayerName);
+                __instance.NumberText.text = "";
+            }
+        }
+    }
 }
