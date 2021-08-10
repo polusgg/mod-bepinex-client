@@ -8,7 +8,6 @@ namespace Polus.Behaviours.Inner {
         private static readonly int UILayer = LayerMask.NameToLayer("UI");
         private ArrowBehaviour arrow;
         private PolusNetworkTransform cnt;
-        private bool wasMissingParent = true;
 
         static PolusPoi() {
             ClassInjector.RegisterTypeInIl2Cpp<PolusPoi>();

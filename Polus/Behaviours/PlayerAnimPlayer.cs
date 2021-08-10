@@ -17,6 +17,7 @@ namespace Polus.Behaviours {
         public Color hatColor = Color.white;
         public Color petColor = Color.white;
         public Color skinColor = Color.white;
+        public float nameAlpha = 1.0f;
 
         static PlayerAnimPlayer() {
             ClassInjector.RegisterTypeInIl2Cpp<PlayerAnimPlayer>();
@@ -33,16 +34,15 @@ namespace Polus.Behaviours {
             Player.myRend.color = playerColor;
             Player.HatRenderer.color = hatColor;
             Player.MyPhysics.Skin.layer.color = skinColor;
+            Player.nameText.alpha = nameAlpha;
             if (!Player.CurrentPet) return;
-            if (!Player.CurrentPet.rend) return;
-            if (!Player.CurrentPet.shadowRend) return;
-            Player.CurrentPet.rend.color = petColor; 
-            Player.CurrentPet.shadowRend.color = petColor;
+            if (Player.CurrentPet.rend) Player.CurrentPet.rend.color = petColor;
+            if (Player.CurrentPet.shadowRend) Player.CurrentPet.shadowRend.color = petColor;
         }
 
         public void HandleMessage(MessageReader reader) {
             List<PlayerKeyframe> playerKeyframes = new();
-            bool[] field = BitfieldParser(reader.ReadUInt16(), 10);
+            bool[] field = BitfieldParser(reader.ReadUInt16(), 11);
             if (Player == null) Player = GetComponent<PlayerControl>();
             while (reader.Position < reader.Length - 1) {
                 MessageReader message = reader.ReadMessage();
@@ -56,15 +56,16 @@ namespace Polus.Behaviours {
                     field[1] ? message.ReadSingle() : null,
                     field[2] ? message.ReadSingle() : null,
                     field[3] ? message.ReadSingle() : null,
-                    field[4] ? new Color32(message.ReadByte(), message.ReadByte(), message.ReadByte(),
-                        message.ReadByte()) : null,
+                    field[4] ? message.ReadSingle() : null,
                     field[5] ? new Color32(message.ReadByte(), message.ReadByte(), message.ReadByte(),
                         message.ReadByte()) : null,
                     field[6] ? new Color32(message.ReadByte(), message.ReadByte(), message.ReadByte(),
                         message.ReadByte()) : null,
-                    field[7] ? message.ReadVector2() : null,
+                    field[7] ? new Color32(message.ReadByte(), message.ReadByte(), message.ReadByte(),
+                        message.ReadByte()) : null,
                     field[8] ? message.ReadVector2() : null,
-                    field[9] ? message.ReadSingle() : null,
+                    field[9] ? message.ReadVector2() : null,
+                    field[10] ? message.ReadSingle() : null,
                     Player,
                     this
                 ));
@@ -89,14 +90,15 @@ namespace Polus.Behaviours {
                     if (field[1]) current.HatOpacity = Mathf.Lerp(previous.HatOpacity.Value, current.HatOpacity.Value, dt);
                     if (field[2]) current.PetOpacity = Mathf.Lerp(previous.PetOpacity.Value, current.PetOpacity.Value, dt);
                     if (field[3]) current.SkinOpacity = Mathf.Lerp(previous.SkinOpacity.Value, current.SkinOpacity.Value, dt);
+                    if (field[4]) current.NameOpacity = Mathf.Lerp(previous.NameOpacity.Value, current.NameOpacity.Value, dt);
                     current.SetPlayerColors(
-                        field[4] ? Color.Lerp(previous.MainColor.Value, current.MainColor.Value, dt) : null,
-                        field[5] ? Color.Lerp(previous.ShadowColor.Value, current.ShadowColor.Value, dt) : null,
-                        field[6] ? Color.Lerp(previous.VisorColor.Value, current.VisorColor.Value, dt) : null
+                        field[5] ? Color.Lerp(previous.MainColor.Value, current.MainColor.Value, dt) : null,
+                        field[6] ? Color.Lerp(previous.ShadowColor.Value, current.ShadowColor.Value, dt) : null,
+                        field[7] ? Color.Lerp(previous.VisorColor.Value, current.VisorColor.Value, dt) : null
                     );
-                    if (field[7]) current.Scale = Vector2.Lerp(previous.Scale.Value, current.Scale.Value, dt);
-                    // if (field[8]) current.Position = Vector2.Lerp(previous.Position.Value, current.Position.Value, dt);
-                    if (field[9]) current.Angle = Mathf.Lerp(previous.Angle.Value, current.Angle.Value, dt);
+                    if (field[8]) current.Scale = Vector2.Lerp(previous.Scale.Value, current.Scale.Value, dt);
+                    // if (field[9]) current.Position = Vector2.Lerp(previous.Position.Value, current.Position.Value, dt);
+                    if (field[10]) current.Angle = Mathf.Lerp(previous.Angle.Value, current.Angle.Value, dt);
                 }));
 
                 i++;
@@ -108,10 +110,11 @@ namespace Polus.Behaviours {
             if (field[1]) resetTo.HatOpacity = resetTo.HatOpacity;
             if (field[2]) resetTo.PetOpacity = resetTo.PetOpacity;
             if (field[3]) resetTo.SkinOpacity = resetTo.SkinOpacity;
-            resetTo.SetPlayerColors(field[4] ? resetTo.MainColor : null, field[5] ? resetTo.ShadowColor : null, field[6] ? resetTo.VisorColor : null);
-            if (field[7]) resetTo.Scale = resetTo.Scale;
-            // if (field[8]) resetTo.Position = resetTo.Position;
-            if (field[9]) resetTo.Angle = resetTo.Angle;
+            if (field[4]) resetTo.NameOpacity = resetTo.NameOpacity;
+            resetTo.SetPlayerColors(field[5] ? resetTo.MainColor : null, field[6] ? resetTo.ShadowColor : null, field[7] ? resetTo.VisorColor : null);
+            if (field[8]) resetTo.Scale = resetTo.Scale;
+            // if (field[9]) resetTo.Position = resetTo.Position;
+            if (field[10]) resetTo.Angle = resetTo.Angle;
         }
 
         public bool[] BitfieldParser(ushort value, byte size) {
@@ -132,6 +135,7 @@ namespace Polus.Behaviours {
                 Player.HatRenderer.FrontLayer.color.a,
                 Player.CurrentPet.rend.color.a,
                 Player.MyPhysics.Skin.layer.color.a,
+                Player.nameText.alpha,
                 Player.myRend.material.GetColor(BackColorID),
                 Player.myRend.material.GetColor(BodyColorID),
                 Player.myRend.material.GetColor(VisorColorID),
@@ -151,6 +155,7 @@ namespace Polus.Behaviours {
             private readonly float? _hatOpacity;
             private readonly float? _petOpacity;
             private readonly float? _skinOpacity;
+            private readonly float? _nameOpacity;
             private readonly Color32? _mainColor;
             private readonly Color32? _shadowColor;
             private readonly Color32? _visorColor;
@@ -162,14 +167,15 @@ namespace Polus.Behaviours {
             private readonly PlayerControl _playerControl;
 
             public PlayerKeyframe(uint offset, uint duration, float? playerOpacity, float? hatOpacity, float? petOpacity,
-                float? skinOpacity, Color32? mainColor, Color32? shadowColor, Color32? visorColor, Vector2? scale,
-                Vector2? position, float? angle, PlayerControl playerControl, PlayerAnimPlayer animPlayer) {
+                float? skinOpacity, float? nameOpacity, Color32? mainColor, Color32? shadowColor, Color32? visorColor,
+                Vector2? scale, Vector2? position, float? angle, PlayerControl playerControl, PlayerAnimPlayer animPlayer) {
                 Offset = offset;
                 Duration = duration;
                 _playerOpacity = playerOpacity;
                 _hatOpacity = hatOpacity;
                 _petOpacity = petOpacity;
                 _skinOpacity = skinOpacity;
+                _nameOpacity = nameOpacity;
                 _mainColor = mainColor;
                 _shadowColor = shadowColor;
                 _visorColor = visorColor;
@@ -208,6 +214,13 @@ namespace Polus.Behaviours {
                 }
             }
 
+            public float? NameOpacity {
+                get => _nameOpacity;
+                set {
+                    if (value != null) _animPlayer.nameAlpha = value.Value;
+                }
+            }
+
             public Color? MainColor => _mainColor;
             public Color? ShadowColor => _shadowColor;
             public Color? VisorColor => _visorColor;
@@ -216,8 +229,7 @@ namespace Polus.Behaviours {
                 get => _scale;
                 set {
                     if (value == null) return;
-                    Transform transform1 = _playerControl.transform;
-                    transform1.eulerAngles = value.Value;
+                    _playerControl.transform.localScale = new Vector3(value.Value.x, value.Value.y, 0);
                 }
             }
 

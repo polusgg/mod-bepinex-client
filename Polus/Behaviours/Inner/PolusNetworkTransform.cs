@@ -9,8 +9,8 @@ using UnityEngine;
 
 namespace Polus.Behaviours.Inner {
     public class PolusNetworkTransform : PnoBehaviour {
-        public static readonly FloatRange XRange = new(50f, -50f);
-        public static readonly FloatRange YRange = new(50f, -50f);
+        public static readonly FloatRange XRange = new(-50f, 50f);
+        public static readonly FloatRange YRange = new(-50f, 50f);
 
         private int? parent;
         // private Vector2 _start;

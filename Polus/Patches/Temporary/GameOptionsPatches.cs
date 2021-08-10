@@ -184,24 +184,24 @@ namespace Polus.Patches.Temporary {
 
             public static void HandleNumberChanged(OptionBehaviour toggleBehaviour) {
                 UpdateHudString();
-                NumberOption toggle = toggleBehaviour.Cast<NumberOption>();
-                GameOption gameOption = OptionMap[toggle.TitleText.text];
+                NumberOption floatOption = toggleBehaviour.Cast<NumberOption>();
+                GameOption gameOption = OptionMap[floatOption.TitleText.text];
                 FloatValue value = (FloatValue) gameOption.Value;
-                value.Value = (uint) toggle.Value;
+                value.Value = (uint) floatOption.Value;
                 MessageWriter writer = MessageWriter.Get(SendOption.Reliable);
                 writer.StartMessage((byte) PolusRootPackets.SetGameOption);
                 writer.Write((ushort) 0);
                 writer.Write(gameOption.CategoryName);
                 writer.Write(gameOption.Priority);
-                writer.Write(toggle.TitleText.text);
+                writer.Write(floatOption.TitleText.text);
                 writer.Write((byte) 0);
-                writer.Write(toggle.Value);
+                writer.Write(floatOption.Value);
                 // just for the fans (not used on server, just to avoid server crashes)
-                writer.Write(toggle.Increment);
-                writer.Write(toggle.ValidRange.min);
-                writer.Write(toggle.ValidRange.max);
-                writer.Write(toggle.ZeroIsInfinity);
-                writer.Write(toggle.FormatString);
+                writer.Write(floatOption.Increment);
+                writer.Write(floatOption.ValidRange.min);
+                writer.Write(floatOption.ValidRange.max);
+                writer.Write(floatOption.ZeroIsInfinity);
+                writer.Write(floatOption.FormatString);
                 PolusMod.EndSend(writer);
             }
 

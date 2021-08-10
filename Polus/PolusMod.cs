@@ -123,12 +123,13 @@ namespace Polus {
                     break;
                 }
                 case PolusRpcCalls.SetOpacity: {
-                    PlayerAnimPlayer animator = netObject.Cast<PlayerControl>().gameObject.EnsureComponent<PlayerAnimPlayer>();
+                    PlayerAnimPlayer animator = netObject.gameObject.EnsureComponent<PlayerAnimPlayer>();
                     float alpha = reader.ReadByte() / 255.0f;
                     animator.playerColor.a = alpha;
                     animator.hatColor.a = alpha;
                     animator.petColor.a = alpha;
                     animator.skinColor.a = alpha;
+                    animator.nameAlpha = alpha;
                     break;
                 }
                 case PolusRpcCalls.SetOutline: {
