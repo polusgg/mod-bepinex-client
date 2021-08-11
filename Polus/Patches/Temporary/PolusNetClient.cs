@@ -102,13 +102,6 @@ namespace Polus.Patches.Temporary {
                             reader.Position = pos;
                             return true;
                         }
-
-                        if (netId != 4294967295U && !instance.DestroyedObjects.Contains(netId) &&
-                            !objectManager
-                                .IsDestroyed(netId)) // DeferMessage(cnt, reader, "Stored RPC for " + netId);
-                            return false;
-
-                        return false;
                     }
                     case 4: {
                         uint num3 = reader.ReadPackedUInt32();

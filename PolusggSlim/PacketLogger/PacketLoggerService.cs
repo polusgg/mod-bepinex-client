@@ -45,10 +45,8 @@ namespace PolusggSlim.PacketLogger
         {
             try
             {
-                _logFileStream.WriteByte(0x81);
                 foreach (var packet in _packetQueue.GetConsumingEnumerable())
                 {
-                    _logFileStream.WriteByte(0x81);
                     _logFileStream.Write(packet);
                 }
                 _logFileStream.Flush(true);

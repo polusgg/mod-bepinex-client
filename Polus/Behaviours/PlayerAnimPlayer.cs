@@ -35,6 +35,7 @@ namespace Polus.Behaviours {
             Player.HatRenderer.color = hatColor;
             Player.MyPhysics.Skin.layer.color = skinColor;
             Player.nameText.alpha = nameAlpha;
+
             if (!Player.CurrentPet) return;
             if (Player.CurrentPet.rend) Player.CurrentPet.rend.color = petColor;
             if (Player.CurrentPet.shadowRend) Player.CurrentPet.shadowRend.color = petColor;

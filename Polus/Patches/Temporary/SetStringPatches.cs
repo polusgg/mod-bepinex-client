@@ -76,7 +76,7 @@ namespace Polus.Patches.Temporary {
                 return false;
             }
 
-            __instance.text.text = __instance.LastRoom ? __instance.LastRoom.name : "";
+            __instance.text.text = __instance.LastRoom ? DestroyableSingleton<TranslationController>.Instance.GetString(__instance.LastRoom.RoomId) : "";
 
             // if (!Enum.IsDefined(typeof(SystemTypes), __instance.text.text))
             // {
