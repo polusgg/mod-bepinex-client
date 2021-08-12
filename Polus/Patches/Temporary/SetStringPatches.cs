@@ -20,9 +20,11 @@ namespace Polus.Patches.Temporary {
     [HarmonyPatch(typeof(PingTracker), nameof(PingTracker.Update))]
     public static class PingTrackerTextPatch {
         public static string PingText;
-        #if DEBUG
-        public static int _counter = 5;
-        #endif
+#if DEBUG
+        private static int _counter = 5;
+        private static bool _displayed;
+#endif
+        
 
         [HarmonyPostfix]
         public static void Update(PingTracker __instance) {
@@ -33,9 +35,13 @@ namespace Polus.Patches.Temporary {
                 pos.AdjustPosition();
                 __instance.useGUILayout = false;
             }
-            #if DEBUG
+#if DEBUG
             if (GameData.Instance)
-                if (_counter-- <= 0) {
+            {
+                if (Input.GetKeyDown(KeyCode.F3))
+                    _displayed = !_displayed;
+
+                if (_counter-- <= 0 && _displayed) {
                     string textText = "\n";
                     foreach (GameData.PlayerInfo player in GameData.Instance.AllPlayers) {
                         Append(ref textText,
@@ -48,7 +54,8 @@ namespace Polus.Patches.Temporary {
                     }
                     __instance.text.text += textText;
                 }
-            #endif
+            }
+#endif
 
             if (PingText is not null) __instance.text.text = PingText.Replace("%s", AmongUsClient.Instance.Ping.ToString());
         }
