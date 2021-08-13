@@ -514,6 +514,8 @@ namespace Polus {
             maintnet.AddComponent<MaintenanceBehaviour>();
             PingTrackerTextPatch.PingText = null;
             RoomTrackerTextPatch.RoomText = null;
+            StupidModStampPatches.TextColor = null;
+            StupidModStampPatches.Suffix = "";
             ResizeHandlerPatch.SetResolution(Screen.width, Screen.height);
             AmongUsClient.Instance.mode = MatchMakerModes.Client;
         }
@@ -524,6 +526,8 @@ namespace Polus {
             PingTrackerTextPatch.PingText = null;
             RoomTrackerTextPatch.RoomText = null;
             GameOptionsPatches.OnEnablePatch.Reset();
+            StupidModStampPatches.TextColor = null;
+            StupidModStampPatches.Suffix = "";
         }
 
         public override void PlayerSpawned(PlayerControl player) { }
