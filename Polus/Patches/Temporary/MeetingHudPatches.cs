@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using System.Linq;
+using HarmonyLib;
 using Hazel;
 using Polus.Behaviours;
 using UnityEngine;
@@ -55,11 +56,12 @@ namespace Polus.Patches.Temporary {
 
         [HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.UpdateButtons))]
         public class ForegroundSetter {
+            private static bool IsDead(MeetingHud mhud, PlayerControl control) => mhud.playerStates.First(state => state.TargetPlayerId == control.PlayerId).AmDead; 
             [HarmonyPostfix]
             public static void UpdateButtons(MeetingHud __instance) {
                 __instance.SortButtons();
-                if (PlayerControl.LocalPlayer.Data.IsDead == __instance.amDead) return;
-                bool shouldBeDead = PlayerControl.LocalPlayer.Data.IsDead;
+                bool shouldBeDead = IsDead(__instance, PlayerControl.LocalPlayer);
+                if (shouldBeDead == __instance.amDead) return;
                 __instance.amDead = shouldBeDead;
                 __instance.SkipVoteButton.gameObject.SetActive(!shouldBeDead);
                 __instance.Glass.sprite = shouldBeDead ? __instance.CrackedGlass : GrabUncrackedGlassPatch.UncrackedGlass;

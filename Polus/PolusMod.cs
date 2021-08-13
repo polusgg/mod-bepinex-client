@@ -329,11 +329,11 @@ namespace Polus {
                     bool isFree = reader.ReadBoolean();
                     
                     AddDispatch(() => {
-                        PetBehaviour pet = Object.Instantiate(Cache.CachedFiles[resourceId].Get<GameObject>()).GetComponent<PetBehaviour>();
+                        PetBehaviour pet = (Cache.CachedFiles[resourceId].Get<GameObject>()).GetComponent<PetBehaviour>();
                         CosmeticManager.Instance.SetPet((uint) petId, pet);
                         pet.Free = isFree;
                         RefreshCpmTab();
-                        foreach (PlayerControl playerControl in PlayerControl.AllPlayerControls.ToArray().Where(x => x.Data != null && x.Data.HatId == petId)) {
+                        foreach (PlayerControl playerControl in PlayerControl.AllPlayerControls.ToArray().Where(x => x.Data != null && x.Data.PetId == petId)) {
                             if (playerControl.CurrentPet) Object.Destroy(playerControl.CurrentPet.gameObject);
                             playerControl.CurrentPet = Object.Instantiate(pet);
                             playerControl.CurrentPet.transform.position = playerControl.transform.position;
@@ -473,7 +473,10 @@ namespace Polus {
                     TempQueue.AddRange(Dispatcher);
                     Dispatcher.Clear();
                 }
-            else lock(Dispatcher) Dispatcher.Clear();
+
+            if (AmongUsClient.Instance && !AmongUsClient.Instance.AmConnected) {
+                lock(Dispatcher) Dispatcher.Clear();
+            }
 
             foreach (Action t in TempQueue) {
                 CatchHelper.TryCatch(() => t());

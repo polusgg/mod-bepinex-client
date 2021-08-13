@@ -122,7 +122,7 @@ namespace Polus.Behaviours {
             bool[] output = new bool[size];
             for (byte i = 0; i < size; i++) {
                 output[i] = (value & (1 << i)) != 0;
-                PogusPlugin.Logger.LogInfo($"{i} {output[i]}");
+                // PogusPlugin.Logger.LogInfo($"{i} {output[i]}");
             }
             return output;
         }
@@ -134,7 +134,7 @@ namespace Polus.Behaviours {
                 0,
                 Player.myRend.color.a,
                 Player.HatRenderer.FrontLayer.color.a,
-                Player.CurrentPet.rend.color.a,
+                Player.CurrentPet ? Player.CurrentPet.rend.color.a : 1f,
                 Player.MyPhysics.Skin.layer.color.a,
                 Player.nameText.alpha,
                 Player.myRend.material.GetColor(BackColorID),
