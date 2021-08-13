@@ -28,6 +28,7 @@ namespace Polus.Behaviours.Inner {
         private float currentTimer;
         private float maxTimer;
         private TMP_Text timerText;
+        private KeyCode[] keys;
 
         public bool IsHudButton => netTransform.IsHudButton;
         public bool IsLocked => IsHudButton && locks.Any(lck => lck);
@@ -60,6 +61,8 @@ namespace Polus.Behaviours.Inner {
                 Deserialize(pno.GetSpawnData());
                 CooldownHelpers.SetCooldownNormalizedUvs(graphic.renderer);
             }
+
+            if (keys.Any(Input.GetKeyDown)) OnClick();
 
             graphic.renderer.enabled = !locks[(int) ButtonLocks.SetHudActive];
 
@@ -103,6 +106,8 @@ namespace Polus.Behaviours.Inner {
             isCountingDown = reader.ReadBoolean().Log(3, "now counting down");
             saturated = reader.ReadBoolean();
             color = new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
+            keys = new KeyCode[reader.BytesRemaining / 2];
+            for (int i = 0; i < keys.Length; i++) keys[i] = (KeyCode) reader.ReadUInt16();
         }
 
         public void SetCooldown() {

@@ -81,9 +81,10 @@ namespace Polus.Patches.Temporary {
                                 option.Increment = value.Step;
                                 option.ValidRange = new FloatRange(value.Lower, value.Upper);
                                 option.Value = value.Value;
-                                option.TitleText.text = gameOption.Title;
                                 option.FormatString = value.FormatString;
                                 option.ZeroIsInfinity = value.IsInfinity;
+                                option.TitleText.text = gameOption.Title;
+                                option.ValueText.text = option.ZeroIsInfinity ? "∞" : string.Format(option.FormatString, option.Value);
                                 if (!AmongUsClient.Instance.AmHost) option.SetAsPlayer();
                                 options.Add(option.transform);
                                 break;
@@ -185,9 +186,10 @@ namespace Polus.Patches.Temporary {
             public static void HandleNumberChanged(OptionBehaviour toggleBehaviour) {
                 UpdateHudString();
                 NumberOption floatOption = toggleBehaviour.Cast<NumberOption>();
+                floatOption.ValueText.text = string.Format(floatOption.FormatString, floatOption.Value);
                 GameOption gameOption = OptionMap[floatOption.TitleText.text];
                 FloatValue value = (FloatValue) gameOption.Value;
-                value.Value = (uint) floatOption.Value;
+                value.Value = (uint) floatOption.GetFloat();
                 MessageWriter writer = MessageWriter.Get(SendOption.Reliable);
                 writer.StartMessage((byte) PolusRootPackets.SetGameOption);
                 writer.Write((ushort) 0);
@@ -211,6 +213,7 @@ namespace Polus.Patches.Temporary {
                 GameOption gameOption = OptionMap[toggle.TitleText.text];
                 EnumValue value = (EnumValue) gameOption.Value;
                 value.OptionIndex = (uint) toggle.Selected;
+                toggle.ValueText.text = value.Values[value.OptionIndex];
                 MessageWriter writer = MessageWriter.Get(SendOption.Reliable);
                 writer.StartMessage((byte) PolusRootPackets.SetGameOption);
                 writer.Write((ushort) 0);
@@ -433,11 +436,6 @@ namespace Polus.Patches.Temporary {
         public class NumberButtonFixedUpdatePatch {
             [HarmonyPrefix]
             public static bool OnEnable(NumberOption __instance) {
-                if (Math.Abs(__instance.oldValue - __instance.Value) > 0.001f) {
-                    __instance.oldValue = __instance.Value;
-                    __instance.ValueText.text = string.Format(__instance.FormatString, __instance.Value);
-                }
-
                 return false;
             }
         }
