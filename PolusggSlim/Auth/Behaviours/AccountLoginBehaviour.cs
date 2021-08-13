@@ -80,6 +80,8 @@ namespace PolusggSlim.Auth.Behaviours
             if (_authContext.LoggedIn)
                 UpdateGameSettingsWithName(_authContext.DisplayName);
 
+            UpdateJoinGameButtonState(_authContext.LoggedIn);
+            
             CheckLogin();
         }
 
@@ -181,6 +183,8 @@ namespace PolusggSlim.Auth.Behaviours
                             _loggedInMenu.active = true;
                             _topButtonBar.active = false;
                             
+                            UpdateJoinGameButtonState(true);
+                            
                             UpdateGameSettingsWithName(_authContext.DisplayName);
                             Destroy(menuObj);
                         }
@@ -267,6 +271,8 @@ namespace PolusggSlim.Auth.Behaviours
             
             _loggedInMenu.active = _authContext.LoggedIn;
             _topButtonBar.active = !_authContext.LoggedIn;
+
+            UpdateJoinGameButtonState(_authContext.LoggedIn);
             
             _authContext.DeleteSaveFile();
         }
@@ -279,6 +285,26 @@ namespace PolusggSlim.Auth.Behaviours
             
             var tmp = _loggedInMenu.GetComponentInChildren<TextMeshPro>();
             tmp.text = $"Welcome, {displayName}";
+        }
+
+        private void UpdateJoinGameButtonState(bool enabled)
+        {
+            var rendererColor = new Color(1f, 1f, 1f, enabled ? 1f : 0.3f);
+            
+            var button = GameObject.Find("NormalMenu/HostGameButton/CreateGameButton");
+            button.GetComponent<PassiveButton>().enabled = enabled;
+            button.GetComponent<SpriteRenderer>().color = rendererColor;
+            
+
+            button = GameObject.Find("NormalMenu/FindGameButton/FindGameButton");
+            button.GetComponent<PassiveButton>().enabled = enabled;
+            button.GetComponent<SpriteRenderer>().color = rendererColor;
+            
+            var gameIdField = GameObject.Find("NormalMenu/JoinGameButton/GameIdText");
+            gameIdField.transform.Find("Background").GetComponent<SpriteRenderer>().color = rendererColor;
+            gameIdField.transform.Find("arrowEnter").gameObject.active = enabled;
+            gameIdField.GetComponent<PassiveButton>().enabled = enabled;
+            gameIdField.GetComponent<TextBoxTMP>().enabled = enabled;
         }
 
 
