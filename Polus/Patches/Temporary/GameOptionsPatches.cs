@@ -194,7 +194,7 @@ namespace Polus.Patches.Temporary {
                 writer.Write((ushort) 0);
                 writer.Write(gameOption.CategoryName);
                 writer.Write(gameOption.Priority);
-                writer.Write(toggleOption.TitleText.text);
+                writer.Write(gameOption.Title);
                 writer.Write((byte) 1);
                 writer.Write(toggleOption.CheckMark.enabled);
                 PolusMod.EndSend(writer);
@@ -212,7 +212,7 @@ namespace Polus.Patches.Temporary {
                 writer.Write((ushort) 0);
                 writer.Write(gameOption.CategoryName);
                 writer.Write(gameOption.Priority);
-                writer.Write(floatOption.TitleText.text);
+                writer.Write(gameOption.Title);
                 writer.Write((byte) 0);
                 writer.Write(floatOption.Value);
                 // just for the fans (not used on server, just to avoid server crashes)
@@ -236,7 +236,7 @@ namespace Polus.Patches.Temporary {
                 writer.Write((ushort) 0);
                 writer.Write(gameOption.CategoryName);
                 writer.Write(gameOption.Priority);
-                writer.Write(stringOption.TitleText.text);
+                writer.Write(gameOption.Title);
                 writer.Write((byte) OptionType.Enum);
                 writer.WritePacked(stringOption.Selected);
                 // just for the fans (not used on server, just to avoid server crashes)
@@ -318,7 +318,7 @@ namespace Polus.Patches.Temporary {
                                 category = NoCategory;
                             }
 
-                            if (category.Any(x => x.Title == SanitizeName(name))) {
+                            if (category.Any(x => x.Title == name)) {
                                 GameOption option = category.Find(x => x.Title == name);
                                 option.Value = optionType switch {
                                     OptionType.Boolean => new BooleanValue(reader.ReadBoolean()),
