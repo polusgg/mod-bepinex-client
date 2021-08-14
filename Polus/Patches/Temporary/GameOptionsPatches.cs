@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using HarmonyLib;
 using Hazel;
@@ -117,7 +118,8 @@ namespace Polus.Patches.Temporary {
 
                                 option.Selected = (int) value.OptionIndex;
                                 option.ValueText.text = value.Values[value.OptionIndex];
-                                option.TitleText.text = SanitizeName(gameOption.Title);;
+                                option.TitleText.text = SanitizeName(gameOption.Title);
+
                                 if (!AmongUsClient.Instance.AmHost) option.SetAsPlayer();
                                 options.Add(option.transform);
                                 break;
@@ -166,7 +168,6 @@ namespace Polus.Patches.Temporary {
             }
 
             private static string SanitizeName(string name) {
-
                 while (true) {
                     int pos;
                     if ((pos = name.IndexOf("<sprite", StringComparison.Ordinal)) != -1 && name.IndexOf('>', pos) != -1) {
@@ -183,7 +184,6 @@ namespace Polus.Patches.Temporary {
             }
 
             public static void HandleToggleChanged(OptionBehaviour toggleBehaviour) {
-                UpdateHudString();
                 ToggleOption toggleOption = toggleBehaviour.Cast<ToggleOption>();
                 GameOption gameOption = OptionMap[toggleOption.name];
                 BooleanValue value = (BooleanValue) gameOption.Value;
@@ -198,14 +198,14 @@ namespace Polus.Patches.Temporary {
                 writer.Write((byte) 1);
                 writer.Write(toggleOption.CheckMark.enabled);
                 PolusMod.EndSend(writer);
+                UpdateHudString();
             }
 
             public static void HandleNumberChanged(OptionBehaviour numberBehaviour) {
-                UpdateHudString();
                 NumberOption floatOption = numberBehaviour.Cast<NumberOption>();
                 GameOption gameOption = OptionMap[floatOption.name];
                 FloatValue value = (FloatValue) gameOption.Value;
-                value.Value = (uint) floatOption.GetFloat().Log(comment: "A");
+                value.Value = floatOption.GetFloat();
                 floatOption.ValueText.text = floatOption.ZeroIsInfinity && value.Value == 0 ? "∞" : string.Format(floatOption.FormatString, floatOption.Value);
                 MessageWriter writer = MessageWriter.Get(SendOption.Reliable);
                 writer.StartMessage((byte) PolusRootPackets.SetGameOption);
@@ -214,7 +214,7 @@ namespace Polus.Patches.Temporary {
                 writer.Write(gameOption.Priority);
                 writer.Write(floatOption.TitleText.text);
                 writer.Write((byte) 0);
-                writer.Write(floatOption.Value.Log(comment: "B"));
+                writer.Write(floatOption.Value);
                 // just for the fans (not used on server, just to avoid server crashes)
                 writer.Write(floatOption.Increment);
                 writer.Write(floatOption.ValidRange.min);
@@ -222,10 +222,10 @@ namespace Polus.Patches.Temporary {
                 writer.Write(floatOption.ZeroIsInfinity);
                 writer.Write(floatOption.FormatString);
                 PolusMod.EndSend(writer);
+                UpdateHudString();
             }
 
             public static void HandleStringChanged(OptionBehaviour enumBehaviour) {
-                UpdateHudString();
                 KeyValueOption stringOption = enumBehaviour.Cast<KeyValueOption>();
                 GameOption gameOption = OptionMap[stringOption.name];
                 EnumValue value = (EnumValue) gameOption.Value;
@@ -242,8 +242,8 @@ namespace Polus.Patches.Temporary {
                 // just for the fans (not used on server, just to avoid server crashes)
                 foreach (Il2CppSystem.Collections.Generic.KeyValuePair<string, int> keyValuePair in stringOption.Values)
                     writer.Write(keyValuePair.key);
-
                 PolusMod.EndSend(writer);
+                UpdateHudString();
             }
 
             private static ushort _nextSequenceReceived;
@@ -264,6 +264,7 @@ namespace Polus.Patches.Temporary {
                         $"Holding seqid {sequenceId}, currently on {_nextSequenceReceived}".Log();
                         return;
                     }
+
                     while (_packetQueue.ContainsKey(_nextSequenceReceived)) {
                         CatchHelper.TryCatch(() => HandlePacket(_packetQueue[_nextSequenceReceived]));
                         _packetQueue.Remove(_nextSequenceReceived);
@@ -273,7 +274,8 @@ namespace Polus.Patches.Temporary {
             }
 
             private static void HandlePacket(GameOptionPacket packet) {
-                /*lock (Lockable)*/ {
+                /*lock (Lockable)*/
+                {
                     MessageReader reader = MessageReader.GetSized(packet.Reader.Length);
                     reader.Buffer = packet.Reader;
                     reader.Length = packet.Reader.Length;
@@ -282,7 +284,7 @@ namespace Polus.Patches.Temporary {
                         case OptionPacketType.DeleteOption: {
                             string name = reader.ReadString();
                             // (string categoryName, List<GameOption> category) = NoCategory.Any(x => x.Title == name) ? ("", NoCategory) : ;
-                            KeyValuePair<string,List<GameOption>>[] allCategories = Categories.Append(new KeyValuePair<string, List<GameOption>>("", NoCategory)).ToArray();
+                            KeyValuePair<string, List<GameOption>>[] allCategories = Categories.Append(new KeyValuePair<string, List<GameOption>>("", NoCategory)).ToArray();
                             var options = allCategories
                                 .SelectMany(x => x.Value)
                                 .Where(x => x.Title == name)
@@ -531,7 +533,6 @@ namespace Polus.Patches.Temporary {
             public float Lower;
             public float Step;
             public float Upper;
-
             public float Value;
 
             public FloatValue(float value, float step, float lower, float upper, bool isInfinity, string formatString) {
@@ -547,6 +548,14 @@ namespace Polus.Patches.Temporary {
         public class TitleOption : MonoBehaviour {
             public TextMeshPro title;
             public TitleOption(IntPtr ptr) : base(ptr) { }
+        }
+
+        [HarmonyPatch(typeof(LobbyBehaviour), nameof(LobbyBehaviour.FixedUpdate))]
+        public static class LobbyBehaviourFixedUpdate {
+            [HarmonyPrefix]
+            public static bool FixedUpdate() {
+                return false;
+            }
         }
 
         [HarmonyPatch(typeof(GameOptionsData), nameof(GameOptionsData.ToHudString))]

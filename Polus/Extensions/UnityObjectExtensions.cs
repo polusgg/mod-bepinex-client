@@ -11,7 +11,9 @@ namespace Polus.Extensions {
         }
 
         public static T EnsureComponent<T>(this GameObject gameObject) where T : Component {
-            return gameObject.GetComponent<T>() ?? gameObject.AddComponent<T>();
+            T t = gameObject.GetComponent<T>();
+            if (t != null) return t;
+            return gameObject.AddComponent<T>();
         }
 
         // public static T EnsureComponent<T>(this Component gameObject) where T : Component {

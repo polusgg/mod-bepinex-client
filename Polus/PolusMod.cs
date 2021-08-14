@@ -2,7 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using BepInEx.Logging;
+using Gma.QrCodeNet.Encoding;
 using HarmonyLib;
 using Hazel;
 using InnerNet;
@@ -17,6 +19,8 @@ using Polus.Patches.Temporary;
 using Polus.Resources;
 using Polus.Utils;
 using PowerTools;
+using QRCoder;
+using QRCoder.Unity;
 using TMPro;
 using UnhollowerBaseLib;
 using UnityEngine;
@@ -34,6 +38,7 @@ namespace Polus {
         private ICache Cache;
         private bool loaded;
         private bool optionsDirty;
+        private bool lobbyExisted;
         public static PolusMod Instance;
         private GameObject maintnet;
         private static CoroutineManager coMan;
@@ -65,17 +70,12 @@ namespace Polus {
             PogusPlugin.ObjectManager.Register(0x88, RegisterPnos.CreateCameraController(PogusPlugin.ObjectManager));
             PogusPlugin.ObjectManager.Register(0x89, RegisterPnos.CreatePrefabHandle(PogusPlugin.ObjectManager));
 
-            // TMP_Settings.instance.m_defaultSpriteAsset = 
-
             Cache = PogusPlugin.Cache;
 
             ModManager.Instance.ShowModStamp();
         }
 
-        public override void Stop() {
-            // if (PolusDiscordManager.Instance) Object.Destroy(PolusDiscordManager.Instance.gameObject);
-            // DiscordManager.Instance.Start();
-        }
+        public override void Stop() { }
 
         private void OnInnerRpcReceived(InnerNetObject netObject, MessageReader reader, byte callId) {
             PlayerControl playerControl;
@@ -309,11 +309,12 @@ namespace Polus {
                     int hatId = (int) reader.ReadPackedUInt32();
                     uint resourceId = reader.ReadPackedUInt32();
                     bool isFree = reader.ReadBoolean();
-                    
+
                     AddDispatch(() => {
                         HatBehaviour hat = Cache.CachedFiles[resourceId].Get<HatBehaviour>();
                         CosmeticManager.Instance.SetHat((uint) hatId, hat);
                         if (isFree) hat.LimitedMonth = 0;
+                        if (hat.AltShader != null) hat.AltShader = PlayerControl.LocalPlayer.myRend.material;
                         RefreshCpmTab();
                         foreach (PlayerControl playerControl in PlayerControl.AllPlayerControls.ToArray().Where(x => x.Data != null && x.Data.HatId == hatId)) {
                             playerControl.HatRenderer.SetHat(hat, playerControl.Data.ColorId);
@@ -327,9 +328,9 @@ namespace Polus {
                     int petId = (int) reader.ReadPackedUInt32();
                     uint resourceId = reader.ReadPackedUInt32();
                     bool isFree = reader.ReadBoolean();
-                    
+
                     AddDispatch(() => {
-                        PetBehaviour pet = (Cache.CachedFiles[resourceId].Get<GameObject>()).GetComponent<PetBehaviour>();
+                        PetBehaviour pet = Cache.CachedFiles[resourceId].Get<GameObject>().GetComponent<PetBehaviour>();
                         CosmeticManager.Instance.SetPet((uint) petId, pet);
                         pet.Free = isFree;
                         RefreshCpmTab();
@@ -408,9 +409,26 @@ namespace Polus {
                     ServerMigrationPatches.HostGamePacketChange.Migrated = true;
                     break;
                 }
-                case PolusRootPackets.ModstampSetString: {
+                case PolusRootPackets.StampSetString: {
                     StupidModStampPatches.TextColor = reader.ReadColor();
                     StupidModStampPatches.Suffix = reader.ReadString();
+                    break;
+                }
+                case PolusRootPackets.SetQrCodeContents: {
+                    
+                    // qr.Start();
+                    // if (qr.SetVisible(reader.ReadBoolean())) {
+                    //     string data = reader.ReadString();
+                    //
+                    //     AddDispatch(() => {
+                    //         QRCodeGenerator qrGenerator = new();
+                    //         QRCodeData qrCodeData = qrGenerator.CreateQrCode(data.Log(comment: "perhaps"), QRCodeGenerator.ECCLevel.L, true, false, QRCodeGenerator.EciMode.Default, -1);
+                    //         UnityQRCode qrCode = new(qrCodeData);
+                    //         Texture2D qrCodeAsTexture2D = qrCode.GetGraphic(2);
+                    //         qr.SetCode(qrCodeAsTexture2D);
+                    //     });
+                    // }
+
                     break;
                 }
                 default: {
@@ -468,14 +486,15 @@ namespace Polus {
                 PolusClickBehaviour.SetLock(ButtonLocks.PlayerCanMove, CannotMove);
             }
 
-            if (AmongUsClient.Instance && AmongUsClient.Instance.InOnlineScene)
-                lock (Dispatcher) {
+            lock (Dispatcher) {
+                if (AmongUsClient.Instance && AmongUsClient.Instance.InOnlineScene) {
                     TempQueue.AddRange(Dispatcher);
                     Dispatcher.Clear();
                 }
 
-            if (AmongUsClient.Instance && !AmongUsClient.Instance.AmConnected) {
-                lock(Dispatcher) Dispatcher.Clear();
+                if (AmongUsClient.Instance && !AmongUsClient.Instance.AmConnected) {
+                    Dispatcher.Clear();
+                }
             }
 
             foreach (Action t in TempQueue) {
@@ -483,6 +502,11 @@ namespace Polus {
             }
 
             TempQueue.Clear();
+            if (LobbyBehaviour.Instance != lobbyExisted) {
+                lobbyExisted = LobbyBehaviour.Instance;
+                if (lobbyExisted) optionsDirty = true;
+            }
+            if (HudManager.InstanceExists) HudManager.Instance.GameSettings.gameObject.SetActive(LobbyBehaviour.Instance);
             if (!optionsDirty) return;
             GameSettingMenu menu = Object.FindObjectOfType<GameSettingMenu>();
             if (menu) menu.OnEnable();
