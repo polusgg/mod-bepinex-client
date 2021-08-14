@@ -83,8 +83,8 @@ namespace Polus.Patches.Temporary {
                                 option.Value = value.Value;
                                 option.FormatString = value.FormatString;
                                 option.ZeroIsInfinity = value.IsInfinity;
-                                option.TitleText.text = gameOption.Title;
-                                option.ValueText.text = option.ZeroIsInfinity ? "∞" : string.Format(option.FormatString, option.Value);
+                                option.TitleText.text = SanitizeName(gameOption.Title);
+                                option.ValueText.text = option.ZeroIsInfinity && value.Value == 0 ? "∞" : string.Format(option.FormatString, option.Value);
                                 if (!AmongUsClient.Instance.AmHost) option.SetAsPlayer();
                                 options.Add(option.transform);
                                 break;
@@ -95,7 +95,7 @@ namespace Polus.Patches.Temporary {
                                     Object.Instantiate(_boolOption);
                                 option.name = gameOption.Title;
                                 option.CheckMark.enabled = value.Value;
-                                option.TitleText.text = gameOption.Title;
+                                option.TitleText.text = SanitizeName(gameOption.Title);
                                 if (!AmongUsClient.Instance.AmHost)
                                     option.GetComponent<PassiveButton>().enabled = false;
                                 options.Add(option.transform);
@@ -117,7 +117,7 @@ namespace Polus.Patches.Temporary {
 
                                 option.Selected = (int) value.OptionIndex;
                                 option.ValueText.text = value.Values[value.OptionIndex];
-                                option.TitleText.text = gameOption.Title;
+                                option.TitleText.text = SanitizeName(gameOption.Title);;
                                 if (!AmongUsClient.Instance.AmHost) option.SetAsPlayer();
                                 options.Add(option.transform);
                                 break;
@@ -165,31 +165,48 @@ namespace Polus.Patches.Temporary {
                 return true;
             }
 
+            private static string SanitizeName(string name) {
+
+                while (true) {
+                    int pos;
+                    if ((pos = name.IndexOf("<sprite", StringComparison.Ordinal)) != -1 && name.IndexOf('>', pos) != -1) {
+                        int second = name.IndexOf('>', pos) + 1;
+                        while (second + 1 < name.Length && name[second] == ' ') second++;
+                        name = name[..pos] + name[second..];
+                        continue;
+                    }
+
+                    break;
+                }
+
+                return name;
+            }
+
             public static void HandleToggleChanged(OptionBehaviour toggleBehaviour) {
                 UpdateHudString();
-                ToggleOption toggle = toggleBehaviour.Cast<ToggleOption>();
-                GameOption gameOption = OptionMap[toggle.TitleText.text];
+                ToggleOption toggleOption = toggleBehaviour.Cast<ToggleOption>();
+                GameOption gameOption = OptionMap[toggleOption.name];
                 BooleanValue value = (BooleanValue) gameOption.Value;
-                value.Value = toggle.CheckMark.enabled;
+                value.Value = toggleOption.CheckMark.enabled;
                 MessageWriter writer = MessageWriter.Get(SendOption.Reliable);
                 writer.StartMessage((byte) PolusRootPackets.SetGameOption);
                 // TODO do this when serverside sequence id handling
                 writer.Write((ushort) 0);
                 writer.Write(gameOption.CategoryName);
                 writer.Write(gameOption.Priority);
-                writer.Write(toggle.TitleText.text);
+                writer.Write(toggleOption.TitleText.text);
                 writer.Write((byte) 1);
-                writer.Write(toggle.CheckMark.enabled);
+                writer.Write(toggleOption.CheckMark.enabled);
                 PolusMod.EndSend(writer);
             }
 
-            public static void HandleNumberChanged(OptionBehaviour toggleBehaviour) {
+            public static void HandleNumberChanged(OptionBehaviour numberBehaviour) {
                 UpdateHudString();
-                NumberOption floatOption = toggleBehaviour.Cast<NumberOption>();
-                floatOption.ValueText.text = string.Format(floatOption.FormatString, floatOption.Value);
-                GameOption gameOption = OptionMap[floatOption.TitleText.text];
+                NumberOption floatOption = numberBehaviour.Cast<NumberOption>();
+                GameOption gameOption = OptionMap[floatOption.name];
                 FloatValue value = (FloatValue) gameOption.Value;
-                value.Value = (uint) floatOption.GetFloat();
+                value.Value = (uint) floatOption.GetFloat().Log(comment: "A");
+                floatOption.ValueText.text = floatOption.ZeroIsInfinity && value.Value == 0 ? "∞" : string.Format(floatOption.FormatString, floatOption.Value);
                 MessageWriter writer = MessageWriter.Get(SendOption.Reliable);
                 writer.StartMessage((byte) PolusRootPackets.SetGameOption);
                 writer.Write((ushort) 0);
@@ -197,7 +214,7 @@ namespace Polus.Patches.Temporary {
                 writer.Write(gameOption.Priority);
                 writer.Write(floatOption.TitleText.text);
                 writer.Write((byte) 0);
-                writer.Write(floatOption.Value);
+                writer.Write(floatOption.Value.Log(comment: "B"));
                 // just for the fans (not used on server, just to avoid server crashes)
                 writer.Write(floatOption.Increment);
                 writer.Write(floatOption.ValidRange.min);
@@ -207,23 +224,23 @@ namespace Polus.Patches.Temporary {
                 PolusMod.EndSend(writer);
             }
 
-            public static void HandleStringChanged(OptionBehaviour toggleBehaviour) {
+            public static void HandleStringChanged(OptionBehaviour enumBehaviour) {
                 UpdateHudString();
-                KeyValueOption toggle = toggleBehaviour.Cast<KeyValueOption>();
-                GameOption gameOption = OptionMap[toggle.TitleText.text];
+                KeyValueOption stringOption = enumBehaviour.Cast<KeyValueOption>();
+                GameOption gameOption = OptionMap[stringOption.name];
                 EnumValue value = (EnumValue) gameOption.Value;
-                value.OptionIndex = (uint) toggle.Selected;
-                toggle.ValueText.text = value.Values[value.OptionIndex];
+                value.OptionIndex = (uint) stringOption.Selected;
+                stringOption.ValueText.text = value.Values[value.OptionIndex];
                 MessageWriter writer = MessageWriter.Get(SendOption.Reliable);
                 writer.StartMessage((byte) PolusRootPackets.SetGameOption);
                 writer.Write((ushort) 0);
                 writer.Write(gameOption.CategoryName);
                 writer.Write(gameOption.Priority);
-                writer.Write(toggle.TitleText.text);
+                writer.Write(stringOption.TitleText.text);
                 writer.Write((byte) OptionType.Enum);
-                writer.WritePacked(toggle.Selected);
+                writer.WritePacked(stringOption.Selected);
                 // just for the fans (not used on server, just to avoid server crashes)
-                foreach (Il2CppSystem.Collections.Generic.KeyValuePair<string, int> keyValuePair in toggle.Values)
+                foreach (Il2CppSystem.Collections.Generic.KeyValuePair<string, int> keyValuePair in stringOption.Values)
                     writer.Write(keyValuePair.key);
 
                 PolusMod.EndSend(writer);
@@ -299,7 +316,7 @@ namespace Polus.Patches.Temporary {
                                 category = NoCategory;
                             }
 
-                            if (category.Any(x => x.Title == name)) {
+                            if (category.Any(x => x.Title == SanitizeName(name))) {
                                 GameOption option = category.Find(x => x.Title == name);
                                 option.Value = optionType switch {
                                     OptionType.Boolean => new BooleanValue(reader.ReadBoolean()),
@@ -453,7 +470,7 @@ namespace Polus.Patches.Temporary {
             [HarmonyPrefix]
             public static bool Prefix(KeyValueOption __instance) {
                 //no lock 🙈
-                if (!OptionMap.TryGetValue(__instance.TitleText.text, out GameOption option) || __instance.oldValue == __instance.Selected) return false;
+                if (!OptionMap.TryGetValue(__instance.name, out GameOption option) || __instance.oldValue == __instance.Selected) return false;
                 __instance.oldValue = __instance.Selected;
                 __instance.ValueText.text =
                     ((EnumValue) option.Value).Values[
@@ -548,8 +565,7 @@ namespace Polus.Patches.Temporary {
                             if (categoryTitle != null) output += "  ";
                             output += $"{option.Title}: ";
                             output += option.Type switch {
-                                OptionType.Number => string.Format(((FloatValue) option.Value).FormatString,
-                                    ((FloatValue) option.Value).Value),
+                                OptionType.Number => ((FloatValue) option.Value).IsInfinity && ((FloatValue) option.Value).Value == 0 ? "∞" : string.Format(((FloatValue) option.Value).FormatString, ((FloatValue) option.Value).Value),
                                 OptionType.Boolean => ((BooleanValue) option.Value).Value ? "On" : "Off",
                                 OptionType.Enum => ((EnumValue) option.Value).Values
                                     [((EnumValue) option.Value).OptionIndex],
