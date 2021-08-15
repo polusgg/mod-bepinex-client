@@ -539,6 +539,7 @@ namespace Polus {
             RoomTrackerTextPatch.RoomText = null;
             GameOptionsPatches.OnEnablePatch.Reset();
             StupidModStampPatches.Reset();
+            CosmeticManager.Instance.Reset();
         }
 
         public override void PlayerSpawned(PlayerControl player) { }

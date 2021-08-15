@@ -40,6 +40,12 @@ namespace Polus.Behaviours {
             return this;
         }
 
+        public void Reset() {
+            Hats = Hats.Where(kvp => kvp.Key < 10000000).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+            Pets = Pets.Where(kvp => kvp.Key < 10000000).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+            Skins = Skins.Where(kvp => kvp.Key < 10000000).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+        }
+
         public HatBehaviour GetHatById(uint hatId) => Hats.TryGetValue(hatId, out HatBehaviour hat) ? hat : manager.NoneHat;
         public PetBehaviour GetPetById(uint petId) => Pets.TryGetValue(petId, out PetBehaviour pet) ? pet : Pets[0];
         public SkinData GetSkinById(uint skinId) => Skins.TryGetValue(skinId, out SkinData skin) ? skin : Skins[0];
