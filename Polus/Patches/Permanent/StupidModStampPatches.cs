@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
+using Polus.Behaviours;
 using Polus.Enums;
 using Polus.Extensions;
 using Polus.Mods.Patching;
@@ -12,10 +13,24 @@ using Object = UnityEngine.Object;
 
 namespace Polus.Patches.Permanent {
     // #if RELEASE
-    public class StupidModStampPatches {
+    public static class StupidModStampPatches {
         private static TextMeshPro textObj;
         public static Color? TextColor;
         public static string Suffix = "";
+        public static QRStamp qr;
+
+        public static bool QrActuallyVisible = false;
+        public static bool QrVisible {
+            set => qr.gameObject.SetActive(value || QrActuallyVisible);
+            get => qr.gameObject.active && QrActuallyVisible;
+        }
+
+        public static void Reset() {
+            QrActuallyVisible = false;
+            QrVisible = false;
+            TextColor = null;
+            Suffix = "";
+        }
 
         [HarmonyPatch(typeof(ModManager), nameof(ModManager.ShowModStamp))]
         public static class ShowThatStupidStampPatch {
@@ -27,6 +42,10 @@ namespace Polus.Patches.Permanent {
                         .Cast<GameObject>()
                         .GetComponent<TextMeshPro>();
                 textObj.transform.localPosition = new Vector3(0.75f, 0, 100f);
+                GameObject qrObject = new("QR");
+                qr = qrObject.AddComponent<QRStamp>();
+                qrObject.transform.parent = __instance.transform;
+                qrObject.transform.position = new Vector3(0, 0, 0);
             }
         }
 
@@ -82,14 +101,22 @@ namespace Polus.Patches.Permanent {
                 if (!__instance.localCamera) __instance.localCamera = DestroyableSingleton<HudManager>.InstanceExists ? DestroyableSingleton<HudManager>.Instance.GetComponentInChildren<Camera>() : Camera.main;
 
                 bool inGame = AmongUsClient.Instance && AmongUsClient.Instance.InOnlineScene && ShipStatus.Instance;
+                string name = SceneManager.GetActiveScene().name;
+
                 textObj.gameObject.SetActive(inGame);
+
                 if (inGame) {
-                    __instance.ModStamp.transform.position = AspectPosition.ComputeWorldPosition(__instance.localCamera, AspectPosition.EdgeAlignments.LeftTop, new Vector3(0.4f, 0.85f, __instance.localCamera.nearClipPlane + 0.1f));
+                    __instance.ModStamp.transform.position = AspectPosition.ComputeWorldPosition(__instance.localCamera, AspectPosition.EdgeAlignments.LeftTop, new Vector3(QrVisible ? 1f : 0.4f, 0.85f, __instance.localCamera.nearClipPlane + 0.1f));
                     textObj.color = TextColor ?? Color.white;
                     textObj.text = $"Playing on Polus.gg {Suffix}";
+                    qr.transform.localScale = new Vector3(0.7f, 0.7f, 1f);
+                    qr.transform.position = AspectPosition.ComputeWorldPosition(__instance.localCamera, AspectPosition.EdgeAlignments.LeftTop, new Vector3(0.4f, 0.85f, __instance.localCamera.nearClipPlane + 100f));
                 } else {
-                    (Vector2 position, AspectPosition.EdgeAlignments alignment) = StampPositions.Count(scene => scene.Key == SceneManager.GetActiveScene().name) == 1 ? StampPositions.Single(scene => scene.Key == SceneManager.GetActiveScene().name).Value : defaultLocation;
-                    __instance.ModStamp.transform.position = AspectPosition.ComputeWorldPosition(__instance.localCamera, alignment, new Vector3(position.x, position.y, __instance.localCamera.nearClipPlane + 0.1f));
+                    (Vector2 position, AspectPosition.EdgeAlignments alignment) = StampPositions.Count(scene => scene.Key == name) == 1 ? StampPositions.Single(scene => scene.Key == SceneManager.GetActiveScene().name).Value : defaultLocation;
+                    __instance.ModStamp.transform.position = AspectPosition.ComputeWorldPosition(__instance.localCamera, alignment, new Vector3(position.x, position.y, __instance.localCamera.nearClipPlane + 100f));
+                    QrVisible = name == GameScenes.OnlineGame;
+                    qr.transform.position = AspectPosition.ComputeWorldPosition(__instance.localCamera, AspectPosition.EdgeAlignments.RightBottom, new Vector3(2.1f, 0.7f, __instance.localCamera.nearClipPlane + 100f));
+                    qr.transform.localScale = new Vector3(1.5f, 1.5f, 1f);
                 }
 
                 return false;

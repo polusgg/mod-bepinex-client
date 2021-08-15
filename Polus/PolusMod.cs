@@ -2,9 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using BepInEx.Logging;
-using Gma.QrCodeNet.Encoding;
 using HarmonyLib;
 using Hazel;
 using InnerNet;
@@ -316,10 +314,6 @@ namespace Polus {
                         if (isFree) hat.LimitedMonth = 0;
                         if (hat.AltShader != null) hat.AltShader = PlayerControl.LocalPlayer.myRend.material;
                         RefreshCpmTab();
-                        foreach (PlayerControl playerControl in PlayerControl.AllPlayerControls.ToArray().Where(x => x.Data != null && x.Data.HatId == hatId)) {
-                            playerControl.HatRenderer.SetHat(hat, playerControl.Data.ColorId);
-                            playerControl.nameText.transform.localPosition = new Vector3(0f, (hatId == 0 ? 0.7f : 1.05f) * 2f, -0.5f);
-                        }
                     });
 
                     break;
@@ -334,13 +328,6 @@ namespace Polus {
                         CosmeticManager.Instance.SetPet((uint) petId, pet);
                         pet.Free = isFree;
                         RefreshCpmTab();
-                        foreach (PlayerControl playerControl in PlayerControl.AllPlayerControls.ToArray().Where(x => x.Data != null && x.Data.PetId == petId)) {
-                            if (playerControl.CurrentPet) Object.Destroy(playerControl.CurrentPet.gameObject);
-                            playerControl.CurrentPet = Object.Instantiate(pet);
-                            playerControl.CurrentPet.transform.position = playerControl.transform.position;
-                            playerControl.CurrentPet.Source = playerControl;
-                            if (playerControl.Data != null) PlayerControl.SetPlayerMaterialColors(playerControl.Data.ColorId, playerControl.CurrentPet.rend);
-                        }
                     });
 
                     break;
@@ -415,19 +402,21 @@ namespace Polus {
                     break;
                 }
                 case PolusRootPackets.SetQrCodeContents: {
+                    QRStamp qr = StupidModStampPatches.qr;
+                    qr.Start();
+                    StupidModStampPatches.QrVisible = StupidModStampPatches.QrActuallyVisible = reader.ReadBoolean();
+                    $"Got QR Code {StupidModStampPatches.QrVisible} {StupidModStampPatches.QrActuallyVisible}".Log(10);
+                    if (StupidModStampPatches.QrActuallyVisible) {
+                        string data = reader.ReadString();
                     
-                    // qr.Start();
-                    // if (qr.SetVisible(reader.ReadBoolean())) {
-                    //     string data = reader.ReadString();
-                    //
-                    //     AddDispatch(() => {
-                    //         QRCodeGenerator qrGenerator = new();
-                    //         QRCodeData qrCodeData = qrGenerator.CreateQrCode(data.Log(comment: "perhaps"), QRCodeGenerator.ECCLevel.L, true, false, QRCodeGenerator.EciMode.Default, -1);
-                    //         UnityQRCode qrCode = new(qrCodeData);
-                    //         Texture2D qrCodeAsTexture2D = qrCode.GetGraphic(2);
-                    //         qr.SetCode(qrCodeAsTexture2D);
-                    //     });
-                    // }
+                        AddDispatch(() => {
+                            QRCodeGenerator qrGenerator = new();
+                            QRCodeData qrCodeData = qrGenerator.CreateQrCode(data.Log(comment: "perhaps"), QRCodeGenerator.ECCLevel.L, true, false, QRCodeGenerator.EciMode.Default, -1);
+                            UnityQRCode qrCode = new(qrCodeData);
+                            Texture2D qrCodeAsTexture2D = qrCode.GetGraphic(2, Color.black, new Color(1f, 1f, 1f, 0.5f)).DontDestroy();
+                            qr.SetCode(qrCodeAsTexture2D);
+                        });
+                    }
 
                     break;
                 }
@@ -538,8 +527,7 @@ namespace Polus {
             maintnet.AddComponent<MaintenanceBehaviour>();
             PingTrackerTextPatch.PingText = null;
             RoomTrackerTextPatch.RoomText = null;
-            StupidModStampPatches.TextColor = null;
-            StupidModStampPatches.Suffix = "";
+            StupidModStampPatches.Reset();
             ResizeHandlerPatch.SetResolution(Screen.width, Screen.height);
             AmongUsClient.Instance.mode = MatchMakerModes.Client;
         }
@@ -550,8 +538,7 @@ namespace Polus {
             PingTrackerTextPatch.PingText = null;
             RoomTrackerTextPatch.RoomText = null;
             GameOptionsPatches.OnEnablePatch.Reset();
-            StupidModStampPatches.TextColor = null;
-            StupidModStampPatches.Suffix = "";
+            StupidModStampPatches.Reset();
         }
 
         public override void PlayerSpawned(PlayerControl player) { }
@@ -559,8 +546,7 @@ namespace Polus {
         public override void PlayerDestroyed(PlayerControl player) { }
 
         public override void GameEnded() {
-            StupidModStampPatches.TextColor = null;
-            StupidModStampPatches.Suffix = "";
+            StupidModStampPatches.Reset();
         }
 
         private IEnumerator FetchResource(MessageReader reader) {
