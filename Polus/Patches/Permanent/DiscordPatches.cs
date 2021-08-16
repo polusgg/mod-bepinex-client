@@ -118,32 +118,32 @@ namespace Polus.Patches.Permanent {
             discord.GetActivityManager().UpdateActivity(activity, (Action<Result>) (r => r.Log(comment: "update activity result")));
         }
 
-        [HarmonyPatch(typeof(DiscordManager), nameof(DiscordManager.SetInLobbyClient))]
-        public static class SetInLobbyClientPatch {
-            [PermanentPatch]
-            [HarmonyPrefix]
-            public static bool SetInLobbyClient(DiscordManager __instance) {
-                return false;
-            }
-        }
-
-        [HarmonyPatch(typeof(DiscordManager), nameof(DiscordManager.SetInLobbyHost))]
-        public static class SetInLobbyHostPatch {
-            [PermanentPatch]
-            [HarmonyPrefix]
-            public static bool SetInLobbyClient(DiscordManager __instance) {
-                return false;
-            }
-        }
-
-        [HarmonyPatch(typeof(DiscordManager), nameof(DiscordManager.SetPlayingGame))]
-        public static class SetPlayingGamePatch {
-            [PermanentPatch]
-            [HarmonyPrefix]
-            public static bool SetInLobbyClient(DiscordManager __instance) {
-                return false;
-            }
-        }
+        // [HarmonyPatch(typeof(DiscordManager), nameof(DiscordManager.SetInLobbyClient))]
+        // public static class SetInLobbyClientPatch {
+        //     [PermanentPatch]
+        //     [HarmonyPrefix]
+        //     public static bool SetInLobbyClient(DiscordManager __instance) {
+        //         return false;
+        //     }
+        // }
+        //
+        // [HarmonyPatch(typeof(DiscordManager), nameof(DiscordManager.SetInLobbyHost))]
+        // public static class SetInLobbyHostPatch {
+        //     [PermanentPatch]
+        //     [HarmonyPrefix]
+        //     public static bool SetInLobbyClient(DiscordManager __instance) {
+        //         return false;
+        //     }
+        // }
+        //
+        // [HarmonyPatch(typeof(DiscordManager), nameof(DiscordManager.SetPlayingGame))]
+        // public static class SetPlayingGamePatch {
+        //     [PermanentPatch]
+        //     [HarmonyPrefix]
+        //     public static bool SetInLobbyClient(DiscordManager __instance) {
+        //         return false;
+        //     }
+        // }
 
         [HarmonyPatch(typeof(DiscordManager), nameof(DiscordManager.Start))]
         public static class DisableFixedUpdatePatch {
