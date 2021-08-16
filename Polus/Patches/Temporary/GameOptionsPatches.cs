@@ -117,7 +117,7 @@ namespace Polus.Patches.Temporary {
                                     });
 
                                 option.Selected = (int) value.OptionIndex;
-                                option.ValueText.text = value.Values[value.OptionIndex];
+                                option.ValueText.text = SanitizeName(value.Values[value.OptionIndex]);
                                 option.TitleText.text = SanitizeName(gameOption.Title);
 
                                 if (!AmongUsClient.Instance.AmHost) option.SetAsPlayer();
@@ -230,7 +230,7 @@ namespace Polus.Patches.Temporary {
                 GameOption gameOption = OptionMap[stringOption.name];
                 EnumValue value = (EnumValue) gameOption.Value;
                 value.OptionIndex = (uint) stringOption.Selected;
-                stringOption.ValueText.text = value.Values[value.OptionIndex];
+                stringOption.ValueText.text = SanitizeName(value.Values[value.OptionIndex]);
                 MessageWriter writer = MessageWriter.Get(SendOption.Reliable);
                 writer.StartMessage((byte) PolusRootPackets.SetGameOption);
                 writer.Write((ushort) 0);
