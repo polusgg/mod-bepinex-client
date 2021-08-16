@@ -61,6 +61,14 @@ namespace Polus.Mods {
         /// <param name="player">The player which is being destroyed</param>
         public abstract void PlayerDestroyed(PlayerControl player);
         /// <summary>
+        /// Called when you gain acting host in a lobby
+        /// </summary>
+        public abstract void BecameHost();
+        /// <summary>
+        /// Called when you lose host in a lobby
+        /// </summary>
+        public abstract void LostHost();
+        /// <summary>
         /// Used to do cleanup on references to destroyed objects
         /// </summary>
         public abstract void GameEnded();

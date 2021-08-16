@@ -26,15 +26,15 @@ namespace Polus.Behaviours {
             manager = GetComponent<HatManager>();
 
             for (int i = 0; i < manager.AllHats.Count; i++) {
-                (Hats[(uint) i] = manager.AllHats[(Index) i].Cast<HatBehaviour>()).name.Log(comment: $"hat at {i}");
+                Hats[(uint) i] = manager.AllHats[(Index) i].Cast<HatBehaviour>();
             }
 
             for (int i = 0; i < manager.AllPets.Count; i++) {
-                (Pets[(uint) i] = manager.AllPets[(Index) i].Cast<PetBehaviour>()).name.Log(comment: $"pet at {i}");
+                Pets[(uint) i] = manager.AllPets[(Index) i].Cast<PetBehaviour>();
             }
 
             for (int i = 0; i < manager.AllSkins.Count; i++) {
-                (Skins[(uint) i] = manager.AllSkins[(Index) i].Cast<SkinData>()).name.Log(comment: $"skin at {i}");
+                Skins[(uint) i] = manager.AllSkins[(Index) i].Cast<SkinData>();
             }
 
             return this;
@@ -55,39 +55,7 @@ namespace Polus.Behaviours {
         }
 
         public uint GetIdByPet(PetBehaviour pet) {
-            if (Pets.All(x => x.Value.name != pet.name))
-                return 0;
-            return Pets.First(x => {
-                $"test {x.Value.name} vs {pet.name}".Log();
-                return x.Value.name == pet.name;
-            }).Key.Log();
-        }
-
-        [HarmonyPatch(typeof(PetsTab), nameof(PetsTab.OnEnable))]
-        public static class TestOnEnable {
-            [HarmonyPrefix]
-            public static bool Prefix(PetsTab __instance) {
-                PlayerControl.SetPlayerMaterialColors(PlayerControl.LocalPlayer.Data.ColorId, __instance.DemoImage);
-                __instance.HatImage.SetHat(SaveManager.LastHat, PlayerControl.LocalPlayer.Data.ColorId);
-                PlayerControl.SetSkinImage(SaveManager.LastSkin, __instance.SkinImage);
-                PlayerControl.SetPetImage(SaveManager.LastPet, PlayerControl.LocalPlayer.Data.ColorId, __instance.PetImage);
-                PetBehaviour[] unlockedPets = DestroyableSingleton<HatManager>.Instance.GetUnlockedPets();
-                for (int i = 0; i < unlockedPets.Length; i++) {
-                    PetBehaviour pet = unlockedPets[i];
-                    float num = __instance.XRange.Lerp((float) (i % __instance.NumPerRow) / ((float) __instance.NumPerRow - 1f));
-                    float num2 = __instance.YStart - (float) (i / __instance.NumPerRow) * __instance.YOffset;
-                    ColorChip chip = Instantiate(__instance.ColorTabPrefab, __instance.scroller.Inner);
-                    chip.transform.localPosition = new Vector3(num, num2, -1f);
-                    chip.InUseForeground.SetActive(DestroyableSingleton<HatManager>.Instance.GetIdFromPet(pet) == SaveManager.LastPet);
-                    chip.Button.OnClick.AddListener((Action) (() => __instance.SelectPet(chip, pet)));
-                    PlayerControl.SetPetImage(pet, PlayerControl.LocalPlayer.Data.ColorId, chip.Inner.FrontLayer);
-                    __instance.ColorChips.Add(chip);
-                }
-
-                __instance.scroller.YBounds.max = -(__instance.YStart - unlockedPets.Length / __instance.NumPerRow * __instance.YOffset) - 3f;
-
-                return false;
-            }
+            return Pets.All(x => x.Value.name != pet.name) ? 0 : Pets.First(x => x.Value.name == pet.name).Key;
         }
 
         public uint GetIdBySkin(SkinData skin) {
@@ -99,17 +67,14 @@ namespace Polus.Behaviours {
         public SkinData[] GetOwnedSkins() => Skins.Where(s => !HatManager.IsMapStuff(s.Value.ProdId) || SaveManager.GetPurchase(s.Value.ProdId)).OrderByDescending(o => o.Value.Order).ThenBy(o => o.Key).Select(x => x.Value).ToArray();
 
         public void SetHat(uint id, HatBehaviour behaviour) {
-            $"{behaviour.name} hat at {id}".Log();
             Hats[id] = behaviour;
         }
 
         public void SetPet(uint id, PetBehaviour behaviour) {
-            $"{behaviour.name} pet at {id}".Log();
             Pets[id] = behaviour;
         }
 
         public void SetSkin(uint id, SkinData behaviour) {
-            $"{behaviour.name} skin at {id}".Log();
             Skins[id] = behaviour;
         }
 

@@ -8,6 +8,7 @@ using HarmonyLib;
 using Polus.Behaviours;
 using Polus.Extensions;
 using Polus.Mods;
+using Polus.Patches.Permanent;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -115,6 +116,8 @@ namespace Polus {
 
         public class EventHandlerBehaviour : MonoBehaviour {
             public PggModManager ModManager;
+            private bool amHost;
+            private bool amConnected;
 
             static EventHandlerBehaviour() {
                 ClassInjector.RegisterTypeInIl2Cpp<EventHandlerBehaviour>();
@@ -129,6 +132,17 @@ namespace Polus {
 
             private void Update() {
                 foreach ((PggMod _, Mod mod) in ModManager.TemporaryMods) mod.Update();
+                if (amHost != HostFixingPatches.AmHostDisable.AmHostReal) {
+                    amHost = HostFixingPatches.AmHostDisable.AmHostReal;
+                    if (amHost) foreach ((PggMod _, Mod mod) in ModManager.TemporaryMods) mod.BecameHost();
+                    else foreach ((PggMod _, Mod mod) in ModManager.TemporaryMods) mod.LostHost();
+                }
+
+                if (amConnected != (AmongUsClient.Instance && AmongUsClient.Instance.AmConnected)) {
+                    amConnected = (AmongUsClient.Instance && AmongUsClient.Instance.AmConnected);
+                    if (amConnected) foreach ((PggMod _, Mod mod) in ModManager.TemporaryMods) mod.ConnectionEstablished();
+                    else foreach ((PggMod _, Mod mod) in ModManager.TemporaryMods) mod.ConnectionDestroyed();
+                }
             }
 
             private void FixedUpdate() {

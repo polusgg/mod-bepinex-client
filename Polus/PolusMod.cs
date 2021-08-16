@@ -188,7 +188,7 @@ namespace Polus {
             // Logger.LogInfo($"LOL {reader.Tag}");
             switch ((PolusRootPackets) reader.Tag) {
                 case PolusRootPackets.UpdateDiscordRichPresence: {
-                    DiscordPatches.UpdateRichPresence(reader);
+                    // AddDispatch(() => DiscordPatches.ClearPresence(() => DiscordPatches.UpdateRichPresence(reader)));
                     break;
                 }
                 case PolusRootPackets.FetchResource: {
@@ -506,6 +506,7 @@ namespace Polus {
 
         public override void ConnectionEstablished() {
             //todo write code that calls this
+            WhyDidntHazelHavePacketOrderingPatch.Reset();
         }
 
         public override void ConnectionDestroyed() {
@@ -545,6 +546,14 @@ namespace Polus {
         public override void PlayerSpawned(PlayerControl player) { }
 
         public override void PlayerDestroyed(PlayerControl player) { }
+
+        public override void BecameHost() {
+            optionsDirty = true;
+        }
+
+        public override void LostHost() {
+            optionsDirty = true;
+        }
 
         public override void GameEnded() {
             StupidModStampPatches.Reset();
