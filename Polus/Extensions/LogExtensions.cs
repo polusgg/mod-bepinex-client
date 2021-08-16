@@ -20,7 +20,7 @@ namespace Polus.Extensions {
         }
 
         private static void LogOnce(string value, string comment, LogLevel level) {
-            PogusPlugin.Logger.Log(level, $"{value} {comment}");
+            PogusPlugin.Logger.Log(level, comment == "" ? value : $"{comment} {value}");
         }
 
         public static byte[] Log(this byte[] value, int times = 1, string comment = "", LogLevel level = LogLevel.Info) {

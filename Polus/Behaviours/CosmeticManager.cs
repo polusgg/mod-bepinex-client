@@ -94,9 +94,9 @@ namespace Polus.Behaviours {
             return Skins.All(x => x.Value.Pointer != skin.Pointer) ? 0 : Skins.First(x => x.Value.Pointer == skin.Pointer).Key;
         }
 
-        public HatBehaviour[] GetOwnedHats() => Hats.Select(kvp => kvp.Value).Where(h => !HatManager.IsMapStuff(h.ProdId) && h.LimitedMonth == 0 || SaveManager.GetPurchase(h.ProductId)).OrderByDescending(o => o.Order).ThenBy(o => o.name).ToArray();
-        public PetBehaviour[] GetOwnedPets() => Pets.Select(kvp => kvp.Value).Where(h => h.Free || SaveManager.GetPurchase(h.ProductId)).ToArray();
-        public SkinData[] GetOwnedSkins() => Skins.Select(kvp => kvp.Value).Where(s => !HatManager.IsMapStuff(s.ProdId) || SaveManager.GetPurchase(s.ProdId)).OrderByDescending(o => o.Order).ThenBy(o => o.name).ToArray();
+        public HatBehaviour[] GetOwnedHats() => Hats.Where(h => !HatManager.IsMapStuff(h.Value.ProdId) && h.Value.LimitedMonth == 0 || SaveManager.GetPurchase(h.Value.ProductId)).OrderByDescending(o => o.Value.Order).ThenBy(o => o.Key).Select(x => x.Value).ToArray();
+        public PetBehaviour[] GetOwnedPets() => Pets.Where(h => h.Value.Free || SaveManager.GetPurchase(h.Value.ProductId)).Select(x => x.Value).ToArray();
+        public SkinData[] GetOwnedSkins() => Skins.Where(s => !HatManager.IsMapStuff(s.Value.ProdId) || SaveManager.GetPurchase(s.Value.ProdId)).OrderByDescending(o => o.Value.Order).ThenBy(o => o.Key).Select(x => x.Value).ToArray();
 
         public void SetHat(uint id, HatBehaviour behaviour) {
             $"{behaviour.name} hat at {id}".Log();

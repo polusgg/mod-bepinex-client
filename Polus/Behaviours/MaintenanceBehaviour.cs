@@ -47,6 +47,7 @@ namespace Polus.Behaviours {
         [HideFromIl2Cpp]
         public IEnumerator CoStart(string text) {
             while (!HudManager.InstanceExists) yield return null;
+            text.Log(comment: "Maintenance message issued POG");
             GameObject toast = Instantiate(DisguisedToast);
             toast.active = true;
             Transform toastransform = toast.transform;
