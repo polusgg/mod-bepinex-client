@@ -16,20 +16,20 @@ namespace Polus.Patches.Permanent {
         }
 
         public static void SussyBaka() {
-            return;
-            discord.GetActivityManager().UpdateActivity(new Activity {
-                State = "POGGING IRL OMG NO WAY"
-            }, (Action<Result>) (r => r.Log(comment: "update activity result")));
+            // return;
+            // discord.GetActivityManager().UpdateActivity(new Activity {
+            //     State = "POGGING IRL OMG NO WAY"
+            // }, (Action<Result>) (r => r.Log(comment: "update activity result")));
         }
 
         public static void ClearPresence(Action callback) {
-            return;
-            discord?.GetActivityManager().ClearActivity((Action<Result>) (r => {
-                if (r == Result.Ok)
-                    callback();
-                else
-                    r.Log(comment: "Failed to clear presence!");
-            }));
+            // return;
+            // discord?.GetActivityManager().ClearActivity((Action<Result>) (r => {
+            //     if (r == Result.Ok)
+            //         callback();
+            //     else
+            //         r.Log(comment: "Failed to clear presence!");
+            // }));
         }
 
         public static void UpdateRichPresence(MessageReader reader) {

@@ -1,4 +1,5 @@
 ﻿using System;
+using BepInEx.Logging;
 using HarmonyLib;
 using Hazel;
 using Il2CppSystem.Collections.Generic;
@@ -38,7 +39,8 @@ namespace Polus.Patches.Temporary {
                 if (reader.Tag >= 0x80) {
                     foreach ((_, Mod mod) in PogusPlugin.ModManager.TemporaryMods) {
                         // PogusPlugin.Logger.LogInfo($"Handling packet {reader.Tag:X2} for {mod.Name}");
-                        CatchHelper.TryCatch(() => mod.RootPacketReceived(reader), true);
+                        MessageReader dispatchReader = reader.Clone();
+                        PolusMod.AddDispatch(() => CatchHelper.TryCatch(() => mod.RootPacketReceived(dispatchReader)));
                     }
 
                     return false;
@@ -64,8 +66,8 @@ namespace Polus.Patches.Temporary {
                     case 1: {
                         uint netId = reader.ReadPackedUInt32();
                         if (objectManager.HasObject(netId, out PolusNetObject polusNetObject)) {
-                            polusNetObject.NetId.Log(1, "for dataPOg");
-                            PolusMod.AddDispatch(() => polusNetObject.Data(reader));
+                            polusNetObject.NetId.Log(comment: "for dataPOg");
+                            polusNetObject.Data(reader);
                             return false;
                         }
 
@@ -81,15 +83,15 @@ namespace Polus.Patches.Temporary {
                         uint netId = reader.ReadPackedUInt32();
                         //todo transfer all object management code to iobjectmanager
                         if (objectManager.HasObject(netId, out PolusNetObject polusNetObject)) {
-                            PolusMod.AddDispatch(() => polusNetObject.HandleRpc(reader, reader.ReadByte()));
+                            polusNetObject.HandleRpc(reader, reader.ReadByte());
                             return false;
                         }
 
                         if (instance.allObjectsFast.ContainsKey(netId)) {
                             byte call = reader.ReadByte();
                             if (call >= 0x80) {
-                                PolusMod.AddDispatch(() => objectManager.HandleInnerRpc(instance.allObjectsFast[netId],
-                                    reader, call));
+                                objectManager.HandleInnerRpc(instance.allObjectsFast[netId],
+                                    reader, call);
                                 return false;
                             }
 
@@ -108,11 +110,11 @@ namespace Polus.Patches.Temporary {
 
                         // num3.Log(3, "spawn id");
                         if (num3 >= 0x80) {
-                            PolusMod.AddDispatch(() => CatchHelper.TryCatch(() => objectManager.HandleSpawn(num3, reader)));
+                            CatchHelper.TryCatch(() => objectManager.HandleSpawn(num3, reader));
                             return false;
                         }
 
-                        reader.ReadPackedInt32().Log(3, "owner id?");
+                        reader.ReadPackedInt32().Log(1, "owner id?");
 
                         reader.Position = pos;
                         return true;
@@ -121,7 +123,7 @@ namespace Polus.Patches.Temporary {
                         uint num6 = reader.ReadPackedUInt32();
                         PolusNetObject polusNetObject =
                             objectManager.FindObjectByNetId(num6);
-                        PogusPlugin.Logger.LogWarning($"Despawning {num6}, but is it a pno? {polusNetObject != null}");
+                        $"Despawning {num6}, but is it a pno? {polusNetObject != null}".Log(level: LogLevel.Warning);
                         if ((polusNetObject != null).Log(2, "waawoo")) {
                             objectManager.RemoveNetObject(polusNetObject);
                             return false;
