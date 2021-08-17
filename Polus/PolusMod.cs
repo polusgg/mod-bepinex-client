@@ -3,13 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using BepInEx.Logging;
+using Polus.Extensions;
 using HarmonyLib;
 using Hazel;
 using InnerNet;
 using Polus.Behaviours;
 using Polus.Behaviours.Inner;
 using Polus.Enums;
-using Polus.Extensions;
 using Polus.Mods;
 using Polus.Mods.Patching;
 using Polus.Patches.Permanent;
@@ -482,7 +482,7 @@ namespace Polus {
                 if (HudActive != HudManager.Instance.ReportButton.gameObject.active) {
                     HudActive = HudManager.Instance.ReportButton.gameObject.active;
                     HudActive.Log(comment: "Hud activity changed");
-                    PolusClickBehaviour.SetLock(ButtonLocks.SetHudActive, HudActive);
+                    PolusClickBehaviour.SetLock(ButtonLocks.SetHudActive, !HudActive);
                 }
             } else {
                 HudActive = false;
