@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using Polus.Behaviours;
+using Polus.Enums;
 using Polus.Extensions;
 using Polus.Mods.Patching;
 using UnityEngine;
@@ -14,7 +15,7 @@ namespace Polus.Patches.Permanent {
             GameObject.Find("PlayLocalButton").active = false;
             GameObject.Find("HowToPlayButton").transform.position = new Vector3(0, -1.725f, 0);
             GameObject.Find("FreePlayButton").active = false;
-            AmongUsClient.Instance.MainMenuScene = "MMOnline";
+            AmongUsClient.Instance.MainMenuScene = GameScenes.MMOnline;
         }
     }
 

@@ -1,5 +1,6 @@
 using System;
 using Discord;
+using Polus.Enums;
 using Polus.Extensions;
 using UnhollowerBaseLib;
 using UnhollowerRuntimeLib;
@@ -52,7 +53,7 @@ namespace Polus.Behaviours {
 
         private void OnSceneChanged(Scene scene, LoadSceneMode loadArgs) {
             string name = scene.name;
-            if (name == "MatchMaking" || name == "MMOnline" || name == "MainMenu") SetInMenus();
+            if (name == GameScenes.MatchMaking || name == GameScenes.MMOnline || name == GameScenes.MainMenu) SetInMenus();
         }
 
         public void SetInMenus() {

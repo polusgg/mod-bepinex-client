@@ -19,14 +19,17 @@ namespace Polus.Patches.Permanent {
         public static string Suffix = "";
         public static QRStamp qr;
 
-        public static bool QrActuallyVisible = false;
+        public static bool QrActuallyVisible;
+        public static bool QrToggled = true;
+
         public static bool QrVisible {
-            set => qr.gameObject.SetActive(value || QrActuallyVisible);
-            get => qr.gameObject.active && QrActuallyVisible;
+            set => qr.gameObject.SetActive((value || QrActuallyVisible) && QrToggled);
+            get => qr.gameObject.active && QrActuallyVisible && QrToggled;
         }
 
         public static void Reset() {
             QrActuallyVisible = false;
+            QrToggled = true;
             QrVisible = false;
             TextColor = null;
             Suffix = "";

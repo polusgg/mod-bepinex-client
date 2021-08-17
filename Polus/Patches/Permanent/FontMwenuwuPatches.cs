@@ -1,5 +1,7 @@
 ﻿using System;
 using HarmonyLib;
+using Polus.Enums;
+using Polus.Extensions;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -9,11 +11,12 @@ using Object = UnityEngine.Object;
 namespace Polus.Patches.Permanent {
     public class FontMwenuwuPatches {
         public static void Load() {
+            "unfortunately it was not meant to be.".Log();
             SceneManager.add_sceneLoaded(new Action<Scene, LoadSceneMode>(OnLoadScene));
         }
 
         private static void OnLoadScene(Scene arg1, LoadSceneMode arg2) {
-            if (arg1.name == "MainMenu") {
+            if (arg1.name == GameScenes.MainMenu) {
                 LanguageSetter langSetter = Object.FindObjectOfType(Il2CppType.Of<LanguageSetter>(), true)
                     .Cast<LanguageSetter>();
                 Transform fontObject = Object.Instantiate(langSetter.transform, langSetter.transform.parent);

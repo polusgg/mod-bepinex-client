@@ -1,4 +1,5 @@
 ﻿using System;
+using Polus.Enums;
 using Polus.Extensions;
 using Polus.Utils;
 using TMPro;
@@ -32,7 +33,7 @@ namespace Polus.Patches.Permanent {
         }
 
         private static void SceneLoaded(Scene scene, LoadSceneMode _) {
-            if (scene.name != "MainMenu") return;
+            if (scene.name != GameScenes.MainMenu) return;
             "log".Log(20);
             GameObject main = new("PolusCreditsButton");
             main.AddComponent<SpriteRenderer>().sprite = _crunchuSprite;

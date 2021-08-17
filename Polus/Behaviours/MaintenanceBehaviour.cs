@@ -13,8 +13,8 @@ namespace Polus.Behaviours {
         private static readonly GameObject DisguisedToast;
         private readonly float distance = 0.4f;
         private readonly float duration = 1f;
-        private readonly Queue<string> _notificationQueue = new();
-        private bool _corRunning = false;
+        private readonly Queue<(string text, float time)> _notificationQueue = new();
+        public bool CoroutineRunning;
 
         static MaintenanceBehaviour() {
             ClassInjector.RegisterTypeInIl2Cpp<MaintenanceBehaviour>();
@@ -34,18 +34,19 @@ namespace Polus.Behaviours {
         }
 
         private void Update() {
-            if (_corRunning || _notificationQueue.Count == 0) return;
-            _corRunning = true;
-            this.StartCoroutine(CoStart(_notificationQueue.Dequeue()));
+            if (CoroutineRunning || _notificationQueue.Count == 0) return;
+            CoroutineRunning = true;
+            (string text, float time) = _notificationQueue.Dequeue();
+            this.StartCoroutine(CoStart(text, time));
         }
 
         [HideFromIl2Cpp]
-        public void ShowToast(string text) {
-            _notificationQueue.Enqueue(text);
+        public void ShowToast(string text, float time = 10f) {
+            _notificationQueue.Enqueue((text, time));
         }
 
         [HideFromIl2Cpp]
-        public IEnumerator CoStart(string text) {
+        public IEnumerator CoStart(string text, float time) {
             while (!HudManager.InstanceExists) yield return null;
             text.Log(comment: "Maintenance message issued POG");
             GameObject toast = Instantiate(DisguisedToast);
@@ -66,14 +67,14 @@ namespace Polus.Behaviours {
 
             toastransform.localPosition = vec;
 
-            yield return new WaitForSeconds(10f);
+            yield return new WaitForSeconds(time);
 
             top = AspectPosition.ComputePosition(AspectPosition.EdgeAlignments.Top, new Vector3(0, distance, -10f));
             vec = AspectPosition.ComputePosition(AspectPosition.EdgeAlignments.Top, new Vector3(0, -distance, -10f));
             yield return Effects.Slide2D(toastransform, top, vec, duration);
 
             DestroyImmediate(toast);
-            _corRunning = false;
+            CoroutineRunning = false;
         }
     }
 }

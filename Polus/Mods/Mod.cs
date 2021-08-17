@@ -1,6 +1,7 @@
 ﻿using System;
 using BepInEx.Logging;
 using Hazel;
+using UnityEngine.SceneManagement;
 
 namespace Polus.Mods {
     public abstract class Mod : MarshalByRefObject {
@@ -72,5 +73,9 @@ namespace Polus.Mods {
         /// Used to do cleanup on references to destroyed objects
         /// </summary>
         public abstract void GameEnded();
+        /// <summary>
+        /// Called when the scene is changed
+        /// </summary>
+        public abstract void SceneChanged(Scene scene);
     }
 }

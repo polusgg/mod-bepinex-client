@@ -472,11 +472,11 @@ namespace Polus.Patches.Temporary {
             [HarmonyPrefix]
             public static bool Prefix(KeyValueOption __instance) {
                 //no lock 🙈
-                if (!OptionMap.TryGetValue(__instance.name, out GameOption option) || __instance.oldValue == __instance.Selected) return false;
-                __instance.oldValue = __instance.Selected;
-                __instance.ValueText.text =
-                    ((EnumValue) option.Value).Values[
-                        __instance.Selected];
+                // if (!OptionMap.TryGetValue(__instance.name, out GameOption option) || __instance.oldValue == __instance.Selected) return false;
+                // __instance.oldValue = __instance.Selected;
+                // __instance.ValueText.text =
+                //     ((EnumValue) option.Value).Values[
+                //         __instance.Selected];
 
                 return false;
             }

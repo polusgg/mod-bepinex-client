@@ -30,14 +30,7 @@ namespace Polus {
             gameObject.AddComponent<EventHandlerBehaviour>().ModManager = this;
 
             SceneManager.add_sceneLoaded(new Action<Scene, LoadSceneMode>((scene, mode) => {
-                try {
-                    // if (scene.name == "MMOnline") AccountMenu.InitializeAccountMenu(scene);
-                    if (scene.name == "MMOnline") {
-                        GameObject.Find("NormalMenu").FindRecursive(x => x.name == "RegionText_TMP").AddComponent<RegionTextMonitorTMP>();
-                    }
-                } catch {
-                    throw; // ignored
-                }
+                foreach ((_, Mod mod) in TemporaryMods) mod.SceneChanged(scene);
 
                 if (!AllPatched) return;
                 if (scene.name != "OnlineGame") PogusPlugin.ObjectManager.EndedGame();
