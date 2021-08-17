@@ -43,6 +43,7 @@ namespace Polus {
         public static List<Action> Dispatcher = new();
         private static List<Action> TempQueue = new();
         public bool CannotMove;
+        public bool HudActive;
 
         public override string Name => "PolusMod";
 
@@ -467,12 +468,22 @@ namespace Polus {
             if (PlayerControl.LocalPlayer) {
                 if (CannotMove != !PlayerControl.LocalPlayer.CanMove) {
                     CannotMove = !PlayerControl.LocalPlayer.CanMove;
-                    CannotMove.Log(comment: "Cannot move changed !!!!");
+                    CannotMove.Log(comment: "Cannot move changed");
                     PolusClickBehaviour.SetLock(ButtonLocks.PlayerCanMove, CannotMove);
                 }
             } else {
                 CannotMove = false;
                 PolusClickBehaviour.SetLock(ButtonLocks.PlayerCanMove, CannotMove);
+            }
+
+            if (HudManager.InstanceExists) {
+                if (HudActive != HudManager.Instance.ReportButton.gameObject.active) {
+                    HudActive = HudManager.Instance.ReportButton.gameObject.active;
+                    HudActive.Log(comment: "Hud activity changed");
+                    PolusClickBehaviour.SetLock(ButtonLocks.SetHudActive, HudActive);
+                }
+            } else {
+                HudActive = false;
             }
 
             lock (Dispatcher) {
