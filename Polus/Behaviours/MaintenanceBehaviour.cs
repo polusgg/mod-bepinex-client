@@ -10,6 +10,7 @@ using UnityEngine;
 namespace Polus.Behaviours {
     public class MaintenanceBehaviour : MonoBehaviour {
         public static MaintenanceBehaviour Instance;
+        public static bool InstanceExists => Instance != null;
         private static readonly GameObject DisguisedToast;
         private readonly float distance = 0.4f;
         private readonly float duration = 1f;

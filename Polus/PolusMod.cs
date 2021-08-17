@@ -488,7 +488,7 @@ namespace Polus {
                 HudActive = false;
             }
 
-            if (MaintenanceBehaviour.Instance && !MaintenanceBehaviour.Instance.CoroutineRunning && Input.GetKeyDown(KeyCode.F5)) {
+            if (MaintenanceBehaviour.InstanceExists && !MaintenanceBehaviour.Instance.CoroutineRunning && Input.GetKeyDown(KeyCode.F5)) {
                 StupidModStampPatches.QrToggled = !StupidModStampPatches.QrToggled;
                 StupidModStampPatches.QrVisible = StupidModStampPatches.qr.gameObject.active;
                 MaintenanceBehaviour.Instance.ShowToast(StupidModStampPatches.QrToggled ? "Showing QR code, press F5 to disable it again." : "Now hiding the QR code, press F5 to enable it.", 1f);
