@@ -24,6 +24,7 @@ using UnhollowerBaseLib;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
+using UnityQRCode = QRCoder.Unity.UnityQRCode;
 
 namespace Polus {
     [Mod(Id, "1.0.0", "Sanae6")]
@@ -44,6 +45,7 @@ namespace Polus {
         private static List<Action> TempQueue = new();
         public bool CannotMove;
         public bool HudActive;
+        private QRCodeGenerator qrGenerator = new();
 
         public override string Name => "PolusMod";
 
@@ -406,16 +408,15 @@ namespace Polus {
                     QRStamp qr = StupidModStampPatches.qr;
                     qr.Start();
                     StupidModStampPatches.QrVisible = StupidModStampPatches.QrActuallyVisible = reader.ReadBoolean();
-                    $"Got QR Code {StupidModStampPatches.QrVisible} {StupidModStampPatches.QrActuallyVisible}".Log(10);
+                    // $"Got QR Code {StupidModStampPatches.QrVisible} {StupidModStampPatches.QrActuallyVisible}".Log(10);
                     if (StupidModStampPatches.QrActuallyVisible) {
                         string data = reader.ReadString();
                     
                         AddDispatch(() => {
-                            QRCodeGenerator qrGenerator = new();
-                            QRCodeData qrCodeData = qrGenerator.CreateQrCode(data.Log(comment: "perhaps"), QRCodeGenerator.ECCLevel.L, true, false, QRCodeGenerator.EciMode.Default, -1);
-                            UnityQRCode qrCode = new(qrCodeData);
-                            Texture2D qrCodeAsTexture2D = qrCode.GetGraphic(2, Color.black, new Color(1f, 1f, 1f, 0.5f)).DontDestroy();
-                            qr.SetCode(qrCodeAsTexture2D);
+                            QRCodeData qrCodeData = qrGenerator.CreateQrCode(data, QRCodeGenerator.ECCLevel.M, true, false, QRCodeGenerator.EciMode.Default, -1);
+                            // UnityQRCode qrCode = new(qrCodeData);
+                            // Texture2D qrCodeAsTexture2D = qrCode.GetGraphic(2, Color.black, new Color(1f, 1f, 1f, 0.5f));
+                            qr.SetCode(qrCodeData);
                         });
                     }
 
