@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using BepInEx.Logging;
 using HarmonyLib;
+using System.Diagnostics;
 using UnhollowerBaseLib;
 
 namespace Polus.Extensions {
@@ -17,6 +18,10 @@ namespace Polus.Extensions {
                     LogOnce(value.ToString(), comment, level);
 
             return value;
+        }
+
+        public static string Trace(this object __value) {
+            return new StackTrace().ToString();
         }
 
         private static void LogOnce(string value, string comment, LogLevel level) {

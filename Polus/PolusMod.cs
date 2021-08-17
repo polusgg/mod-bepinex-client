@@ -426,6 +426,7 @@ namespace Polus {
                     break;
                 }
             }
+            reader.Recycle();
         }
 
         public void RefreshCpmTab() {

@@ -41,6 +41,7 @@ namespace Polus.Patches.Temporary {
                         // PogusPlugin.Logger.LogInfo($"Handling packet {reader.Tag:X2} for {mod.Name}");
                         MessageReader dispatchReader = reader.Clone();
                         PolusMod.AddDispatch(() => CatchHelper.TryCatch(() => mod.RootPacketReceived(dispatchReader)));
+                        // PolusMod.AddDispatch(() => CatchHelper.TryCatch(() => mod.RootPacketReceived(dispatchReader)));
                     }
 
                     return false;
