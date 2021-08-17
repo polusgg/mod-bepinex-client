@@ -125,13 +125,13 @@ namespace Polus {
 
             private void Update() {
                 foreach ((PggMod _, Mod mod) in ModManager.TemporaryMods) mod.Update();
-                if (amHost != HostFixingPatches.AmHostDisable.AmHostReal) {
+                if (AmongUsClient.Instance && AmongUsClient.Instance.AmConnected && amHost != HostFixingPatches.AmHostDisable.AmHostReal) {
                     amHost = HostFixingPatches.AmHostDisable.AmHostReal;
                     if (amHost) foreach ((PggMod _, Mod mod) in ModManager.TemporaryMods) mod.BecameHost();
                     else foreach ((PggMod _, Mod mod) in ModManager.TemporaryMods) mod.LostHost();
                 }
 
-                if (amConnected != (AmongUsClient.Instance && AmongUsClient.Instance.AmConnected)) {
+                if (AmongUsClient.Instance && amConnected != AmongUsClient.Instance.AmConnected) {
                     amConnected = (AmongUsClient.Instance && AmongUsClient.Instance.AmConnected);
                     if (amConnected) foreach ((PggMod _, Mod mod) in ModManager.TemporaryMods) mod.ConnectionEstablished();
                     else foreach ((PggMod _, Mod mod) in ModManager.TemporaryMods) mod.ConnectionDestroyed();
