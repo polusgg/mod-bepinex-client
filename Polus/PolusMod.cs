@@ -414,9 +414,9 @@ namespace Polus {
                     
                         AddDispatch(() => {
                             QRCodeData qrCodeData = qrGenerator.CreateQrCode(data, QRCodeGenerator.ECCLevel.M, true, false, QRCodeGenerator.EciMode.Default, -1);
-                            // UnityQRCode qrCode = new(qrCodeData);
-                            // Texture2D qrCodeAsTexture2D = qrCode.GetGraphic(2, Color.black, new Color(1f, 1f, 1f, 0.5f));
-                            qr.SetCode(qrCodeData);
+                            UnityQRCode qrCode = new(qrCodeData);
+                            Texture2D qrCodeAsTexture2D = qrCode.GetGraphic(2, Color.black, new Color(1f, 1f, 1f, 0.5f));
+                            qr.SetCode(qrCodeAsTexture2D);
                         });
                     }
 
@@ -488,7 +488,7 @@ namespace Polus {
                 HudActive = false;
             }
 
-            if (MaintenanceBehaviour.InstanceExists && !MaintenanceBehaviour.Instance.CoroutineRunning && Input.GetKeyDown(KeyCode.F5)) {
+            if (MaintenanceBehaviour.Instance && !MaintenanceBehaviour.Instance.WasCollected && !MaintenanceBehaviour.Instance.CoroutineRunning && Input.GetKeyDown(KeyCode.F5)) {
                 StupidModStampPatches.QrToggled = !StupidModStampPatches.QrToggled;
                 StupidModStampPatches.QrVisible = StupidModStampPatches.qr.gameObject.active;
                 MaintenanceBehaviour.Instance.ShowToast(StupidModStampPatches.QrToggled ? "Showing QR code, press F5 to disable it again." : "Now hiding the QR code, press F5 to enable it.", 1f);

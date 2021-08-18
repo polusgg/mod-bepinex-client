@@ -1,4 +1,5 @@
 ﻿using System;
+using Hazel;
 using Polus.Enums;
 using Polus.Extensions;
 using PowerTools;
@@ -22,7 +23,7 @@ namespace Polus.Patches.Temporary {
             PassiveButton pb = cgb.GetComponent<PassiveButton>();
             pb.ClickSound = Object.Instantiate(GameObject.Find("arrowEnter").GetComponent<PassiveButton>().ClickSound);
             (pb.OnClick = new Button.ButtonClickedEvent()).AddListener((Action) (() => {
-                host.OnClick();
+                if (!AmongUsClient.Instance.AmConnected) host.OnClick();
             }));
         } 
     }
