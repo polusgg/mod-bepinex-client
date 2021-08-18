@@ -17,9 +17,9 @@ namespace Polus.Patches.Temporary {
 
         [HarmonyPatch(typeof(PlayerVoteArea), nameof(PlayerVoteArea.SetTargetPlayerId))]
         public static class AddPvamToButtonsPatch {
-            [HarmonyPrefix]
-            public static void SetTargetPlayerId(PlayerVoteArea __instance) {
-                __instance.gameObject.AddComponent<PvaManager>().Initialize(__instance);
+            [HarmonyPostfix]
+            public static void SetTargetPlayerId(PlayerVoteArea __instance, [HarmonyArgument(0)] byte targetId) {
+                __instance.gameObject.AddComponent<PvaManager>().Initialize(__instance, targetId);
             }
         }
 

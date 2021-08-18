@@ -23,6 +23,8 @@ namespace Polus.Patches.Permanent {
             
             ushort nonce = reader.ReadUInt16();
             
+            __instance.SendAck(nonce);
+            
             lock (_packetQueue) {
                 if (!NetHelpers.SidGreaterThan(nonce, _nextSequenceReceived)) {
                     nonce.Log(comment: "Dropping a potential duplicate packet with id", level: LogLevel.Warning);

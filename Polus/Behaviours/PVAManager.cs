@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 
@@ -10,15 +11,17 @@ namespace Polus.Behaviours {
 
         public PvaManager(IntPtr ptr) : base(ptr) { }
 
+        public PlayerControl player;
         public PlayerVoteArea pva;
         public SpriteRenderer renderer;
         public bool dead;
         public bool disabled;
         public bool reported;
 
-        public void Initialize(PlayerVoteArea voteArea) {
+        public void Initialize(PlayerVoteArea voteArea, byte targetId) {
             pva = voteArea;
             renderer = GetComponent<SpriteRenderer>();
+            if (targetId < 252) player = PlayerControl.AllPlayerControls.Find((Func<PlayerControl, bool>)(pc => pc.PlayerId == targetId));
         }
 
         public void Update() {
@@ -26,6 +29,7 @@ namespace Polus.Behaviours {
                 MeetingHud.VoteStates.Animating or
                 MeetingHud.VoteStates.Discussion or
                 MeetingHud.VoteStates.Proceeding;
+            if (pva.NameText && player) pva.NameText.text = player.nameText.text;
             bool disable = dead || disabled || disabledState;
             if (disable) ControllerManager.Instance.RemoveSelectableUiElement(pva.PlayerButton);
             else ControllerManager.Instance.AddSelectableUiElement(pva.PlayerButton);
