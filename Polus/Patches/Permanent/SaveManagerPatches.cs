@@ -1,5 +1,8 @@
-﻿using HarmonyLib;
+﻿using System.Collections.Generic;
+using System.Reflection;
+using HarmonyLib;
 using InnerNet;
+using Polus.Mods.Patching;
 
 namespace Polus.Patches.Permanent {
     public class SaveManagerPatches {
@@ -13,14 +16,21 @@ namespace Polus.Patches.Permanent {
                 return false;
             }
         }
-        // [HarmonyPatch(typeof(SaveManager), nameof(SaveManager.GameSearchOptions), MethodType.Getter)]
-        // public static class SearchSettingsPatch
-        // {
-        //     [HarmonyPostfix]
-        //     public static bool GameSearchOptions(ref GameOptionsData result) {
-        //         result.Keywords = GameKeywords.All;
-        //         return false;
-        //     }
-        // }
+        [HarmonyPatch]
+        public static class SearchSettingsPatch
+        {
+            [HarmonyTargetMethods]
+            public static IEnumerable<MethodBase> Targets() {
+                yield return AccessTools.PropertyGetter(typeof(SaveManager), nameof(SaveManager.LastHat));
+                yield return AccessTools.PropertyGetter(typeof(SaveManager), nameof(SaveManager.LastPet));
+                yield return AccessTools.PropertyGetter(typeof(SaveManager), nameof(SaveManager.LastSkin));
+            }
+            [PermanentPatch]
+            [HarmonyPrefix]
+            public static bool LastValues(ref uint __result) {
+                __result = uint.MaxValue;
+                return false;
+            }
+        }
     }
 }
