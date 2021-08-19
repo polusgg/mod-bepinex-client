@@ -415,7 +415,7 @@ namespace Polus {
                         AddDispatch(() => {
                             QRCodeData qrCodeData = qrGenerator.CreateQrCode(data, QRCodeGenerator.ECCLevel.M, true, false, QRCodeGenerator.EciMode.Default, -1);
                             UnityQRCode qrCode = new(qrCodeData);
-                            Texture2D qrCodeAsTexture2D = qrCode.GetGraphic(2, Color.black, new Color(1f, 1f, 1f, 0.5f));
+                            Texture2D qrCodeAsTexture2D = qrCode.GetGraphic(2, Color.black, new Color(1f, 1f, 1f, 1f));
                             qr.SetCode(qrCodeAsTexture2D);
                         });
                     }
