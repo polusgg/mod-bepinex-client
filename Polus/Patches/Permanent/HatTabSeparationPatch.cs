@@ -2,20 +2,28 @@
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
-using Polus.Extensions;
 using TMPro;
 using UnhollowerBaseLib;
 using UnityEngine;
 using static UnityEngine.Object;
-using Object = System.Object;
 
 namespace Polus.Patches.Permanent {
+    [HarmonyPatch(typeof(HatsTab), nameof(HatsTab.OnDisable))]
+    public class HatTabClearSeparation {
+        [HarmonyPostfix]
+        public static void OnDisable(HatsTab __instance) {
+            foreach (TextMeshPro tmp in HatTabSeparationPatch.tmps) {
+                Destroy(tmp.gameObject);
+            }
+            HatTabSeparationPatch.tmps.Clear();
+        }
+    }
     [HarmonyPatch(typeof(HatsTab), nameof(HatsTab.OnEnable))]
     public class HatTabSeparationPatch {
+        public static List<TextMeshPro> tmps = new();
         [HarmonyPrefix]
-        public static bool OnEnable(HatsTab __instance) {
+        public static bool OnEnable(HatsTab __instance) {   
             //TODO Separate pgg specific cosmetics by productId but keep innersloth stuff the same
-            return true;
             Il2CppReferenceArray<HatBehaviour> allHats = DestroyableSingleton<HatManager>.Instance.GetUnlockedHats();
             SortedList<string, List<HatBehaviour>> hatGroups = new(
                 new PaddedComparer<string>("Vanilla", "")
@@ -33,14 +41,18 @@ namespace Polus.Patches.Permanent {
 
             __instance.ColorChips.Clear();
             
-            TextMeshPro groupNameText = __instance.transform.parent.parent.GetComponentInChildren<GameSettingMenu>(true).GetComponentInChildren<TextMeshPro>(true);
+            TextMeshPro groupNameText = __instance.transform.parent.parent.GetComponentInChildren<CustomPlayerMenu>(true).Tabs[0].Button.transform.parent.GetComponentInChildren<TextMeshPro>();
+            Material m = __instance.transform.parent.parent.GetComponentInChildren<GameSettingMenu>(true).GetComponentInChildren<TextMeshPro>().renderer.sharedMaterial;
 
             int hatIdx = 0;
             foreach ((string groupName, List<HatBehaviour> hats) in hatGroups) {
                 GameObject text = Instantiate(groupNameText.gameObject, __instance.scroller.Inner, true);
+                Destroy(text.GetComponent<TextTranslatorTMP>());
                 text.transform.localScale = Vector3.one;
 
                 TextMeshPro tmp = text.GetComponent<TextMeshPro>();
+                tmps.Add(tmp);
+                tmp.renderer.sharedMaterial = m;
                 tmp.text = groupName;
                 tmp.alignment = TextAlignmentOptions.Center;
                 tmp.fontSize = 3f;
@@ -69,7 +81,7 @@ namespace Polus.Patches.Permanent {
             }
 
             __instance.scroller.YBounds.max = -(__instance.YStart - (hatIdx + 1) / __instance.NumPerRow * __instance.YOffset) - 3f;
-            return true;
+            return false;
         }
     }
 
