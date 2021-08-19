@@ -251,11 +251,29 @@ namespace Polus.Behaviours {
             }
 
             public void SetPlayerColors(Color? playerColor, Color? shadowColor, Color? visorColor) {
-                if (playerColor.HasValue) _playerControl.myRend.material.SetColor(BackColorID, playerColor.Value);
+                if (playerColor.HasValue) {
+                    _playerControl.myRend.material.SetColor(BodyColorID, playerColor.Value);
+                    if (_playerControl.HatRenderer && _playerControl.HatRenderer.Hat.AltShader != null) {
+                        _playerControl.HatRenderer.FrontLayer.material.SetColor(BodyColorID, playerColor.Value);
+                        _playerControl.HatRenderer.BackLayer.material.SetColor(BodyColorID, playerColor.Value);
+                    }
+                }
 
-                if (shadowColor.HasValue) _playerControl.myRend.material.SetColor(BodyColorID, shadowColor.Value);
+                if (shadowColor.HasValue) {
+                    _playerControl.myRend.material.SetColor(BackColorID, shadowColor.Value);
+                    if (_playerControl.HatRenderer && _playerControl.HatRenderer.Hat.AltShader != null) {
+                        _playerControl.HatRenderer.FrontLayer.material.SetColor(BackColorID, shadowColor.Value);
+                        _playerControl.HatRenderer.BackLayer.material.SetColor(BackColorID, shadowColor.Value);
+                    }
+                }
 
-                if (visorColor.HasValue) _playerControl.myRend.material.SetColor(VisorColorID, visorColor.Value);
+                if (visorColor.HasValue) {
+                    _playerControl.myRend.material.SetColor(VisorColorID, visorColor.Value);
+                    if (_playerControl.HatRenderer && _playerControl.HatRenderer.Hat.AltShader != null) {
+                        _playerControl.HatRenderer.FrontLayer.material.SetColor(VisorColorID, visorColor.Value);
+                        _playerControl.HatRenderer.BackLayer.material.SetColor(VisorColorID, visorColor.Value);
+                    }
+                }
             }
         }
     }
