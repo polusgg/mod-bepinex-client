@@ -16,7 +16,7 @@ namespace Polus.Patches.Permanent {
                 return false;
             }
         }
-        [HarmonyPatch]
+        // [HarmonyPatch]
         public static class SearchSettingsPatch
         {
             [HarmonyTargetMethods]
