@@ -6,6 +6,7 @@ using System.Reflection;
 using BepInEx.Logging;
 using HarmonyLib;
 using Polus.Behaviours;
+using Polus.Enums;
 using Polus.Extensions;
 using Polus.Mods;
 using Polus.Patches.Permanent;
@@ -15,7 +16,7 @@ using UnityEngine.SceneManagement;
 
 namespace Polus {
     public class PggModManager {
-        private static readonly string[] OnlineScenes = {"EndGame", "OnlineGame"};
+        private static readonly string[] OnlineScenes = {GameScenes.EndGame, GameScenes.OnlineGame};
         public bool AllPatched;
         public ManualLogSource Logger;
         public bool PostLoad;
@@ -33,7 +34,7 @@ namespace Polus {
                 foreach ((_, Mod mod) in TemporaryMods) mod.SceneChanged(scene);
 
                 if (!AllPatched) return;
-                if (scene.name != "OnlineGame") PogusPlugin.ObjectManager.EndedGame();
+                if (scene.name != GameScenes.OnlineGame) PogusPlugin.ObjectManager.EndedGame();
                 if (OnlineScenes.Contains(scene.name) != _wasOnline) {
                     Logger.LogInfo(scene.name);
                     _wasOnline = OnlineScenes.Contains(scene.name);
@@ -43,7 +44,7 @@ namespace Polus {
                             mod.LobbyLeft();
                 }
                 
-                if (_previousSceneName == "OnlineGame" && scene.name == "EndGame") 
+                if (_previousSceneName == GameScenes.OnlineGame && scene.name == GameScenes.EndGame) 
                     foreach ((_, Mod mod) in TemporaryMods)
                         mod.GameEnded();
 

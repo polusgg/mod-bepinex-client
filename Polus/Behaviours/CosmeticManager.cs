@@ -17,6 +17,7 @@ namespace Polus.Behaviours {
         private Dictionary<uint, HatBehaviour> Hats = new();
         private Dictionary<uint, PetBehaviour> Pets = new();
         private Dictionary<uint, SkinData> Skins = new();
+        private Dictionary<uint, bool> Owned = new();
 
         public static bool InstanceExists => HatManager.InstanceExists;
         // unreadable :)
@@ -46,6 +47,14 @@ namespace Polus.Behaviours {
             Skins = Skins.Where(kvp => kvp.Key < 10000000).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
         }
 
+        public bool IsOwned(uint id) {
+            if (Owned.ContainsKey(id)) {
+                return Owned[id];
+            } else {
+                return Owned[id] = false;
+            }
+        }
+
         public HatBehaviour GetHatById(uint hatId) => Hats.TryGetValue(hatId, out HatBehaviour hat) ? hat : manager.NoneHat;
         public PetBehaviour GetPetById(uint petId) => Pets.TryGetValue(petId, out PetBehaviour pet) ? pet : Pets[0];
         public SkinData GetSkinById(uint skinId) => Skins.TryGetValue(skinId, out SkinData skin) ? skin : Skins[0];
@@ -62,20 +71,26 @@ namespace Polus.Behaviours {
             return Skins.All(x => x.Value.Pointer != skin.Pointer) ? 0 : Skins.First(x => x.Value.Pointer == skin.Pointer).Key;
         }
 
-        public HatBehaviour[] GetOwnedHats() => Hats.Where(h => !HatManager.IsMapStuff(h.Value.ProdId) && h.Value.LimitedMonth == 0 || SaveManager.GetPurchase(h.Value.ProductId)).OrderByDescending(o => o.Value.Order).ThenBy(o => o.Key).Select(x => x.Value).ToArray();
-        public PetBehaviour[] GetOwnedPets() => Pets.Where(h => h.Value.Free || SaveManager.GetPurchase(h.Value.ProductId)).Select(x => x.Value).ToArray();
-        public SkinData[] GetOwnedSkins() => Skins.Where(s => !HatManager.IsMapStuff(s.Value.ProdId) || SaveManager.GetPurchase(s.Value.ProdId)).OrderByDescending(o => o.Value.Order).ThenBy(o => o.Key).Select(x => x.Value).ToArray();
+        public HatBehaviour[] GetOwnedHats() => Hats.Where(h => h.Key < 10_000_000 ? !HatManager.IsMapStuff(h.Value.ProdId) && h.Value.LimitedMonth == 0 || SaveManager.GetPurchase(h.Value.ProductId) : IsOwned(h.Key)).OrderByDescending(o => o.Value.Order).ThenBy(o => o.Key).Select(x => x.Value).ToArray();
+        public PetBehaviour[] GetOwnedPets() => Pets.Where(p => p.Key < 10_000_000 ? p.Value.Free || SaveManager.GetPurchase(p.Value.ProductId) : IsOwned(p.Key)).Select(x => x.Value).ToArray();
+        public SkinData[] GetOwnedSkins() => Skins.Where(s => {
+            if (s.Key < 10_000_000) return !HatManager.IsMapStuff(s.Value.ProdId) || SaveManager.GetPurchase(s.Value.ProdId);
+            return IsOwned(s.Key);
+        }).OrderByDescending(o => o.Value.Order).ThenBy(o => o.Key).Select(x => x.Value).ToArray();
 
-        public void SetHat(uint id, HatBehaviour behaviour) {
+        public void SetHat(uint id, HatBehaviour behaviour, bool isFree) {
             Hats[id] = behaviour;
+            Owned[id] = isFree;
         }
 
-        public void SetPet(uint id, PetBehaviour behaviour) {
+        public void SetPet(uint id, PetBehaviour behaviour, bool isFree) {
             Pets[id] = behaviour;
+            Owned[id] = isFree;
         }
 
-        public void SetSkin(uint id, SkinData behaviour) {
+        public void SetSkin(uint id, SkinData behaviour, bool isFree) {
             Skins[id] = behaviour;
+            Owned[id] = isFree;
         }
 
         public void AddAllOwnedVanillaCosmetics() {

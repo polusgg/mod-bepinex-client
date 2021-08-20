@@ -311,14 +311,11 @@ namespace Polus {
                     uint resourceId = reader.ReadPackedUInt32();
                     bool isFree = reader.ReadBoolean();
 
-                    AddDispatch(() => {
-                        HatBehaviour hat = Cache.CachedFiles[resourceId].Get<HatBehaviour>();
-                        CosmeticManager.Instance.SetHat((uint) hatId, hat);
-                        if (isFree) hat.LimitedMonth = 0;
-                        if (hat.AltShader != null) hat.AltShader = PlayerControl.LocalPlayer.myRend.material;
-                        RefreshCpmTab();
-                    });
-
+                    HatBehaviour hat = Cache.CachedFiles[resourceId].Get<HatBehaviour>();
+                    $"Loading hat {hat.name} at id {hatId}".Log();
+                    CosmeticManager.Instance.SetHat((uint) hatId, hat, isFree);
+                    if (hat.AltShader != null) hat.AltShader = PlayerControl.LocalPlayer.myRend.material;
+                    RefreshCpmTab();
                     break;
                 }
                 case PolusRootPackets.LoadPet: {
@@ -326,13 +323,10 @@ namespace Polus {
                     uint resourceId = reader.ReadPackedUInt32();
                     bool isFree = reader.ReadBoolean();
 
-                    AddDispatch(() => {
-                        PetBehaviour pet = Cache.CachedFiles[resourceId].Get<GameObject>().GetComponent<PetBehaviour>();
-                        CosmeticManager.Instance.SetPet((uint) petId, pet);
-                        pet.Free = isFree;
-                        RefreshCpmTab();
-                    });
-
+                    PetBehaviour pet = Cache.CachedFiles[resourceId].Get<GameObject>().GetComponent<PetBehaviour>();
+                    $"Loading hat {pet.name} at id {petId}".Log();
+                    CosmeticManager.Instance.SetPet((uint) petId, pet, isFree);
+                    RefreshCpmTab();
                     break;
                 }
                 case PolusRootPackets.SetHudVisibility: {
@@ -495,12 +489,8 @@ namespace Polus {
             }
 
             lock (Dispatcher) {
-                if (AmongUsClient.Instance && AmongUsClient.Instance.InOnlineScene) {
-                    TempQueue.AddRange(Dispatcher);
-                    Dispatcher.Clear();
-                }
-
-                if (AmongUsClient.Instance && !AmongUsClient.Instance.AmConnected) {
+                if (AmongUsClient.Instance) {
+                    if (AmongUsClient.Instance.AmConnected) TempQueue.AddRange(Dispatcher);
                     Dispatcher.Clear();
                 }
             }
@@ -559,6 +549,7 @@ namespace Polus {
             RoomTrackerTextPatch.RoomText = null;
             GameOptionsPatches.OnEnablePatch.Reset();
             StupidModStampPatches.Reset();
+            SaveManagerPatches.SearsPatches.Reset();
             CosmeticManager.Instance.Reset();
         }
 
