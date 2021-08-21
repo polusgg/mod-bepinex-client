@@ -100,6 +100,8 @@ namespace Polus {
             // font = Bundle.LoadAsset("Assets/Fonts/Inter-SemiBold SDF.asset").Cast<TMP_FontAsset>();
             // FontMwenuwuPatches.Load();
             CatchHelper.TryCatch(CreditsMainMenuPatches.Load);
+
+            CosmeticsWindowButton.Load();
             
             ModManager.PostLoad = true;
 
