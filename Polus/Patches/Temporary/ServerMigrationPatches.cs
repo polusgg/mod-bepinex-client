@@ -19,9 +19,9 @@ namespace Polus.Patches.Temporary {
                 messageWriter.Write(Migrated);
                 messageWriter.EndMessage();
                 PolusMod.AddDispatch(() => {
-                    messageWriter.Recycle();
                     $"Hosting a new game (Migrated = {Migrated})".Log();
                     __instance.SendOrDisconnect(messageWriter);
+                    messageWriter.Recycle();
                 });
                 return false;
             }

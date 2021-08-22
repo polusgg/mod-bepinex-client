@@ -482,7 +482,7 @@ namespace Polus {
                 HudActive = false;
             }
 
-            if (maintenance && !maintenance.WasCollected && !maintenance.CoroutineRunning && Input.GetKeyDown(KeyCode.F5)) {
+            if (maintenance && !maintenance.WasCollected && !maintenance.coroutineRunning && Input.GetKeyDown(KeyCode.F5)) {
                 StupidModStampPatches.QrToggled = !StupidModStampPatches.QrToggled;
                 StupidModStampPatches.QrVisible = StupidModStampPatches.qr.gameObject.active;
                 maintenance.ShowToast(StupidModStampPatches.QrToggled ? "Showing QR code, press F5 to disable it again." : "Now hiding the QR code, press F5 to enable it.", 1f);
