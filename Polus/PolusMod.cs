@@ -39,7 +39,7 @@ namespace Polus {
         private bool optionsDirty;
         private bool lobbyExisted;
         public static PolusMod Instance;
-        private GameObject maintnet;
+        private MaintenanceBehaviour maintenance;
         private static CoroutineManager coMan;
         public static List<Action> Dispatcher = new();
         private static List<Action> TempQueue = new();
@@ -284,7 +284,7 @@ namespace Polus {
                     break;
                 }
                 case PolusRootPackets.DisplaySystemAnnouncement: {
-                    MaintenanceBehaviour.Instance.ShowToast(reader.ReadString());
+                    maintenance.ShowToast(reader.ReadString());
                     break;
                 }
                 case PolusRootPackets.SetGameOption: {
@@ -482,10 +482,10 @@ namespace Polus {
                 HudActive = false;
             }
 
-            if (MaintenanceBehaviour.Instance && !MaintenanceBehaviour.Instance.WasCollected && !MaintenanceBehaviour.Instance.CoroutineRunning && Input.GetKeyDown(KeyCode.F5)) {
+            if (maintenance && !maintenance.WasCollected && !maintenance.CoroutineRunning && Input.GetKeyDown(KeyCode.F5)) {
                 StupidModStampPatches.QrToggled = !StupidModStampPatches.QrToggled;
                 StupidModStampPatches.QrVisible = StupidModStampPatches.qr.gameObject.active;
-                MaintenanceBehaviour.Instance.ShowToast(StupidModStampPatches.QrToggled ? "Showing QR code, press F5 to disable it again." : "Now hiding the QR code, press F5 to enable it.", 1f);
+                maintenance.ShowToast(StupidModStampPatches.QrToggled ? "Showing QR code, press F5 to disable it again." : "Now hiding the QR code, press F5 to enable it.", 1f);
             }
 
             lock (Dispatcher) {
@@ -495,11 +495,12 @@ namespace Polus {
                 }
             }
 
-            foreach (Action t in TempQueue) {
-                CatchHelper.TryCatch(() => t());
+            if (AmongUsClient.Instance && AmongUsClient.Instance.AmConnected && AmongUsClient.Instance.connection.State == ConnectionState.Connected){
+                foreach (Action t in TempQueue) {
+                    CatchHelper.TryCatch(() => t());
+                }
+                TempQueue.Clear();
             }
-
-            TempQueue.Clear();
             if (LobbyBehaviour.Instance != lobbyExisted) {
                 lobbyExisted = LobbyBehaviour.Instance;
                 if (lobbyExisted) optionsDirty = true;
@@ -533,8 +534,7 @@ namespace Polus {
 
         public override void LobbyJoined() {
             Logger.LogInfo("Joined Lobby!");
-            maintnet = new GameObject("maintent").DontDestroy();
-            maintnet.AddComponent<MaintenanceBehaviour>();
+            maintenance = new GameObject("maintent").DontDestroy().AddComponent<MaintenanceBehaviour>();
             PingTrackerTextPatch.PingText = null;
             RoomTrackerTextPatch.RoomText = null;
             StupidModStampPatches.Reset();
@@ -543,8 +543,9 @@ namespace Polus {
         }
 
         public override void LobbyLeft() {
-            Object.Destroy(maintnet);
-            maintnet = null;
+            Object.Destroy(maintenance);
+            maintenance = null;
+            PolusClickBehaviour.Buttons.Clear();
             PingTrackerTextPatch.PingText = null;
             RoomTrackerTextPatch.RoomText = null;
             GameOptionsPatches.OnEnablePatch.Reset();

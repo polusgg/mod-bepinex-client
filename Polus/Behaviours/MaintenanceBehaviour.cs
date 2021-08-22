@@ -10,7 +10,6 @@ using UnityEngine;
 
 namespace Polus.Behaviours {
     public class MaintenanceBehaviour : MonoBehaviour {
-        public static MaintenanceBehaviour? Instance;
         private static readonly GameObject DisguisedToast;
         private readonly float distance = 0.4f;
         private readonly float duration = 1f;
@@ -28,15 +27,6 @@ namespace Polus.Behaviours {
         }
 
         public MaintenanceBehaviour(IntPtr ptr) : base(ptr) { }
-
-        private void Start() {
-            Instance = this;
-            // ShowToast("Hello world");
-        }
-
-        private void OnDestroy() {
-            Instance = null;
-        }
 
         private void Update() {
             if (CoroutineRunning || _notificationQueue.Count == 0) return;

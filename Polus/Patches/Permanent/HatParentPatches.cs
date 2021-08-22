@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using Polus.Behaviours;
 using PowerTools;
 using UnityEngine;
 
@@ -12,48 +13,15 @@ namespace Polus.Patches.Permanent {
 
             [HarmonyPrefix]
             public static bool LateUpdate(HatParent __instance) {
-                // return true;
-                if (__instance.Hat != null) {
-                    HatBehaviour behaviour = __instance.Hat;
-                    Sprite front;
-                    Sprite back;
+                if (__instance.Hat == null) return false;
+                HatBehaviour behaviour = __instance.Hat;
+                if (CosmeticManager.Instance.GetIdByHat(behaviour) < 10000000) return true;
+                if (__instance.Parent && __instance.Hat != null && IsValid(__instance, __instance.Hat)) {
+                    __instance.FrontLayer.sprite = behaviour.MainImage ?? behaviour.LeftMainImage;
+                    __instance.BackLayer.sprite = behaviour.BackImage ?? behaviour.LeftBackImage;
 
-                    if (__instance.Parent != null && __instance.Parent.flipX) {
-                        if (behaviour.LeftMainImage != null) {
-                            front = behaviour.LeftMainImage;
-                            __instance.FrontLayer.flipX = false;
-                        } else {
-                            front = behaviour.MainImage;
-                            __instance.FrontLayer.flipX = true;
-                        }
-
-                        if (behaviour.LeftBackImage != null) {
-                            back = behaviour.LeftBackImage;
-                            __instance.BackLayer.flipX = false;
-                        } else {
-                            back = behaviour.BackImage;
-                            __instance.BackLayer.flipX = true;
-                        }
-                    } else {
-                        if (behaviour.MainImage != null) {
-                            front = behaviour.MainImage;
-                            __instance.FrontLayer.flipX = false;
-                        } else {
-                            front = behaviour.LeftMainImage;
-                            __instance.FrontLayer.flipX = true;
-                        }
-
-                        if (behaviour.BackImage != null) {
-                            back = behaviour.BackImage;
-                            __instance.BackLayer.flipX = false;
-                        } else {
-                            back = behaviour.LeftBackImage;
-                            __instance.BackLayer.flipX = true;
-                        }
-                    }
-
-                    __instance.FrontLayer.sprite = front;
-                    __instance.BackLayer.sprite = back;
+                    __instance.FrontLayer.flipX = !behaviour.MainImage ? !__instance.Parent.flipX : __instance.Parent.flipX;
+                    __instance.BackLayer.flipX = !behaviour.BackImage ? !__instance.Parent.flipX : __instance.Parent.flipX;
                 }
 
                 return false;
@@ -66,6 +34,7 @@ namespace Polus.Patches.Permanent {
             public static bool SetIdleAnim(HatParent __instance) {
                 if (!__instance.Hat)
                     return false;
+                if (CosmeticManager.Instance.GetIdByHat(__instance.Hat) < 10000000) return true;
 
                 if (__instance.Hat.AltShader) {
                     __instance.FrontLayer.sharedMaterial = __instance.Hat.AltShader;
@@ -77,9 +46,16 @@ namespace Polus.Patches.Permanent {
 
                 SpriteAnimNodeSync component = __instance.GetComponent<SpriteAnimNodeSync>();
                 if (component != null) component.NodeId = __instance.Hat.NoBounce ? 1 : 0;
-
                 __instance.BackLayer.enabled = true;
                 __instance.FrontLayer.enabled = true;
+
+                __instance.FrontLayer.sprite = __instance.Hat.MainImage ?? __instance.Hat.LeftMainImage;
+                __instance.BackLayer.sprite = __instance.Hat.BackImage ?? __instance.Hat.LeftBackImage;
+
+                if (!__instance.Parent) return false; 
+                __instance.FrontLayer.flipX = !__instance.Hat.MainImage ? !__instance.Parent.flipX : __instance.Parent.flipX;
+                __instance.BackLayer.flipX = !__instance.Hat.BackImage ? !__instance.Parent.flipX : __instance.Parent.flipX;
+
                 return false;
             }
         }

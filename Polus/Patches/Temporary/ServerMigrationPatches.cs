@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using Hazel;
 using InnerNet;
+using Polus.Extensions;
 using UnityEngine;
 
 namespace Polus.Patches.Temporary {
@@ -17,9 +18,11 @@ namespace Polus.Patches.Temporary {
                 messageWriter.Write((byte)SaveManager.ChatModeType);
                 messageWriter.Write(Migrated);
                 messageWriter.EndMessage();
-                __instance.SendOrDisconnect(messageWriter);
-                messageWriter.Recycle();
-                Debug.Log("Client requesting new game.");
+                PolusMod.AddDispatch(() => {
+                    messageWriter.Recycle();
+                    $"Hosting a new game (Migrated = {Migrated})".Log();
+                    __instance.SendOrDisconnect(messageWriter);
+                });
                 return false;
             }
         }

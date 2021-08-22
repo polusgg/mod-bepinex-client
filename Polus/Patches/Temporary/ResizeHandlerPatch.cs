@@ -13,7 +13,10 @@ namespace Polus.Patches.Temporary {
             writer.WritePacked(width);
             writer.WritePacked(height);
             writer.EndMessage();
-            AmongUsClient.Instance.SendOrDisconnect(writer);
+            PolusMod.AddDispatch(() => {
+                AmongUsClient.Instance.SendOrDisconnect(writer);
+                writer.Recycle();
+            });
         }
     }
 }
