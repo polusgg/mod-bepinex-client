@@ -34,6 +34,7 @@ namespace Polus.Behaviours {
             Player.myRend.color = playerColor;
             Player.HatRenderer.color = hatColor;
             Player.MyPhysics.Skin.layer.color = skinColor;
+            Player.nameText.color = Color.white;
             Player.nameText.alpha = nameAlpha;
 
             if (!Player.CurrentPet) return;

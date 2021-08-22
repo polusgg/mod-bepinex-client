@@ -554,7 +554,9 @@ namespace Polus {
             CosmeticManager.Instance.Reset();
         }
 
-        public override void PlayerSpawned(PlayerControl player) { }
+        public override void PlayerSpawned(PlayerControl player) {
+            player.gameObject.EnsureComponent<PlayerAnimPlayer>();
+        }
 
         public override void PlayerDestroyed(PlayerControl player) { }
 

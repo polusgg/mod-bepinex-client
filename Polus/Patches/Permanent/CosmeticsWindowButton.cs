@@ -23,7 +23,7 @@ namespace Polus.Patches.Permanent
         {
             SceneManager.add_sceneLoaded((Action<Scene, LoadSceneMode>)((scene, _) =>
             {
-                if (scene.name == "MainMenu") ;
+                // if (scene.name == "MainMenu") ;
                 // CreateCosmeticsButton();
             }));
         }
