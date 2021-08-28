@@ -68,15 +68,12 @@ namespace Polus.Behaviours {
         }
 
         public uint GetIdBySkin(SkinData skin) {
-            return Skins.All(x => x.Value.Pointer != skin.Pointer) ? 0 : Skins.First(x => x.Value.Pointer == skin.Pointer).Key;
+            return Skins.All(x => x.Value.name != skin.name) ? 0 : Skins.First(x => x.Value.name == skin.name).Key;
         }
 
         public HatBehaviour[] GetOwnedHats() => Hats.Where(h => h.Key < 10_000_000 ? !HatManager.IsMapStuff(h.Value.ProdId) && h.Value.LimitedMonth == 0 || SaveManager.GetPurchase(h.Value.ProductId) : IsOwned(h.Key)).OrderByDescending(o => o.Value.Order).ThenBy(o => o.Key).Select(x => x.Value).ToArray();
         public PetBehaviour[] GetOwnedPets() => Pets.Where(p => p.Key < 10_000_000 ? p.Value.Free || SaveManager.GetPurchase(p.Value.ProductId) : IsOwned(p.Key)).Select(x => x.Value).ToArray();
-        public SkinData[] GetOwnedSkins() => Skins.Where(s => {
-            if (s.Key < 10_000_000) return !HatManager.IsMapStuff(s.Value.ProdId) || SaveManager.GetPurchase(s.Value.ProdId);
-            return IsOwned(s.Key);
-        }).OrderByDescending(o => o.Value.Order).ThenBy(o => o.Key).Select(x => x.Value).ToArray();
+        public SkinData[] GetOwnedSkins() => Skins.Where(s => s.Key < 10_000_000 ? !HatManager.IsMapStuff(s.Value.ProdId) || SaveManager.GetPurchase(s.Value.ProdId) : IsOwned(s.Key)).OrderByDescending(o => o.Value.Order).ThenBy(o => o.Key).Select(x => x.Value).ToArray();
 
         public void SetHat(uint id, HatBehaviour behaviour, bool isFree) {
             Hats[id] = behaviour;
