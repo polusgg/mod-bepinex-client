@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 using HarmonyLib;
 using InnerNet;
+using Polus.Extensions;
 using Polus.Mods.Patching;
 
 namespace Polus.Patches.Permanent {
@@ -28,15 +30,33 @@ namespace Polus.Patches.Permanent {
                 ActuallySkin = false;
             }
 
+            [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.HandleRpc))]
+            public class SearsHandleRpc {
+                [HarmonyPrefix]
+                public static void HandleRpc([HarmonyArgument(0)]RpcCalls rpc) {
+                    switch (rpc) {
+                        case RpcCalls.SetHat:
+                            ActuallyHat = true;
+                            break;
+                        case RpcCalls.SetPet:
+                            ActuallyPet = true;
+                            break;
+                        case RpcCalls.SetSkin:
+                            ActuallySkin = true;
+                            break;
+                    }
+                }
+            }
+
             [HarmonyPatch(typeof(SaveManager), nameof(SaveManager.LastHat), MethodType.Setter)]
             public class LastHatSetPatch {
                 [HarmonyPrefix]
                 public static void SetLastHat() => ActuallyHat = true;
             }
-            [HarmonyPatch(typeof(SaveManager), nameof(SaveManager.lastPet), MethodType.Setter)]
+            [HarmonyPatch(typeof(SaveManager), nameof(SaveManager.LastPet), MethodType.Setter)]
             public class LastPetSetPatch {
                 [HarmonyPrefix]
-                public static void SetLastHat() => ActuallyHat = true;
+                public static void SetLastPet() => ActuallyPet = true;
             }
             [HarmonyPatch(typeof(SaveManager), nameof(SaveManager.LastSkin), MethodType.Setter)]
             public class LastSkinSetPatch {
@@ -48,7 +68,7 @@ namespace Polus.Patches.Permanent {
                 [HarmonyPrefix]
                 public static bool GetLastHat(out uint __result) => (__result = ActuallyHat ? uint.MaxValue : 9999999) == uint.MaxValue;
             }
-            [HarmonyPatch(typeof(SaveManager), nameof(SaveManager.lastPet), MethodType.Getter)]
+            [HarmonyPatch(typeof(SaveManager), nameof(SaveManager.LastPet), MethodType.Getter)]
             public class LastPetGetPatch {
                 [HarmonyPrefix]
                 public static bool GetLastPet(out uint __result) => (__result = ActuallyPet ? uint.MaxValue : 9999999) == uint.MaxValue;
