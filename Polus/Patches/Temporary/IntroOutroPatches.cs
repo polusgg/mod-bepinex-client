@@ -127,6 +127,21 @@ namespace Polus.Patches.Temporary {
                     PlayerControl.SetPetImage(winningPlayerData2.PetId, winningPlayerData2.ColorId,
                         poolablePlayer.PetSlot);
                     poolablePlayer.NameText.text = winningPlayerData2.Name;
+
+                    if (winningPlayerData2.Name.StartsWith("<sprite index="))
+                    {
+                        int spriteEndPos = 0;
+                        while (winningPlayerData2.Name[spriteEndPos] != '>' ||
+                               spriteEndPos >= winningPlayerData2.Name.Length)
+                        {
+                            spriteEndPos++;
+                        }
+
+                        if (spriteEndPos < winningPlayerData2.Name.Length)
+                        {
+                            poolablePlayer.NameText.text = poolablePlayer.NameText.text.Substring(spriteEndPos + 2);
+                        }
+                    }
                     if (winningPlayerData2.IsImpostor) {
                         poolablePlayer.NameText.color = Palette.ImpostorRed;
                     }
