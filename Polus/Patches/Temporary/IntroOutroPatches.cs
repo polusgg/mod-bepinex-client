@@ -131,8 +131,8 @@ namespace Polus.Patches.Temporary {
                     if (winningPlayerData2.Name.StartsWith("<sprite index="))
                     {
                         int spriteEndPos = 0;
-                        while (winningPlayerData2.Name[spriteEndPos] != '>' ||
-                               spriteEndPos >= winningPlayerData2.Name.Length)
+                        while (winningPlayerData2.Name[spriteEndPos] != '>' &&
+                               spriteEndPos < winningPlayerData2.Name.Length)
                         {
                             spriteEndPos++;
                         }
