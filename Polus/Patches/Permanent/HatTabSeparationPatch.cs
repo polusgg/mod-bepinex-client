@@ -22,8 +22,7 @@ namespace Polus.Patches.Permanent {
     public class HatTabSeparationPatch {
         public static List<TextMeshPro> tmps = new();
         [HarmonyPrefix]
-        public static bool OnEnable(HatsTab __instance) {   
-            //TODO Separate pgg specific cosmetics by productId but keep innersloth stuff the same
+        public static bool OnEnable(HatsTab __instance) {
             Il2CppReferenceArray<HatBehaviour> allHats = DestroyableSingleton<HatManager>.Instance.GetUnlockedHats();
             SortedList<string, List<HatBehaviour>> hatGroups = new(
                 new PaddedComparer<string>("Vanilla", "")

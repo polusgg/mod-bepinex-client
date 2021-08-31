@@ -84,7 +84,7 @@ namespace Polus.Patches.Temporary {
                                 option.Value = value.Value;
                                 option.FormatString = value.FormatString;
                                 option.ZeroIsInfinity = value.IsInfinity;
-                                option.TitleText.text = SanitizeName(gameOption.Title);
+                                option.TitleText.text = gameOption.Title.SanitizeName();
                                 option.ValueText.text = option.ZeroIsInfinity && value.Value == 0 ? "∞" : string.Format(option.FormatString, option.Value);
                                 if (!AmongUsClient.Instance.AmHost) option.SetAsPlayer();
                                 options.Add(option.transform);
@@ -96,7 +96,7 @@ namespace Polus.Patches.Temporary {
                                     Object.Instantiate(_boolOption);
                                 option.name = gameOption.Title;
                                 option.CheckMark.enabled = value.Value;
-                                option.TitleText.text = SanitizeName(gameOption.Title);
+                                option.TitleText.text = gameOption.Title.SanitizeName();
                                 if (!AmongUsClient.Instance.AmHost)
                                     option.GetComponent<PassiveButton>().enabled = false;
                                 options.Add(option.transform);
@@ -117,8 +117,8 @@ namespace Polus.Patches.Temporary {
                                     });
 
                                 option.Selected = (int) value.OptionIndex;
-                                option.ValueText.text = SanitizeName(value.Values[value.OptionIndex]);
-                                option.TitleText.text = SanitizeName(gameOption.Title);
+                                option.ValueText.text = (value.Values[value.OptionIndex].SanitizeName());
+                                option.TitleText.text = gameOption.Title.SanitizeName();
 
                                 if (!AmongUsClient.Instance.AmHost) option.SetAsPlayer();
                                 options.Add(option.transform);
@@ -165,22 +165,6 @@ namespace Polus.Patches.Temporary {
                 }
 
                 return true;
-            }
-
-            private static string SanitizeName(string name) {
-                while (true) {
-                    int pos;
-                    if ((pos = name.IndexOf("<sprite", StringComparison.Ordinal)) != -1 && name.IndexOf('>', pos) != -1) {
-                        int second = name.IndexOf('>', pos) + 1;
-                        while (second + 1 < name.Length && name[second] == ' ') second++;
-                        name = name[..pos] + name[second..];
-                        continue;
-                    }
-
-                    break;
-                }
-
-                return name;
             }
 
             public static void HandleToggleChanged(OptionBehaviour toggleBehaviour) {
@@ -230,7 +214,7 @@ namespace Polus.Patches.Temporary {
                 GameOption gameOption = OptionMap[stringOption.name];
                 EnumValue value = (EnumValue) gameOption.Value;
                 value.OptionIndex = (uint) stringOption.Selected;
-                stringOption.ValueText.text = SanitizeName(value.Values[value.OptionIndex]);
+                stringOption.ValueText.text = value.Values[value.OptionIndex].SanitizeName();
                 MessageWriter writer = MessageWriter.Get(SendOption.Reliable);
                 writer.StartMessage((byte) PolusRootPackets.SetGameOption);
                 writer.Write((ushort) 0);

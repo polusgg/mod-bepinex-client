@@ -314,7 +314,7 @@ namespace Polus {
                     HatBehaviour hat = Cache.CachedFiles[resourceId].Get<HatBehaviour>();
                     $"Loading hat {hat.name} at id {hatId}".Log();
                     CosmeticManager.Instance.SetHat((uint) hatId, hat, isFree);
-                    if (hat.AltShader != null) hat.AltShader = PlayerControl.LocalPlayer.myRend.material;
+                    if (hat.AltShader != null) hat.AltShader = AmongUsClient.Instance.PlayerPrefab.myRend.material;
                     RefreshCpmTab();
                     break;
                 }
