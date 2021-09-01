@@ -91,7 +91,8 @@ namespace Polus.Behaviours.Inner {
 
             wap.AddComponent<PolusSoundSource>();
             wap.AddComponent<AudioSource>();
-            objectManager.RegisterType<PolusCameraController>();
+            objectManager.RegisterType<PolusSoundSource>();
+            objectManager.RegisterType<PolusNetworkTransform>();
             return wap.AddComponent<PolusNetworkTransform>();
         }
 
