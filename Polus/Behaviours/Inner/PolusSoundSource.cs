@@ -38,13 +38,13 @@ namespace Polus.Behaviours.Inner {
             source.loop = reader.ReadBoolean();
             source.volume *= (SoundType) reader.ReadByte() switch {
                 SoundType.None => 1f,
-                SoundType.SoundEffect => SoundManager.SfxVolume,
-                SoundType.Music => SoundManager.MusicVolume,
+                SoundType.SoundEffect => Mathf.Clamp01(SoundManager.SfxVolume / 80 + 1),
+                SoundType.Music => Mathf.Clamp01(SoundManager.MusicVolume / 80 + 1),
                 _ => throw new Exception("Invalid sound type")
             };
             source.time = reader.ReadSingle() / 1000f;
             if (reader.ReadBoolean()) source.Pause();
-            else source.UnPause();
+            else source.Play();
         }
     }
 }
