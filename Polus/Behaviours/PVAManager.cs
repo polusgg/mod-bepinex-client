@@ -29,7 +29,10 @@ namespace Polus.Behaviours {
                 MeetingHud.VoteStates.Animating or
                 MeetingHud.VoteStates.Discussion or
                 MeetingHud.VoteStates.Proceeding;
-            if (pva.NameText && player) pva.NameText.text = player.nameText.text;
+            if (pva.NameText && player) {
+                pva.NameText.text = player.nameText.text;
+                pva.NameText.color = Color.white;
+            }
             bool disable = dead || disabled || disabledState;
             if (disable) ControllerManager.Instance.RemoveSelectableUiElement(pva.PlayerButton);
             else ControllerManager.Instance.AddSelectableUiElement(pva.PlayerButton);

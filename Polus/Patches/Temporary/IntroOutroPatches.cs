@@ -142,9 +142,6 @@ namespace Polus.Patches.Temporary {
                             poolablePlayer.NameText.text = poolablePlayer.NameText.text.Substring(spriteEndPos + 2);
                         }
                     }
-                    if (winningPlayerData2.IsImpostor) {
-                        poolablePlayer.NameText.color = Palette.ImpostorRed;
-                    }
 
                     poolablePlayer.NameText.transform.localScale = new Vector3(num3, num3, num3) * 1.25f;
                 }

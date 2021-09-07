@@ -30,7 +30,6 @@ namespace Polus.Behaviours {
         }
 
         private void Update() {
-            Player.nameText.color = playerColor;
             Player.myRend.color = playerColor;
             Player.HatRenderer.color = hatColor;
             Player.MyPhysics.Skin.layer.color = skinColor;
