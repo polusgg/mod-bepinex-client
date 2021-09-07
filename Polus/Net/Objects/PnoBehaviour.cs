@@ -13,9 +13,5 @@ namespace Polus.Net.Objects {
         }
 
         public PnoBehaviour(IntPtr ptr) : base(ptr) { }
-
-        public virtual void TestVirtual() {
-            "Base called".Log();
-        }
     }
 }

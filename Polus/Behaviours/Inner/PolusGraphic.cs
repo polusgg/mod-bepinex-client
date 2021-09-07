@@ -23,10 +23,6 @@ namespace Polus.Behaviours.Inner {
             if (pno.HasData()) Deserialize(pno.GetSpawnData());
         }
 
-        public override void TestVirtual() {
-            "NEW".Log();
-        }
-
         private void Deserialize(MessageReader reader) {
             Texture2D tex = PogusPlugin.Cache.CachedFiles[reader.ReadPackedUInt32()].Get<Texture2D>();
             renderer.sprite = Sprite.Create(tex, new Rect(new Vector2(), new Vector2(tex.width, tex.height)),
