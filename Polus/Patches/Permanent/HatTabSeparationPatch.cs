@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
+using Polus.Behaviours;
 using TMPro;
 using UnhollowerBaseLib;
 using UnityEngine;
@@ -29,7 +30,7 @@ namespace Polus.Patches.Permanent {
             );
 
             foreach (HatBehaviour hat in allHats) {
-                if (HatManager.Instance.GetIdFromHat(hat) < 10000000) hat.StoreName = "Vanilla";
+                if (HatManager.Instance.GetIdFromHat(hat) < CosmeticManager.CosmeticStartId) hat.StoreName = "Vanilla";
                 if (!hatGroups.ContainsKey(hat.StoreName))
                     hatGroups[hat.StoreName] = new List<HatBehaviour>();
                 hatGroups[hat.StoreName].Add(hat);

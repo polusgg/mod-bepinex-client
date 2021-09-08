@@ -20,12 +20,17 @@ namespace Polus.Extensions {
             return value;
         }
 
-        public static string Trace(this object __value) {
-            return new StackTrace().ToString();
+        public static T Trace<T>(this T value, LogLevel level = LogLevel.Info) {
+            new StackTrace().ToString().Log(level: level);
+            return value;
         }
 
         private static void LogOnce(string value, string comment, LogLevel level) {
             PogusPlugin.Logger.Log(level, comment == "" ? value : $"{comment} {value}");
+        }
+
+        public static string Hog(this object value) {
+            return "Hog";
         }
 
         public static byte[] Log(this byte[] value, int times = 1, string comment = "", LogLevel level = LogLevel.Info) {

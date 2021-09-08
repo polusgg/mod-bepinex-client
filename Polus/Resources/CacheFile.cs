@@ -16,7 +16,7 @@ namespace Polus.Resources {
         public ResourceType Type;
 
         public void Unload() {
-            $"Unload {Location}".Log();
+            $"Attempting to unload {Location}".Log();
             CatchHelper.TryCatch(()=>((AssetBundle) InternalData)?.Unload(false));
         }
 
@@ -26,7 +26,7 @@ namespace Polus.Resources {
 
         public T Get<T>() where T : Object {
             if (Type != ResourceType.Asset)
-                throw new Exception(
+                throw new InvalidOperationException(
                     $"Invalid Get call to non-asset {Type} {PogusPlugin.Cache.CachedFiles.First(x => x.Value == this).Key}");
 
             if (InternalData == null)

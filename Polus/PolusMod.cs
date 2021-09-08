@@ -46,6 +46,7 @@ namespace Polus {
         public bool CannotMove;
         public bool HudActive;
         private QRCodeGenerator qrGenerator = new();
+        private object fetchLock = new();
 
         public override string Name => "PolusMod";
 
@@ -556,9 +557,22 @@ namespace Polus {
 
         public override void PlayerSpawned(PlayerControl player) {
             player.gameObject.EnsureComponent<PlayerAnimPlayer>();
+            player.gameObject.AddComponent<CacheListenerBehaviour>().Initialize(new CacheListener((id, current, old) => {
+                if (id >= CosmeticManager.CosmeticStartId && player.Data.HatId == id - 1) {
+                    player.SetHat(id - 1, player.Data.ColorId);
+                }
+                if (id >= CosmeticManager.CosmeticStartId && player.Data.PetId == id - 1) {
+                    player.SetHat(id - 1, player.Data.ColorId);
+                }
+                if (id >= CosmeticManager.CosmeticStartId && player.Data.SkinId == id - 1) {
+                    player.SetHat(id - 1, player.Data.ColorId);
+                }
+            }));
         }
 
-        public override void PlayerDestroyed(PlayerControl player) { }
+        public override void PlayerDestroyed(PlayerControl player) {
+            
+        }
 
         public override void BecameHost() {
             optionsDirty = true;
@@ -577,45 +591,54 @@ namespace Polus {
         }
 
         private IEnumerator FetchResource(MessageReader reader) {
-            uint resource = reader.ReadPackedUInt32();
-            string location = reader.ReadString();
-            byte[] hash = reader.ReadBytes(32);
-            uint resourceType = reader.ReadByte();
-            MessageWriter writer;
-            // if (Cache.IsCachedAndValid(resource, hash)) {
-            //     Logger.LogInfo($"{resource} is already cached");
-            //     writer = StartSendResourceResponse(resource, ResponseType.DownloadEnded);
-            //     writer.Write(1);
-            //     EndSend(writer);
-            //     return;
-            // }
+            lock (fetchLock) {
+                uint resource = reader.ReadPackedUInt32();
+                string location = reader.ReadString();
+                byte[] hash = reader.ReadBytes(32);
+                uint resourceType = reader.ReadByte();
+                MessageWriter writer;
+                // if (Cache.IsCachedAndValid(resource, hash)) {
+                //     Logger.LogInfo($"{resource} is already cached");
+                //     writer = StartSendResourceResponse(resource, ResponseType.DownloadEnded);
+                //     writer.Write(1);
+                //     EndSend(writer);
+                //     return;
+                // }
 
-            Logger.LogInfo($"Trying to download and cache {resource} ({location})");
-            IEnumerator<ICache.CacheAddResult> addToCache = Cache.AddToCache(resource, location, hash,
-                (ResourceType) resourceType);
+                Logger.LogInfo($"Trying to download and cache {resource} ({location})");
+                IEnumerator<ICache.CacheAddResult> addToCache = Cache.AddToCache(resource, location, hash,
+                    (ResourceType) resourceType);
 
-            while (true) {
-                try {
-                    if (!addToCache.MoveNext()) break;
-                } catch (Exception e) {
-                    Logger.LogError($"Failed to cache {resource} ({location})");
-                    Logger.LogError(e);
-                    writer = StartSendResourceResponse(resource, ResponseType.DownloadFailed);
-                    if (e is CacheRequestException exception)
-                        writer.WritePacked((uint) exception.Code);
-                    else
-                        writer.WritePacked(0x69420);
+                while (true) {
+                    try {
+                        if (!addToCache.MoveNext()) break;
+                    } catch (Exception e) {
+                        Logger.LogError($"Failed to cache {resource} ({location})");
+                        Logger.LogError(e);
+                        writer = StartSendResourceResponse(resource, ResponseType.DownloadFailed);
+                        if (e is CacheRequestException exception)
+                            writer.WritePacked((uint) exception.Code);
+                        else
+                            writer.WritePacked(0x69420);
 
-                    EndSend(writer);
+                        EndSend(writer);
+                    }
+
+                    yield return null;
                 }
 
-                yield return null;
-            }
+                if (addToCache.Current.Cached == CacheResult.Invalid) {
+                    writer = StartSendResourceResponse(resource, ResponseType.DownloadInvalid);
+                    EndSend(writer);
+                    Logger.LogInfo($"Invalid hash but still saved {resource}, telling the server about this");
+                    yield break;
+                }
 
-            writer = StartSendResourceResponse(resource, ResponseType.DownloadEnded);
-            writer.Write(addToCache.Current.Cached);
-            EndSend(writer);
-            Logger.LogInfo($"Cached {resource}!");
+                writer = StartSendResourceResponse(resource, ResponseType.DownloadEnded);
+                writer.Write(addToCache.Current.Cached == CacheResult.Success);
+                EndSend(writer);
+                Logger.LogInfo($"Cached {resource}!");
+            }
         }
 
         private MessageWriter StartSendResourceResponse(uint resource, ResponseType type) {

@@ -1,6 +1,5 @@
 ﻿namespace Polus.Enums {
     public enum SaveValues : byte {
-        FontName,
-        GameOption
+        FontName
     }
 }

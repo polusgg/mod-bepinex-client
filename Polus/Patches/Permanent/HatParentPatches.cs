@@ -15,7 +15,7 @@ namespace Polus.Patches.Permanent {
             public static bool LateUpdate(HatParent __instance) {
                 if (__instance.Hat == null) return false;
                 HatBehaviour behaviour = __instance.Hat;
-                if (CosmeticManager.Instance.GetIdByHat(behaviour) < 10000000) return true;
+                if (CosmeticManager.Instance.GetIdByHat(behaviour) < CosmeticManager.CosmeticStartId) return true;
                 if (__instance.Parent && __instance.Hat != null && IsValid(__instance, __instance.Hat)) {
                     __instance.FrontLayer.sprite = behaviour.MainImage ?? behaviour.LeftMainImage;
                     __instance.BackLayer.sprite = behaviour.BackImage ?? behaviour.LeftBackImage;
@@ -34,7 +34,7 @@ namespace Polus.Patches.Permanent {
             public static bool SetIdleAnim(HatParent __instance) {
                 if (!__instance.Hat)
                     return false;
-                if (CosmeticManager.Instance.GetIdByHat(__instance.Hat) < 10000000) return true;
+                if (CosmeticManager.Instance.GetIdByHat(__instance.Hat) < CosmeticManager.CosmeticStartId) return true;
 
                 if (__instance.Hat.AltShader) {
                     __instance.FrontLayer.sharedMaterial = __instance.Hat.AltShader;

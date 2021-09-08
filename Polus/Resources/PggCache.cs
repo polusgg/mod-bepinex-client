@@ -4,10 +4,12 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Polus.Extensions;
+using Polus.Utils;
 using UnityEngine;
 
 namespace Polus.Resources {
@@ -18,25 +20,43 @@ namespace Polus.Resources {
 
         public IEnumerator<ICache.CacheAddResult> AddToCache(uint id, string location, byte[] hash, ResourceType type,
             uint parentId = uint.MaxValue) {
+            CacheResult result = CacheResult.Success;
+            HttpResponseMessage responseMessage = null;
+            Task<HttpResponseMessage> responseTask;
             string path = Path.Join(PggConstants.DownloadFolder, $"{id}");
+            CachedFiles.TryGetValue(id, out CacheFile cached);
 
-            if (!IsCachedAndValid(id, hash)) {
-                HttpResponseMessage responseMessage = null;
-                if (type == ResourceType.Asset) goto AssetOnly;
-
-                Task<HttpResponseMessage> responseTask =
-                    Client.GetAsync(PggConstants.DownloadServer + location,
+            byte[] data = Array.Empty<byte>();
+            if (type != ResourceType.Asset) {
+                responseTask =
+                    Client.GetAsync($"{location}.sha256".Log(comment: "Requesting at"),
                         HttpCompletionOption.ResponseHeadersRead);
                 while (!responseTask.IsCompleted) yield return null;
                 responseMessage = responseTask.Result;
-                if (!responseMessage.IsSuccessStatusCode) {
-                    PlayerControl.LocalPlayer.SetThickAssAndBigDumpy(true, true);
-                    PogusPlugin.Logger.LogFatal($"Failed with: {responseMessage.StatusCode}");
-                    throw new CacheRequestException($"Unsuccessful attempt at getting {location}",
-                        responseMessage.StatusCode);
+                byte[] cdnHash = responseMessage.Content.ReadAsStringAsync().Result.FromHex();
+                if (!cdnHash.SequenceEqual(hash)) {
+                    result = CacheResult.Invalid;
+                    hash = cdnHash;
+                }
+            }
+
+            if (!IsCachedAndValid(id, hash)) {
+
+                if (type != ResourceType.Asset) {
+                    responseTask =
+                        Client.GetAsync(location.Log(comment: "Requesting at"),
+                            HttpCompletionOption.ResponseHeadersRead);
+                    while (!responseTask.IsCompleted) yield return null;
+                    responseMessage = responseTask.Result;
+                    if (!responseMessage.IsSuccessStatusCode) {
+                        PlayerControl.LocalPlayer.SetThickAssAndBigDumpy(true, true);
+                        PogusPlugin.Logger.LogFatal($"Failed with: {responseMessage.StatusCode}");
+                        throw new CacheRequestException($"Unsuccessful attempt at getting {location}",
+                            responseMessage.StatusCode);
+                    }
+                    data = responseMessage.Content.ReadAsByteArrayAsync().Result;
                 }
 
-                AssetOnly:
                 CacheFile cacheFile = new() {
                     Hash = hash,
                     Location = location,
@@ -46,10 +66,8 @@ namespace Polus.Resources {
                     ExtraData = null
                 };
 
-                byte[] data;
                 switch (type) {
                     case ResourceType.Assembly: {
-                        data = responseMessage.Content.ReadAsByteArrayAsync().Result;
                         using (FileStream fs = GetFileStream(path, FileMode.Create, FileAccess.Write, FileShare.None)) fs.Write(data);
                         cacheFile.ExtraData = Assembly.ReflectionOnlyLoad(data).GetName().Name;
                         break;
@@ -70,6 +88,7 @@ namespace Polus.Resources {
                             IEnumerator<ICache.CacheAddResult> assetCache = AddToCache(++assetId, bundoneAsset, hash, ResourceType.Asset, id);
                             while (assetCache.MoveNext()) yield return null;
                         }
+
                         cacheFile.ExtraData = bundone.Assets;
                         break;
                     }
@@ -78,11 +97,6 @@ namespace Polus.Resources {
                         break;
                     }
                 }
-
-                CachedFiles[id] = cacheFile;
-                // if (!WaitForFile(PggConstants.CacheLocation)) {
-                //     throw new Exception("Failed to get unlocked cache file!");
-                // }
 
                 using (BinaryWriter writer = new(GetFileStream(PggConstants.CacheLocation, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None))) {
                     try {
@@ -93,15 +107,20 @@ namespace Polus.Resources {
                     }
                 }
 
+                CachedFiles[id] = cacheFile;
+
                 PogusPlugin.Logger.LogMessage($"Downloaded file at {location} ({id}, {hash.Hex()})");
-                yield return new ICache.CacheAddResult(cacheFile, false);
+                CatchHelper.TryCatch(() => CacheUpdated(id, cacheFile, cached));
+                yield return new ICache.CacheAddResult(cacheFile, result, null);
+                yield break; // in case it still continues
             }
 
-            CacheFile cached = CachedFiles[id];
             PogusPlugin.Logger.LogInfo($"Using cached file {cached.LocalLocation} ({cached.LocalLocation} {cached.Hash.Hex()})");
             PogusPlugin.Logger.LogInfo($"Over {location} ({cached.Hash.Hex()})");
-            yield return new ICache.CacheAddResult(cached, true);
+            yield return new ICache.CacheAddResult(cached, CacheResult.Cached, null);
         }
+
+        public event ICache.CacheUpdateHandler CacheUpdated = (_, _, _) => { };
 
         public bool IsCachedAndValid(uint id, byte[] hash) {
             return CachedFiles.ContainsKey(id) && CachedFiles[id].Hash.SequenceEqual(hash);
