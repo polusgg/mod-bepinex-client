@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Net;
+using System.Threading.Tasks;
+using Il2CppSystem.Collections;
 using Polus.Enums;
 using Polus.Extensions;
 using Polus.Utils;
@@ -8,12 +11,16 @@ using UnhollowerRuntimeLib;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using IEnumerator = System.Collections.IEnumerator;
 using Object = UnityEngine.Object;
 
 namespace Polus.Patches.Permanent {
     public class CreditsMainMenuPatches {
         private static Sprite _crunchuSprite;
         private static CreditsMenuHolder _creditsMenu;
+        private static WebClient client = new() {
+            BaseAddress = "https://static.polus.gg"
+        };
 
         public static void Load() {
             _creditsMenu = PogusPlugin.Bundle
@@ -74,7 +81,7 @@ namespace Polus.Patches.Permanent {
 
             private void Start() {
                 Instance = this;
-                DownloadJesters();
+                this.StartCoroutine(DownloadJesters());
                 ControllerManager.Instance.OpenOverlayMenu("PolusCreditsMenu", back);
             }
 
@@ -82,9 +89,18 @@ namespace Polus.Patches.Permanent {
                 ControllerManager.Instance.CloseOverlayMenu("PolusCreditsMenu");
             }
 
-            public void DownloadJesters() {
+            public IEnumerator DownloadJesters() {
                 TextMeshPro tmp = gameObject.FindRecursive(x => x.name == "PatreonText").GetComponent<TextMeshPro>();
-                tmp.text = "TODO";
+                tmp.text = "Loading...";
+                Task<string> task = client.DownloadStringTaskAsync("jesters.txt");
+                while (!task.IsCompleted) yield return null;
+                if (task.IsFaulted) {
+                    tmp.text = "Failed to get jesters:\n";
+                    tmp.text += task.Exception.Message;
+                    yield break;
+                }
+
+                tmp.text = $"<size=150%><align=center>{task.Result}";
             }
         }
     }
