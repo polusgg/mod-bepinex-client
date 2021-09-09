@@ -116,8 +116,9 @@ namespace Polus.Patches.Temporary {
                     }
 
                     if (!winningPlayerData2.IsDead) {
-                        DestroyableSingleton<HatManager>.Instance.SetSkin(poolablePlayer.Skin.layer,
-                            winningPlayerData2.SkinId);
+                        poolablePlayer.SetSkin(winningPlayerData2.SkinId.Log(comment: "Wake up babe new end game skin"));
+                        // DestroyableSingleton<HatManager>.Instance.SetSkin(poolablePlayer.Skin.layer,
+                        //     winningPlayerData2.SkinId);
                     } else {
                         poolablePlayer.HatSlot.color = new Color(1f, 1f, 1f, 0.5f);
                     }

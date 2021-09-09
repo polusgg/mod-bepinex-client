@@ -425,7 +425,7 @@ namespace Polus {
             reader.Recycle();
         }
 
-        public void RefreshCpmTab() {
+        public static void RefreshCpmTab() {
             PlayerTab player = Object.FindObjectOfType<PlayerTab>();
             if (player != null) {
                 player.OnDisable();
@@ -544,6 +544,7 @@ namespace Polus {
         }
 
         public override void LobbyLeft() {
+            Logger.LogInfo("Left Lobby!");
             Object.Destroy(maintenance);
             maintenance = null;
             PolusClickBehaviour.Buttons.Clear();
@@ -551,7 +552,7 @@ namespace Polus {
             RoomTrackerTextPatch.RoomText = null;
             GameOptionsPatches.OnEnablePatch.Reset();
             StupidModStampPatches.Reset();
-            SaveManagerPatches.SearsPatches.Reset();
+            SearsPatches.Reset();
             CosmeticManager.Instance.Reset();
         }
 
