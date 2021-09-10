@@ -2,6 +2,7 @@
 using HarmonyLib;
 using Polus.Extensions;
 using Polus.Mods.Patching;
+using Polus.ServerList;
 using UnityEngine.SceneManagement;
 
 namespace Polus.Patches.Permanent {

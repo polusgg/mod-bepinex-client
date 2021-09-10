@@ -21,12 +21,16 @@ namespace Polus.ServerList
 
                 foreach (var server in servers)
                 {
-                    var ipAddr = (await Dns.GetHostAddressesAsync(server.Address)).FirstOrDefault();
-                    if (ipAddr is not null && !server.Maintenance)
+                    try
                     {
-                        server.Ip = ipAddr.ToString();
-                        successfulServers.Add(server);
+                        var ipAddr = (await Dns.GetHostAddressesAsync(server.Address)).FirstOrDefault();
+                        if (ipAddr is not null && !server.Maintenance)
+                        {
+                            server.Ip = ipAddr.ToString();
+                            successfulServers.Add(server);
+                        }
                     }
+                    catch (Exception) { /* ignored */ }
                 }
 
                 return successfulServers.ToArray();

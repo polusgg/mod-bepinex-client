@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using HarmonyLib;
 using Polus.Extensions;
 using Polus.Mods.Patching;
@@ -29,13 +30,18 @@ namespace Polus.Patches.Permanent {
             ServerManager.DefaultRegions = ServerManager.Instance.AvailableRegions = Array.Empty<IRegionInfo>();
             var servers = ServerListLoader.Load().GetAwaiter().GetResult();
 
-            foreach (var server in servers)
+            ServerManager.DefaultRegions = ServerManager.Instance.AvailableRegions = servers.Select(server => new StaticRegionInfo(server.Name, StringNames.NoTranslation, server.Ip, new[]
             {
-                ServerManager.Instance.AddOrUpdateRegion(new StaticRegionInfo(server.Name, StringNames.NoTranslation, server.Ip, new[]
-                {
-                    new ServerInfo(server.Name, server.Ip, 22023)
-                }).Cast<IRegionInfo>());
+                new ServerInfo(server.Name, server.Ip, 22023)
+            }).Cast<IRegionInfo>()).ToArray();
+
+            if (ServerManager.DefaultRegions.Length > 0)
+            {
+                ServerManager.Instance.CurrentRegion = ServerManager.DefaultRegions[0];
+                ServerManager.Instance.CurrentServer = ServerManager.DefaultRegions[0].Servers[0];
+
             }
+                
 
             if (PogusPlugin.ModManager.AllPatched) return false;
             PogusPlugin.ModManager.LoadMods();
