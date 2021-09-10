@@ -26,7 +26,7 @@ namespace Polus.Patches.Permanent {
             // ServerManager.DefaultRegions =
             // ServerManager.DefaultRegions.Prepend(PggConstants.Region).ToArray();
 
-            ServerManager.Instance.AvailableRegions = Array.Empty<IRegionInfo>();
+            ServerManager.DefaultRegions = ServerManager.Instance.AvailableRegions = Array.Empty<IRegionInfo>();
             var servers = ServerListLoader.Load().GetAwaiter().GetResult();
 
             foreach (var server in servers)
