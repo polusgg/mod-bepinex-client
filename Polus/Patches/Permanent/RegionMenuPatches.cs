@@ -26,11 +26,7 @@ namespace Polus.Patches.Permanent {
                 button.SetSelected(DestroyableSingleton<ServerManager>.Instance.CurrentRegion.Name == button.Text.text);
                 button.Button.OnClick.AddListener((Action) (() => {
                     bool original = PogusPlugin.ModManager.AllPatched;
-                    if (button.Text.text.Contains("Polus")) {
-                        if (!PogusPlugin.ModManager.AllPatched) PogusPlugin.ModManager.PatchMods();
-                    } else {
-                        PogusPlugin.ModManager.UnpatchMods();
-                    }
+                    if (!PogusPlugin.ModManager.AllPatched) PogusPlugin.ModManager.PatchMods();
 
                     PogusPlugin.Logger.LogInfo(
                         $"IsPatched = {PogusPlugin.ModManager.AllPatched}, original = {original}");

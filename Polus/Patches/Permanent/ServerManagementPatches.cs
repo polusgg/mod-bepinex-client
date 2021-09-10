@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using HarmonyLib;
 using Polus.Extensions;
 using Polus.Mods.Patching;
+using Polus.ServerList;
 using UnhollowerBaseLib;
 
 namespace Polus.Patches.Permanent {
+
     [HarmonyPatch(typeof(ServerManager), nameof(ServerManager.Awake))]
     public class ServerManagerAwakePatch {
         private static bool _hasStarted;
@@ -22,12 +25,21 @@ namespace Polus.Patches.Permanent {
             StatsManager.Instance.WinReasons = stats;
             // ServerManager.DefaultRegions =
             // ServerManager.DefaultRegions.Prepend(PggConstants.Region).ToArray();
-            ServerManager.Instance.AddOrUpdateRegion(PggConstants.Region);
+
+            ServerManager.Instance.AvailableRegions = Array.Empty<IRegionInfo>();
+            var servers = ServerListLoader.Load().GetAwaiter().GetResult();
+
+            foreach (var server in servers)
+            {
+                ServerManager.Instance.AddOrUpdateRegion(new StaticRegionInfo(server.Name, StringNames.NoTranslation, server.Ip, new[]
+                {
+                    new ServerInfo(server.Name, server.Ip, 22023)
+                }).Cast<IRegionInfo>());
+            }
+
             if (PogusPlugin.ModManager.AllPatched) return false;
             PogusPlugin.ModManager.LoadMods();
             PogusPlugin.ModManager.PatchMods();
-
-            __instance.StartCoroutine(SetPggRegion());
             return false;
         }
 

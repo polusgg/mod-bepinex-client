@@ -19,7 +19,7 @@ namespace Polus.Patches.Permanent {
         }
     }
 
-    [HarmonyPatch(typeof(RegionTextMonitor), nameof(RegionTextMonitor.Start))]
+    // [HarmonyPatch(typeof(RegionTextMonitor), nameof(RegionTextMonitor.Start))]
     public class DisableRegionMenuPatch {
         [PermanentPatch]
         [HarmonyPrefix]

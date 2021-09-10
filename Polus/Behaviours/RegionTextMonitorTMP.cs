@@ -20,11 +20,7 @@ namespace Polus.Behaviours {
             while (DestroyableSingleton<ServerManager>.Instance.CurrentRegion == null)
                 yield return null;
 
-            GetComponent<TextMeshPro>().text =
-                DestroyableSingleton<TranslationController>.Instance.GetStringWithDefault(
-                    DestroyableSingleton<ServerManager>.Instance.CurrentRegion.TranslateName,
-                    DestroyableSingleton<ServerManager>.Instance.CurrentRegion.Name,
-                    Array.Empty<Il2CppSystem.Object>());
+            GetComponent<TextMeshPro>().text = DestroyableSingleton<ServerManager>.Instance.CurrentRegion.Name;
         }
     }
 }
