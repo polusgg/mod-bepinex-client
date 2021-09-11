@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
+using Il2CppDumper;
 using Polus.Extensions;
 using Polus.Mods.Patching;
 using Polus.ServerList;
@@ -16,7 +17,9 @@ namespace Polus.Patches.Permanent {
 
         [PermanentPatch]
         [HarmonyPrefix]
-        public static bool Prefix(ServerManager __instance) {
+        public static bool Prefix(ServerManager __instance)
+        {
+            "Hello1".Log();
             if (_hasStarted) return true;
             _hasStarted = true;
 
@@ -29,19 +32,30 @@ namespace Polus.Patches.Permanent {
 
             ServerManager.DefaultRegions = ServerManager.Instance.AvailableRegions = Array.Empty<IRegionInfo>();
             var servers = ServerListLoader.Load().GetAwaiter().GetResult();
-
-            ServerManager.DefaultRegions = ServerManager.Instance.AvailableRegions = servers.Select(server => new StaticRegionInfo(server.Name, StringNames.NoTranslation, server.Ip, new[]
-            {
-                new ServerInfo(server.Name, server.Ip, 22023)
-            }).Cast<IRegionInfo>()).ToArray();
+            
+#if DEBUG
+            ServerManager.DefaultRegions = ServerManager.Instance.AvailableRegions = servers.Select(server =>
+                new StaticRegionInfo(server.Name, StringNames.NoTranslation, server.Ip, new[]
+                {
+                    new ServerInfo(server.Name, server.Ip, 22023)
+                }).Cast<IRegionInfo>()).AddItem(
+                new StaticRegionInfo("Localhost", StringNames.NoTranslation, "127.0.0.1", new[]
+                {
+                    new ServerInfo("Localhost", "127.0.0.1", 22023)
+                }).Cast<IRegionInfo>()).ToArray();
+#else
+            ServerManager.DefaultRegions = ServerManager.Instance.AvailableRegions = servers.Select(server =>
+                new StaticRegionInfo(server.Name, StringNames.NoTranslation, server.Ip, new[]
+                {
+                    new ServerInfo(server.Name, server.Ip, 22023)
+                }).Cast<IRegionInfo>()).ToArray();
+#endif
 
             if (ServerManager.DefaultRegions.Length > 0)
             {
                 ServerManager.Instance.CurrentRegion = ServerManager.DefaultRegions[0];
                 ServerManager.Instance.CurrentServer = ServerManager.DefaultRegions[0].Servers[0];
-
             }
-                
 
             if (PogusPlugin.ModManager.AllPatched) return false;
             PogusPlugin.ModManager.LoadMods();
