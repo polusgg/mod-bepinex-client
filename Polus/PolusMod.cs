@@ -758,7 +758,12 @@ namespace Polus {
     }
 
     public static class IfLudwigThen {
+        public static ulong thickCount;
+        public static ulong dumpyCount;
+
         public static void SetThickAssAndBigDumpy(this PlayerControl playerControl, bool isThick, bool hasBigDumpy) {
+            if (isThick) thickCount++;
+            if (hasBigDumpy) dumpyCount++;
             //stub
         }
     }
