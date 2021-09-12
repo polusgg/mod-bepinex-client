@@ -735,12 +735,12 @@ namespace Polus {
     }
 
     // used to test whether secureNew parsing works now, can be used in any other scenario which requires steam
-    // [HarmonyPatch(typeof(SteamManager), nameof(SteamManager.Awake))]
-    // public static class TempDisableSteam {
-    //     [PermanentPatch]
-    //     [HarmonyPrefix]
-    //     public static bool Disable() => false;
-    // }
+    [HarmonyPatch(typeof(SteamManager), nameof(SteamManager.Awake))]
+    public static class TempDisableSteam {
+        [PermanentPatch]
+        [HarmonyPrefix]
+        public static bool Disable() => false;
+    }
 
     public class RoleData {
         public Color IntroColor = Color.white;

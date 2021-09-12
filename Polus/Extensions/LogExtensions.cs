@@ -2,6 +2,7 @@
 using BepInEx.Logging;
 using HarmonyLib;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnhollowerBaseLib;
 
 namespace Polus.Extensions {

@@ -33,7 +33,6 @@ namespace Polus.Behaviours {
 
         public void Update() {
             PlayerControl.SetPlayerMaterialColors(color, thirdLayer);
-            color.Log(comment: "sexcolor");
         }
     }
 }

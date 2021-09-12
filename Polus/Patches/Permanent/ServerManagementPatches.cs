@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using HarmonyLib;
 using Il2CppDumper;
@@ -33,23 +34,28 @@ namespace Polus.Patches.Permanent {
             ServerManager.DefaultRegions = ServerManager.Instance.AvailableRegions = Array.Empty<IRegionInfo>();
             var servers = ServerListLoader.Load().GetAwaiter().GetResult();
             
-#if DEBUG
-            ServerManager.DefaultRegions = ServerManager.Instance.AvailableRegions = servers.Select(server =>
+// #if DEBUG
+//             var newServers = servers.Select(server =>
+//                 new StaticRegionInfo(server.Name, StringNames.NoTranslation, server.Ip, new[]
+//                 {
+//                     new ServerInfo(server.Name, server.Ip, 22023)
+//                 }).Cast<IRegionInfo>()).Prepend(
+//                 new StaticRegionInfo("Localhost", StringNames.NoTranslation, "127.0.0.1", new[]
+//                 {
+//                     new ServerInfo("Localhost", "127.0.0.1", 22023)
+//                 }).Cast<IRegionInfo>()).ToArray();
+//             if (File.Exists("region.txt")) {
+//                 newServers = newServers.Prepend(PggConstants.Region).ToArray();
+//             }
+// #else
+            var newServers = servers.Select(server =>
                 new StaticRegionInfo(server.Name, StringNames.NoTranslation, server.Ip, new[]
                 {
                     new ServerInfo(server.Name, server.Ip, 22023)
-                }).Cast<IRegionInfo>()).AddItem(
-                new StaticRegionInfo("Localhost", StringNames.NoTranslation, "127.0.0.1", new[]
-                {
-                    new ServerInfo("Localhost", "127.0.0.1", 22023)
                 }).Cast<IRegionInfo>()).ToArray();
-#else
-            ServerManager.DefaultRegions = ServerManager.Instance.AvailableRegions = servers.Select(server =>
-                new StaticRegionInfo(server.Name, StringNames.NoTranslation, server.Ip, new[]
-                {
-                    new ServerInfo(server.Name, server.Ip, 22023)
-                }).Cast<IRegionInfo>()).ToArray();
-#endif
+// #endif
+
+            ServerManager.DefaultRegions = ServerManager.Instance.AvailableRegions = newServers;
 
             if (ServerManager.DefaultRegions.Length > 0)
             {
