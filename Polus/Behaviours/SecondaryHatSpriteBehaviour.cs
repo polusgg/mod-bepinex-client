@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Polus.Enums;
 using Polus.Extensions;
 using Reactor;
 using UnhollowerRuntimeLib;
@@ -14,6 +15,7 @@ namespace Polus.Behaviours {
         public HatParent parent;
         public SpriteRenderer thirdLayer;
         public int color = int.MaxValue;
+        public HatState state;
 
         private static SecondaryHatSpriteBehaviour Create(HatParent parent) {
             SpriteRenderer front2 = Instantiate(parent.FrontLayer, parent.transform);
@@ -25,11 +27,13 @@ namespace Polus.Behaviours {
 
         public void SetColor(int colorParam) {
             color = colorParam;
+            
             Update();
         }
 
-        private void Update() {
+        public void Update() {
             PlayerControl.SetPlayerMaterialColors(color, thirdLayer);
+            color.Log(comment: "sexcolor");
         }
     }
 }
