@@ -734,6 +734,14 @@ namespace Polus {
         }
     }
 
+    // used to test whether secureNew parsing works now, can be used in any other scenario which requires steam
+    // [HarmonyPatch(typeof(SteamManager), nameof(SteamManager.Awake))]
+    // public static class TempDisableSteam {
+    //     [PermanentPatch]
+    //     [HarmonyPrefix]
+    //     public static bool Disable() => false;
+    // }
+
     public class RoleData {
         public Color IntroColor = Color.white;
         public string IntroDesc = "Something went horribly wrong\nwhile displaying this intro!";
@@ -752,7 +760,6 @@ namespace Polus {
     public static class IfLudwigThen {
         public static void SetThickAssAndBigDumpy(this PlayerControl playerControl, bool isThick, bool hasBigDumpy) {
             //stub
-            // "uwu kissies mwah! @Sanae#4092 on discord!!!".Log(level: LogLevel.Debug);
         }
     }
 }
