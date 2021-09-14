@@ -55,7 +55,6 @@ namespace Polus.Patches.Temporary {
 			return false;
 		}
 	}
-}
 
 	public static class BaseCoroutines {
 		public static IEnumerator Animate(ExileController instance) {
@@ -319,3 +318,4 @@ namespace Polus.Patches.Temporary {
 			yield break;
 		}
 	}
+}

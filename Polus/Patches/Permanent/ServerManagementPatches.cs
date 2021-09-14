@@ -11,15 +11,13 @@ using Polus.ServerList;
 using UnhollowerBaseLib;
 
 namespace Polus.Patches.Permanent {
-
     [HarmonyPatch(typeof(ServerManager), nameof(ServerManager.Awake))]
     public class ServerManagerAwakePatch {
         private static bool _hasStarted;
 
         [PermanentPatch]
         [HarmonyPrefix]
-        public static bool Prefix(ServerManager __instance)
-        {
+        public static bool Prefix(ServerManager __instance) {
             "Hello1".Log();
             if (_hasStarted) return true;
             _hasStarted = true;
@@ -33,32 +31,30 @@ namespace Polus.Patches.Permanent {
 
             ServerManager.DefaultRegions = ServerManager.Instance.AvailableRegions = Array.Empty<IRegionInfo>();
             var servers = ServerListLoader.Load().GetAwaiter().GetResult();
-            
+
 // #if DEBUG
 //             var newServers = servers.Select(server =>
 //                 new StaticRegionInfo(server.Name, StringNames.NoTranslation, server.Ip, new[]
 //                 {
 //                     new ServerInfo(server.Name, server.Ip, 22023)
 //                 }).Cast<IRegionInfo>()).Prepend(
-//                 new StaticRegionInfo("Localhost", StringNames.NoTranslation, "127.0.0.1", new[]
-//                 {
-//                     new ServerInfo("Localhost", "127.0.0.1", 22023)
-//                 }).Cast<IRegionInfo>()).ToArray();
-//             if (File.Exists("region.txt")) {
-//                 newServers = newServers.Prepend(PggConstants.Region).ToArray();
-//             }
+            // if (File.Exists("newregion.txt")) {
+            //     newServers = newServers.Prepend(PggConstants.Region).ToArray();
+            // }
 // #else
             var newServers = servers.Select(server =>
-                new StaticRegionInfo(server.Name, StringNames.NoTranslation, server.Ip, new[]
-                {
+                new StaticRegionInfo(server.Name, StringNames.NoTranslation, server.Ip, new[] {
                     new ServerInfo(server.Name, server.Ip, 22023)
-                }).Cast<IRegionInfo>()).ToArray();
+                }).Cast<IRegionInfo>());
+                // .Prepend(new DnsRegionInfo("hall.ly", "Sex", StringNames.August, "72.68.129.83", 22023).Duplicate())
+                // .AddItem(new StaticRegionInfo("Localhost", StringNames.NoTranslation, "127.0.0.1", new[] {
+                //     new ServerInfo("Localhost", "127.0.0.1", 22023)
+                // }).Cast<IRegionInfo>()).ToArray();
 // #endif
 
             ServerManager.DefaultRegions = ServerManager.Instance.AvailableRegions = newServers;
 
-            if (ServerManager.DefaultRegions.Length > 0)
-            {
+            if (ServerManager.DefaultRegions.Length > 0) {
                 ServerManager.Instance.CurrentRegion = ServerManager.DefaultRegions[0];
                 ServerManager.Instance.CurrentServer = ServerManager.DefaultRegions[0].Servers[0];
             }

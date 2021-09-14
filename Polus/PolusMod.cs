@@ -764,7 +764,6 @@ namespace Polus {
         public static void SetThickAssAndBigDumpy(this PlayerControl playerControl, bool isThick, bool hasBigDumpy) {
             if (isThick) thickCount++;
             if (hasBigDumpy) dumpyCount++;
-            //stub
         }
     }
 }

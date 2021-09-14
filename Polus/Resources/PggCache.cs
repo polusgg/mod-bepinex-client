@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
+using BepInEx.Logging;
 using Newtonsoft.Json;
 using Polus.Extensions;
 using Polus.Utils;
@@ -78,18 +79,31 @@ namespace Polus.Resources {
                         using (FileStream fs = GetFileStream(path, FileMode.Create, FileAccess.Write, FileShare.None)) fs.Write(data);
                         AssetBundle bundle = AssetBundle.LoadFromFile(path);
                         cacheFile.InternalData = bundle;
-
-                        Bundle bundone =
-                            JsonConvert.DeserializeObject<Bundle>(bundle.LoadAsset("Assets/AssetListing.json")
-                                .Cast<TextAsset>().text);
-
-                        uint assetId = bundone.BaseId;
-                        foreach (string bundoneAsset in bundone.Assets) {
-                            IEnumerator<ICache.CacheAddResult> assetCache = AddToCache(++assetId, bundoneAsset, hash, ResourceType.Asset, id);
-                            while (assetCache.MoveNext()) yield return null;
+                        Bundle? bundopt = null;
+                        try {
+                            bundopt =
+                                JsonConvert.DeserializeObject<Bundle>(bundle.LoadAsset("Assets/AssetListing.json")
+                                    .Cast<TextAsset>().text);
+                        } catch (Exception e) {
+                            e.Log(level: LogLevel.Fatal, comment: "What the hell why is this brokened");
+                            foreach (string allScenePath in PogusPlugin.Bundle.GetAllAssetNames())
+                                allScenePath.Log(comment: "    grrrr");
                         }
 
-                        cacheFile.ExtraData = bundone.Assets;
+                        if (bundopt.HasValue) {
+                            Bundle bundone = bundopt.Value;
+
+                            uint assetId = bundone.BaseId;
+                            foreach (string bundoneAsset in bundone.Assets) {
+                                IEnumerator<ICache.CacheAddResult> assetCache = AddToCache(++assetId, bundoneAsset, hash, ResourceType.Asset, id);
+                                while (assetCache.MoveNext()) yield return null;
+                            }
+
+                            cacheFile.ExtraData = bundone.Assets;
+                        } else {
+                            yield return new ICache.CacheAddResult(null, CacheResult.Failed, new Exception("Somehow, the bundle has no bundle ☹"));
+                            yield break;
+                        }
                         break;
                     }
                     case ResourceType.Asset: {
@@ -102,8 +116,8 @@ namespace Polus.Resources {
                     try {
                         Serialize(writer);
                     } catch (Exception ex) {
-                        PogusPlugin.Logger.LogWarning($"Failed to cache {location}!");
-                        PogusPlugin.Logger.LogWarning(ex);
+                        $"Failed to cache {location}!".Log(level: LogLevel.Warning);
+                        ex.Log(level: LogLevel.Warning);
                     }
                 }
 
