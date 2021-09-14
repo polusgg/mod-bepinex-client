@@ -52,7 +52,7 @@ namespace Polus.Patches.Permanent {
                 // }).Cast<IRegionInfo>()).ToArray();
 // #endif
 
-            ServerManager.DefaultRegions = ServerManager.Instance.AvailableRegions = newServers;
+            ServerManager.DefaultRegions = ServerManager.Instance.AvailableRegions = newServers.ToArray();
 
             if (ServerManager.DefaultRegions.Length > 0) {
                 ServerManager.Instance.CurrentRegion = ServerManager.DefaultRegions[0];

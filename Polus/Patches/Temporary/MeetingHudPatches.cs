@@ -68,5 +68,13 @@ namespace Polus.Patches.Temporary {
                 __instance.Glass.color = shouldBeDead ? Color.white : GrabUncrackedGlassPatch.UncrackedColor;
             }
         }
+
+        [HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.Update))]
+        public static class UpdateSortingPatch {
+            [HarmonyPostfix]
+            public static void Update(MeetingHud __instance) {
+                __instance.SortButtons();
+            }
+        }
     }
 }
