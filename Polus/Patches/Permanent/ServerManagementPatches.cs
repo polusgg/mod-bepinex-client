@@ -55,10 +55,11 @@ namespace Polus.Patches.Permanent {
 
             ServerManager.DefaultRegions = ServerManager.Instance.AvailableRegions = newServers.ToArray();
 
-            if (ServerManager.DefaultRegions.Length > 0) {
-                if (PggSaveManager.CurrentRegion >= ServerManager.DefaultRegions.Length) PggSaveManager.CurrentRegion = 0;
-                ServerManager.Instance.CurrentRegion = ServerManager.DefaultRegions[PggSaveManager.CurrentRegion];
-                ServerManager.Instance.CurrentServer = ServerManager.DefaultRegions[PggSaveManager.CurrentRegion].Servers[0];
+            if (ServerManager.Instance.AvailableRegions.Length > 0) {
+                byte change = (byte) Math.Clamp(PggSaveManager.CurrentRegion, 0, ServerManager.Instance.AvailableRegions.Length - 1);
+                if (PggSaveManager.CurrentRegion != change) PggSaveManager.CurrentRegion = change;
+                ServerManager.Instance.CurrentRegion = ServerManager.Instance.AvailableRegions[PggSaveManager.CurrentRegion];
+                ServerManager.Instance.CurrentServer = ServerManager.Instance.AvailableRegions[PggSaveManager.CurrentRegion].Servers[0];
 
                 $"Current Region: {ServerManager.Instance.CurrentRegion.Name} {ServerManager.Instance.CurrentServer.Ip}".Log();
             }

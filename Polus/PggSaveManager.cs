@@ -8,6 +8,7 @@ using Polus.Utils;
 namespace Polus {
     public static class PggSaveManager {
         // public static Dictionary<string, GameOption> GameOptions = new();
+        private static string SavePath => Path.Combine(PlatformPaths.persistentDataPath, PggConstants.SaveFileName);
         private static bool _initiallyLoaded;
         private static string _fontName = "Arial";
         private static byte _currentRegion;
@@ -37,10 +38,9 @@ namespace Polus {
             if (_initiallyLoaded && noOverwrite) return;
 
             _initiallyLoaded = true;
-            string path = Path.Combine(PlatformPaths.persistentDataPath, PggConstants.SaveFileName);
-            if (File.Exists(path)) {
+            if (File.Exists(SavePath)) {
                 CatchHelper.TryCatch(() => {
-                    using FileStream stream = File.OpenRead(path);
+                    using FileStream stream = File.OpenRead(SavePath);
                     using BinaryReader reader = new(stream);
                     Deserialize(reader);
                 });
@@ -48,8 +48,7 @@ namespace Polus {
         }
 
         public static void SaveSave() {
-            string path = Path.Combine(PlatformPaths.persistentDataPath, PggConstants.SaveFileName);
-            using FileStream stream = File.OpenWrite(path);
+            using FileStream stream = File.OpenWrite(SavePath);
             using BinaryWriter writer = new(stream);
             Serialize(writer);
         }
@@ -74,6 +73,7 @@ namespace Polus {
                     }
                 }
             }
+            $"Loaded {SavePath}".Log();
         }
 
         private static void Serialize(BinaryWriter writer) {
@@ -83,6 +83,7 @@ namespace Polus {
             StartMessage(writer, SaveValues.CurrentRegion);
             writer.Write(_currentRegion);
             EndMessage(writer);
+            $"Saved {SavePath}".Log();
         }
 
         private static void StartMessage(BinaryWriter writer, SaveValues type) {
