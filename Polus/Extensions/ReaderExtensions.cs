@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using Hazel;
 using UnityEngine;
 
@@ -9,6 +10,14 @@ namespace Polus.Extensions {
         public static MessageReader Clone(this MessageReader reader) {
             reader.Position -= 3;
             return reader.ReadMessageAsNewBuffer();
+        }
+
+        public static void WriteStringNoLength(this BinaryWriter writer, string value) {
+            writer.Write(value.ToCharArray()[..]);
+        }
+
+        public static void ReadStringNoLength(this BinaryWriter writer, string value) {
+            writer.Write(value.ToCharArray()[..]);
         }
     }
 }

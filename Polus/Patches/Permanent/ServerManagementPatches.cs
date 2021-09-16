@@ -43,20 +43,24 @@ namespace Polus.Patches.Permanent {
             // }
 // #else
             var newServers = servers.Select(server =>
-                new StaticRegionInfo(server.Name, StringNames.NoTranslation, server.Ip, new[] {
-                    new ServerInfo(server.Name, server.Ip, 22023)
-                }).Cast<IRegionInfo>());
+                    new StaticRegionInfo(server.Name, StringNames.NoTranslation, server.Ip, new[] {
+                        new ServerInfo(server.Name, server.Ip, 22023)
+                    }).Cast<IRegionInfo>())
                 // .Prepend(new DnsRegionInfo("hall.ly", "Sex", StringNames.August, "72.68.129.83", 22023).Duplicate())
                 // .AddItem(new StaticRegionInfo("Localhost", StringNames.NoTranslation, "127.0.0.1", new[] {
                 //     new ServerInfo("Localhost", "127.0.0.1", 22023)
-                // }).Cast<IRegionInfo>()).ToArray();
+                // }).Cast<IRegionInfo>()).ToArray()
+                ;
 // #endif
 
             ServerManager.DefaultRegions = ServerManager.Instance.AvailableRegions = newServers.ToArray();
 
             if (ServerManager.DefaultRegions.Length > 0) {
-                ServerManager.Instance.CurrentRegion = ServerManager.DefaultRegions[0];
-                ServerManager.Instance.CurrentServer = ServerManager.DefaultRegions[0].Servers[0];
+                if (PggSaveManager.CurrentRegion >= ServerManager.DefaultRegions.Length) PggSaveManager.CurrentRegion = 0;
+                ServerManager.Instance.CurrentRegion = ServerManager.DefaultRegions[PggSaveManager.CurrentRegion];
+                ServerManager.Instance.CurrentServer = ServerManager.DefaultRegions[PggSaveManager.CurrentRegion].Servers[0];
+
+                $"Current Region: {ServerManager.Instance.CurrentRegion.Name} {ServerManager.Instance.CurrentServer.Ip}".Log();
             }
 
             if (PogusPlugin.ModManager.AllPatched) return false;

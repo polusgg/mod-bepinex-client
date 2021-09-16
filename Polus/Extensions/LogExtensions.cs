@@ -22,7 +22,7 @@ namespace Polus.Extensions {
         }
 
         public static T Trace<T>(this T value, LogLevel level = LogLevel.Info) {
-            new StackTrace().ToString().Log(level: level);
+            new Il2CppSystem.Diagnostics.StackTrace().ToString().Log(level: level);
             return value;
         }
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using HarmonyLib;
 using Polus.Extensions;
 using Polus.Mods.Patching;
@@ -26,6 +27,8 @@ namespace Polus.Patches.Permanent {
                 ServerListButton button = regionButton.Cast<ServerListButton>();
                 button.SetSelected(DestroyableSingleton<ServerManager>.Instance.CurrentRegion.Name == button.Text.text);
                 button.Button.OnClick.AddListener((Action) (() => {
+                    PggSaveManager.CurrentRegion = (byte) global::Extensions.IndexOf(ServerManager.Instance.AvailableRegions, new Func<IRegionInfo, bool>(region => region.Name == button.Text.text));
+                    
                     bool original = PogusPlugin.ModManager.AllPatched;
                     if (!PogusPlugin.ModManager.AllPatched) PogusPlugin.ModManager.PatchMods();
 

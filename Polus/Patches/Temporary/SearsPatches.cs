@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using Polus.Extensions;
 
 namespace Polus.Patches.Temporary {
     [HarmonyPatch]
@@ -37,7 +38,7 @@ namespace Polus.Patches.Temporary {
             [HarmonyPostfix]
             public static void SetHat(PlayerControl __instance, [HarmonyArgument(0)] uint id) {
                 if (__instance.Pointer == PlayerControl.LocalPlayer.Pointer && id != 9999999) SaveManager.LastHat = id;
-            } 
+            }
         }
 
         [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.SetPet))]
@@ -45,7 +46,7 @@ namespace Polus.Patches.Temporary {
             [HarmonyPostfix]
             public static void SetPet(PlayerControl __instance, [HarmonyArgument(0)] uint id) {
                 if (__instance.Pointer == PlayerControl.LocalPlayer.Pointer && id != 9999999) SaveManager.LastPet = id;
-            } 
+            }
         }
 
         [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.SetSkin))]
@@ -53,7 +54,7 @@ namespace Polus.Patches.Temporary {
             [HarmonyPostfix]
             public static void SetSkin(PlayerControl __instance, [HarmonyArgument(0)] uint id) {
                 if (__instance.Pointer == PlayerControl.LocalPlayer.Pointer && id != 9999999) SaveManager.LastSkin = id;
-            } 
+            }
         }
 
         [HarmonyPatch(typeof(SaveManager), nameof(SaveManager.LastHat), MethodType.Setter)]
@@ -77,19 +78,19 @@ namespace Polus.Patches.Temporary {
         [HarmonyPatch(typeof(SaveManager), nameof(SaveManager.LastHat), MethodType.Getter)]
         public class LastHatGetPatch {
             [HarmonyPrefix]
-            public static bool GetLastHat(out uint __result) => (__result = ActuallyHat ? uint.MaxValue : 9999999) == uint.MaxValue;
+            public static bool GetLastHat(out uint __result) => (__result = (uint) (ActuallyHat ? 10000 : 9999999)) == 10000;
         }
 
         [HarmonyPatch(typeof(SaveManager), nameof(SaveManager.LastPet), MethodType.Getter)]
         public class LastPetGetPatch {
             [HarmonyPrefix]
-            public static bool GetLastPet(out uint __result) => (__result = ActuallyPet ? uint.MaxValue : 9999999) == uint.MaxValue;
+            public static bool GetLastPet(out uint __result) => (__result = ActuallyPet ? uint.MaxValue - 1 : 9999999) == uint.MaxValue - 1;
         }
 
         [HarmonyPatch(typeof(SaveManager), nameof(SaveManager.LastSkin), MethodType.Getter)]
         public class LastSkinGetPatch {
             [HarmonyPrefix]
-            public static bool GetLastSkin(out uint __result) => (__result = ActuallySkin ? uint.MaxValue : 9999999) == uint.MaxValue;
+            public static bool GetLastSkin(out uint __result) => (__result = ActuallySkin ? uint.MaxValue - 1 : 9999999) == uint.MaxValue - 1;
         }
     }
 }

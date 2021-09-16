@@ -517,7 +517,7 @@ namespace Polus {
 
         public override void ConnectionEstablished() {
             //todo write code that calls this
-            WhyDidntHazelHavePacketOrderingPatch.Reset();
+            WhyDidntHazelHave.PacketOrderingPatch.Reset();
         }
 
         public override void ConnectionDestroyed() {

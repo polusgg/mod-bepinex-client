@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using Polus.Behaviours;
+using Polus.Extensions;
 using TMPro;
 using UnhollowerBaseLib;
 using UnityEngine;
@@ -16,12 +17,15 @@ namespace Polus.Patches.Permanent {
             foreach (TextMeshPro tmp in HatTabSeparationPatch.tmps) {
                 Destroy(tmp.gameObject);
             }
+
             HatTabSeparationPatch.tmps.Clear();
         }
     }
+
     [HarmonyPatch(typeof(HatsTab), nameof(HatsTab.OnEnable))]
     public class HatTabSeparationPatch {
         public static List<TextMeshPro> tmps = new();
+
         [HarmonyPrefix]
         public static bool OnEnable(HatsTab __instance) {
             Il2CppReferenceArray<HatBehaviour> allHats = DestroyableSingleton<HatManager>.Instance.GetUnlockedHats();
@@ -40,7 +44,7 @@ namespace Polus.Patches.Permanent {
                 Destroy(instanceColorChip.gameObject);
 
             __instance.ColorChips.Clear();
-            
+
             TextMeshPro groupNameText = __instance.transform.parent.parent.GetComponentInChildren<CustomPlayerMenu>(true).Tabs[0].Button.transform.parent.GetComponentInChildren<TextMeshPro>();
             Material m = __instance.transform.parent.parent.GetComponentInChildren<GameSettingMenu>(true).GetComponentInChildren<TextMeshPro>().renderer.sharedMaterial;
 
@@ -71,7 +75,7 @@ namespace Polus.Patches.Permanent {
                     float num2 = __instance.YStart - hatIdx / __instance.NumPerRow * __instance.YOffset;
                     ColorChip colorChip = Instantiate(__instance.ColorTabPrefab, __instance.scroller.Inner);
                     colorChip.transform.localPosition = new Vector3(num, num2, -1f);
-                    colorChip.Button.OnClick.AddListener((Action) (() => __instance.SelectHat(hat)));
+                    colorChip.Button.OnClick.AddListener((Action) (() => SelectHat(__instance, hat)));
                     colorChip.Inner.SetHat(hat, PlayerControl.LocalPlayer.Data.ColorId);
                     colorChip.Inner.transform.localPosition = hat.ChipOffset + new Vector2(0f, -0.3f);
                     colorChip.Tag = hat;
@@ -82,6 +86,13 @@ namespace Polus.Patches.Permanent {
 
             __instance.scroller.YBounds.max = -(__instance.YStart - (hatIdx + 1) / __instance.NumPerRow * __instance.YOffset) - 3f;
             return false;
+        }
+
+        private static void SelectHat(HatsTab owner, HatBehaviour hat) {
+            uint idFromHat = DestroyableSingleton<HatManager>.Instance.GetIdFromHat(hat);
+            SaveManager.LastHat = idFromHat;
+            owner.HatImage.SetHat(idFromHat, PlayerControl.LocalPlayer.Data.ColorId);
+            if (PlayerControl.LocalPlayer) PlayerControl.LocalPlayer.RpcSetHat(idFromHat);
         }
     }
 

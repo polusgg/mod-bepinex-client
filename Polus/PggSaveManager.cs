@@ -1,12 +1,16 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using MonoMod.Utils;
 using Polus.Enums;
+using Polus.Extensions;
+using Polus.Utils;
 
 namespace Polus {
     public static class PggSaveManager {
         // public static Dictionary<string, GameOption> GameOptions = new();
         private static bool _initiallyLoaded;
         private static string _fontName = "Arial";
+        private static byte _currentRegion;
 
         private static readonly Stack<long> startStack = new();
 
@@ -17,19 +21,35 @@ namespace Polus {
             }
         }
 
+        public static byte CurrentRegion {
+            get {
+                LoadSave();
+                return _currentRegion;
+            }
+            set {
+                LoadSave();
+                _currentRegion = value;
+                SaveSave();
+            }
+        }
+
         public static void LoadSave(bool noOverwrite = true) {
             if (_initiallyLoaded && noOverwrite) return;
-            string path = Path.Combine(PlatformPaths.persistentDataPath, PggConstants.SaveFileName);
-            using FileStream stream = File.OpenRead(path);
-            using BinaryReader reader = new(stream);
-            Deserialize(reader);
 
             _initiallyLoaded = true;
+            string path = Path.Combine(PlatformPaths.persistentDataPath, PggConstants.SaveFileName);
+            if (File.Exists(path)) {
+                CatchHelper.TryCatch(() => {
+                    using FileStream stream = File.OpenRead(path);
+                    using BinaryReader reader = new(stream);
+                    Deserialize(reader);
+                });
+            }
         }
 
         public static void SaveSave() {
             string path = Path.Combine(PlatformPaths.persistentDataPath, PggConstants.SaveFileName);
-            using FileStream stream = File.OpenRead(path);
+            using FileStream stream = File.OpenWrite(path);
             using BinaryWriter writer = new(stream);
             Serialize(writer);
         }
@@ -40,11 +60,15 @@ namespace Polus {
                 byte type = reader.ReadByte();
                 switch ((SaveValues) type) {
                     case SaveValues.FontName: {
-                        _fontName = reader.ReadString();
+                        _fontName = reader.ReadNullTerminatedString();
+                        break;
+                    }
+                    case SaveValues.CurrentRegion: {
+                        _currentRegion = reader.ReadByte();
                         break;
                     }
                     default: {
-                        PogusPlugin.Logger.LogWarning("Attempted to load invalid save option");
+                        "Attempted to load invalid save option".Log(comment: "");
                         reader.ReadBytes(length);
                         break;
                     }
@@ -54,7 +78,10 @@ namespace Polus {
 
         private static void Serialize(BinaryWriter writer) {
             StartMessage(writer, SaveValues.FontName);
-            writer.Write(_fontName);
+            writer.WriteNullTerminatedString(_fontName);
+            EndMessage(writer);
+            StartMessage(writer, SaveValues.CurrentRegion);
+            writer.Write(_currentRegion);
             EndMessage(writer);
         }
 
@@ -68,7 +95,7 @@ namespace Polus {
             long currentPosition = writer.BaseStream.Position;
             long lengthPosition = startStack.Pop();
             writer.BaseStream.Seek(lengthPosition, SeekOrigin.Begin);
-            writer.Write((ushort) lengthPosition - currentPosition - 1);
+            writer.Write((ushort) (currentPosition - lengthPosition - 3));
             writer.BaseStream.Seek(currentPosition, SeekOrigin.Begin);
         }
     }

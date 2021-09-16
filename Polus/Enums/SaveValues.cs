@@ -1,5 +1,6 @@
 ﻿namespace Polus.Enums {
     public enum SaveValues : byte {
-        FontName
+        FontName,
+        CurrentRegion
     }
 }

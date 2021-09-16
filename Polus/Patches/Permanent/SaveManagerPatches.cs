@@ -1,13 +1,11 @@
 ﻿using System;
+using System.IO;
 using BepInEx.Logging;
 using HarmonyLib;
-using Il2CppSystem.IO;
 using InnerNet;
 using Polus.Extensions;
 using Polus.Mods.Patching;
 using UnityEngine;
-using BinaryReader = Il2CppSystem.IO.BinaryReader;
-using File = System.IO.File;
 
 namespace Polus.Patches.Permanent {
     public class SaveManagerPatches {
@@ -21,23 +19,45 @@ namespace Polus.Patches.Permanent {
             }
         }
 
-        [HarmonyPatch(typeof(SecureDataFile), nameof(SecureDataFile.LoadData))]
-        public static class LoadSecureNewBypassPatch {
+        [HarmonyPatch(typeof(SaveManager), nameof(SaveManager.LoadSecureData))]
+        public static class LoadSecureDataPatch {
             [PermanentPatch]
             [HarmonyPrefix]
-            public static bool LoadSecureData(SecureDataFile __instance, [HarmonyArgument(0)] Action<BinaryReader> performRead) {
-                __instance.filePath = System.IO.Path.Combine(Application.persistentDataPath, "secureNew");
-                __instance.Loaded = true;
-                ("Loading secure: " + __instance.filePath).Log(30);
-                if (File.Exists(__instance.filePath)) {
+            public static void LoadSecureData() {
+                if (!SaveManager.purchaseFile.Loaded) {
+                    try {
+                        LoadData(SaveManager.purchaseFile, delegate(BinaryReader reader) {
+                            while (reader.BaseStream.Position < reader.BaseStream.Length) {
+                                string text = reader.ReadString();
+                                if (text.Split(new char[] {
+                                    '-'
+                                }).Length == 3) {
+                                    SaveManager.dobInfo = text;
+                                } else {
+                                    SaveManager.purchases.Add(text);
+                                }
+                            }
+                        });
+                    } catch (NullReferenceException) { } catch (Exception ex) {
+                        $"Deleted corrupt secure file outer: {ex}".Log();
+                        SaveManager.purchaseFile.Delete();
+                    }
+                }
+            }
+            public static void LoadData(SecureDataFile sdf, [HarmonyArgument(0)] Action<BinaryReader> performRead) {
+                // return true;
+                sdf.filePath = Path.Combine(Application.persistentDataPath, "secureNew");
+                sdf.Loaded = true;
+                $"Loading secure: {sdf.filePath}".Log(30);
+                if (File.Exists(sdf.filePath)) {
                     byte[] array;
                     try {
-                        array = File.ReadAllBytes(__instance.filePath);
+                        array = File.ReadAllBytes(sdf.filePath);
                         for (int i = 0; i < array.Length; i++) array[i] ^= (byte) (i % 212);
                     } catch {
                         "Couldn't read secure file".Log(level: LogLevel.Error);
-                        __instance.Delete();
-                        return false;
+                        sdf.Delete();
+                        return;
                     }
 
                     try {
@@ -45,14 +65,14 @@ namespace Polus.Patches.Permanent {
                         BinaryReader binaryReader = new(memoryStream);
                         binaryReader.ReadString(); //sysid
                         performRead(binaryReader);
+                        "wawoowoowooeee".Log();
                         binaryReader.Dispose();
+                        memoryStream.Dispose();
                     } catch {
-                        ("Deleted corrupt secure file inner").Log(level: LogLevel.Error);
-                        __instance.Delete();
+                        "Deleted corrupt secure file inner".Log(level: LogLevel.Error);
+                        sdf.Delete();
                     }
                 }
-
-                return false;
             }
         }
     }
