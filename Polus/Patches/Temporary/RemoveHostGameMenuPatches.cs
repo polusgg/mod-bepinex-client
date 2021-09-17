@@ -2,6 +2,7 @@
 using Hazel;
 using Polus.Enums;
 using Polus.Extensions;
+using Polus.Utils;
 using PowerTools;
 using UnityEngine;
 using UnityEngine.Events;
@@ -21,7 +22,7 @@ namespace Polus.Patches.Temporary {
             host.targetScene = GameScenes.OnlineGame;
             host.GameMode = GameModes.OnlineGame;
             PassiveButton pb = cgb.GetComponent<PassiveButton>();
-            pb.ClickSound = Object.Instantiate(GameObject.Find("arrowEnter").GetComponent<PassiveButton>().ClickSound);
+            CatchHelper.TryCatch(()=>pb.ClickSound = Object.Instantiate(GameObject.Find("arrowEnter").GetComponent<PassiveButton>().ClickSound));
             (pb.OnClick = new Button.ButtonClickedEvent()).AddListener((Action) (() => {
                 if (!AmongUsClient.Instance.AmConnected) host.OnClick();
             }));

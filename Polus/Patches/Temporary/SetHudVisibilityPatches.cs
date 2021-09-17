@@ -196,15 +196,28 @@ namespace Polus.Patches.Temporary
     public static class AdminTableUsePatch
     {
         [HarmonyPrefix]
-        public static bool Prefix(MapConsole __instance, [HarmonyArgument(1)] out bool canUse)
+        public static bool CanUse(MapConsole __instance, [HarmonyArgument(1)] out bool canUse, [HarmonyArgument(1)] out bool couldUse)
         {
-            canUse = false;
+            canUse = couldUse = false;
             
-            if (!adminTableEnabled && __instance.Image)
+            if (!adminTableEnabled)
             {
                 return false;
             }
             
+            return true;
+        }
+    }
+
+    [HarmonyPatch(typeof(SystemConsole), nameof(SystemConsole.CanUse))]
+    public static class MeetingConsoleUsePatch {
+        [HarmonyPrefix]
+        public static bool CanUse(SystemConsole __instance, [HarmonyArgument(1)] out bool canUse, [HarmonyArgument(1)] out bool couldUse) {
+            canUse = couldUse = false;
+            
+            if (__instance.MinigamePrefab.TryCast<EmergencyMinigame>() != null && !meetingButtonEnabled)
+                return false;
+
             return true;
         }
     }

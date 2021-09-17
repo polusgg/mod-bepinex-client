@@ -27,7 +27,7 @@ namespace Polus {
 
         public static IRegionInfo Region {
             get {
-                string[] lines = File.ReadAllLines("region.txt");
+                string[] lines = File.ReadAllLines("newregion.txt");
                 return new StaticRegionInfo("Region File", StringNames.NoTranslation,
                     lines[0], new Il2CppReferenceArray<ServerInfo>(new[] {
                         new ServerInfo(lines[0], lines[0], ushort.Parse(lines[1]))

@@ -150,8 +150,11 @@ namespace Polus {
                     break;
                 }
                 case PolusRpcCalls.BeginAnimationPlayer:
-                    netObject.gameObject.EnsureComponent<PlayerAnimPlayer>().HandleMessage(reader);
+                    netObject.gameObject.EnsureComponent<PlayerAnimPlayer>().BeginAnimation(reader);
                     break;
+                // case PolusRpcCalls.BeginAnimationPlayer:
+                //     netObject.gameObject.EnsureComponent<PlayerAnimPlayer>().BeginAnimation(reader);
+                //     break;
                 case PolusRpcCalls.SetAliveState: {
                     PlayerControl player = netObject.Cast<PlayerControl>();
                     SetAliveState(player, reader.ReadBoolean());

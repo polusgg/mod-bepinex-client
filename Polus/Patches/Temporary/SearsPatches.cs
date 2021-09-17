@@ -18,7 +18,7 @@ namespace Polus.Patches.Temporary {
         public class SearsHandleRpc {
             [HarmonyPrefix]
             public static void HandleRpc(PlayerControl __instance, [HarmonyArgument(0)] RpcCalls rpc) {
-                if (__instance.Pointer != PlayerControl.LocalPlayer.Pointer) return;
+                if (!__instance.AmOwner) return;
                 switch (rpc) {
                     case RpcCalls.SetHat:
                         ActuallyHat = true;

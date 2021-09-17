@@ -26,32 +26,23 @@ namespace Polus.Patches.Permanent {
             Il2CppStructArray<uint> stats = new(8);
             Array.Copy(StatsManager.Instance.WinReasons, stats, 7);
             StatsManager.Instance.WinReasons = stats;
-            // ServerManager.DefaultRegions =
-            // ServerManager.DefaultRegions.Prepend(PggConstants.Region).ToArray();
 
             ServerManager.DefaultRegions = ServerManager.Instance.AvailableRegions = Array.Empty<IRegionInfo>();
             var servers = ServerListLoader.Load().GetAwaiter().GetResult();
 
-// #if DEBUG
-//             var newServers = servers.Select(server =>
-//                 new StaticRegionInfo(server.Name, StringNames.NoTranslation, server.Ip, new[]
-//                 {
-//                     new ServerInfo(server.Name, server.Ip, 22023)
-//                 }).Cast<IRegionInfo>()).Prepend(
-            // if (File.Exists("newregion.txt")) {
-            //     newServers = newServers.Prepend(PggConstants.Region).ToArray();
-            // }
-// #else
             var newServers = servers.Select(server =>
-                    new StaticRegionInfo(server.Name, StringNames.NoTranslation, server.Ip, new[] {
-                        new ServerInfo(server.Name, server.Ip, 22023)
-                    }).Cast<IRegionInfo>())
-                // .Prepend(new DnsRegionInfo("hall.ly", "Sex", StringNames.August, "72.68.129.83", 22023).Duplicate())
-                // .AddItem(new StaticRegionInfo("Localhost", StringNames.NoTranslation, "127.0.0.1", new[] {
-                //     new ServerInfo("Localhost", "127.0.0.1", 22023)
-                // }).Cast<IRegionInfo>()).ToArray()
-                ;
-// #endif
+                new StaticRegionInfo(server.Name, StringNames.NoTranslation, server.Ip, new[] {
+                    new ServerInfo(server.Name, server.Ip, 22023)
+                }).Cast<IRegionInfo>());
+            if (!PogusPlugin.Revision.HasValue) {
+                newServers = newServers.Append(new DnsRegionInfo("hall.ly", "Rose's server", StringNames.NoTranslation, "72.68.129.83", 22023).Duplicate())
+                    .AddItem(new StaticRegionInfo("Localhost", StringNames.NoTranslation, "127.0.0.1", new[] {
+                        new ServerInfo("Localhost", "127.0.0.1", 22023)
+                    }).Cast<IRegionInfo>());
+                if (File.Exists("newregion.txt")) {
+                    newServers = newServers.Append(PggConstants.Region).ToArray();
+                }
+            }
 
             ServerManager.DefaultRegions = ServerManager.Instance.AvailableRegions = newServers.ToArray();
 

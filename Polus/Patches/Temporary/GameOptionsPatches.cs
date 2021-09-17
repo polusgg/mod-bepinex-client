@@ -238,23 +238,25 @@ namespace Polus.Patches.Temporary {
                 _nextSequenceReceived = 0;
                 Categories = new Dictionary<string, List<GameOption>>();
                 OptionMap = new Dictionary<string, GameOption>();
+                NoCategory = new List<GameOption>();
             }
 
             public static void ReceivedGameOptionPacket(GameOptionPacket packet) {
                 ushort sequenceId = packet.SequenceId;
-                lock (Lockable) {
-                    _packetQueue.Add(sequenceId, packet);
-                    if (_nextSequenceReceived != sequenceId) {
-                        $"Holding seqid {sequenceId}, currently on {_nextSequenceReceived}".Log();
-                        return;
-                    }
-
-                    while (_packetQueue.ContainsKey(_nextSequenceReceived)) {
-                        CatchHelper.TryCatch(() => HandlePacket(_packetQueue[_nextSequenceReceived]));
-                        _packetQueue.Remove(_nextSequenceReceived);
-                        _nextSequenceReceived++;
-                    }
-                }
+                CatchHelper.TryCatch(() => HandlePacket(packet));
+                // lock (Lockable) {
+                //     _packetQueue.Add(sequenceId, packet);
+                //     if (_nextSequenceReceived != sequenceId) {
+                //         $"Holding seqid {sequenceId}, currently on {_nextSequenceReceived}".Log();
+                //         return;
+                //     }
+                //
+                //     while (_packetQueue.ContainsKey(_nextSequenceReceived)) {
+                //         CatchHelper.TryCatch(() => HandlePacket(_packetQueue[_nextSequenceReceived]));
+                //         _packetQueue.Remove(_nextSequenceReceived);
+                //         _nextSequenceReceived++;
+                //     }
+                // }
             }
 
             private static void HandlePacket(GameOptionPacket packet) {

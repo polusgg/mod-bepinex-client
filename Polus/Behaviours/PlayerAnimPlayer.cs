@@ -9,10 +9,11 @@ using UnityEngine;
 
 namespace Polus.Behaviours {
     public class PlayerAnimPlayer : MonoBehaviour {
-        public PlayerControl Player;
         private static readonly int BackColorID = Shader.PropertyToID("_BackColor");
         private static readonly int BodyColorID = Shader.PropertyToID("_BodyColor");
         private static readonly int VisorColorID = Shader.PropertyToID("_VisorColor");
+        private readonly List<IEnumerator> AllCoroutines = new();
+        public PlayerControl Player;
         public Color playerColor = Color.white;
         public Color hatColor = Color.white;
         public Color petColor = Color.white;
@@ -41,7 +42,13 @@ namespace Polus.Behaviours {
             if (Player.CurrentPet.shadowRend) Player.CurrentPet.shadowRend.color = petColor;
         }
 
-        public void HandleMessage(MessageReader reader) {
+        public void StopAllAnimations() {
+            foreach (IEnumerator coroutine in AllCoroutines) {
+                this.StopCoroutine(coroutine);
+            }
+        }
+
+        public void BeginAnimation(MessageReader reader) {
             List<PlayerKeyframe> playerKeyframes = new();
             bool[] field = BitfieldParser(reader.ReadUInt16(), 11);
             if (Player == null) Player = GetComponent<PlayerControl>();
@@ -72,7 +79,7 @@ namespace Polus.Behaviours {
                 ));
             }
 
-            this.StartCoroutine(CoPlayAnimation(field, playerKeyframes.ToArray(), reader.ReadBoolean()));
+            AllCoroutines.Add(this.StartCoroutine(CoPlayAnimation(field, playerKeyframes.ToArray(), reader.ReadBoolean())));
         }
 
         [SuppressMessage("ReSharper", "AccessToModifiedClosure")]
@@ -116,6 +123,7 @@ namespace Polus.Behaviours {
             if (field[8]) resetTo.Scale = resetTo.Scale;
             // if (field[9]) resetTo.Position = resetTo.Position;
             if (field[10]) resetTo.Angle = resetTo.Angle;
+            // AllCoroutines.Remove()
         }
 
         public bool[] BitfieldParser(ushort value, byte size) {

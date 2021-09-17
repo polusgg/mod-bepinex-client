@@ -7,6 +7,8 @@ using BepInEx;
 using BepInEx.IL2CPP;
 using BepInEx.Logging;
 using HarmonyLib;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Polus.Extensions;
 using Polus.Patches.Permanent;
 using Polus.Resources;
@@ -32,6 +34,8 @@ namespace Polus {
 
         public static TMP_FontAsset font;
         public static TMP_SpriteAsset spriteSheet;
+
+        public static int? Revision = null;
 
         public static AssetBundle Bundle {
             get {
@@ -62,25 +66,22 @@ namespace Polus {
             Logger = Log;
             ObjectManager = new PggObjectManager();
 
-            string[] argv = Environment.GetCommandLineArgs();
-            // psi.Arguments.Log(20);
-            // psi.FileName.Log(20);
-            // psi.WindowStyle.Log(20);
-            // if (argv.Length > 1 && int.TryParse(argv[1], out int runs)) {
-            //     // if (runs > 1) {
-            //     //     Process.Start(new ProcessStartInfo {
-            //     //         FileName = argv[0], 
-            //     //         Arguments = (runs - 1).ToString(),
-            //     //         WorkingDirectory = Path.GetDirectoryName(argv[0])
-            //     //     });
-            //     // }
-            // }
+            CatchHelper.TryCatch(() => {
+                if (File.Exists("modpackage.manifest.json")) {
+                    //todo move to a version management class and periodically check for updates :)
+                    ModPackage modPackage = JsonConvert.DeserializeObject<ModPackage>(File.ReadAllText("modpackage.manifest.json"));
+                    if (modPackage != null) {
+                        Revision = modPackage.Version;
+                    }
+                }
+            });
 
             try {
                 if (File.Exists(PggConstants.CacheLocation)) {
                     using (FileStream stream = PggCache.GetFileStream(PggConstants.CacheLocation, FileMode.Open, FileAccess.Read, FileShare.None))
                         Cache.Deserialize(new BinaryReader(stream));
                 }
+
                 PermanentMod.LoadPatches("gg.polus.permanent",
                     Assembly.GetExecutingAssembly().GetTypes()
                         .Where(x => x.GetCustomAttribute(typeof(HarmonyPatch)) != null).ToArray());
@@ -102,7 +103,7 @@ namespace Polus {
             CatchHelper.TryCatch(CreditsMainMenuPatches.Load);
 
             CosmeticsWindowButton.Load();
-            
+
             ModManager.PostLoad = true;
 
             "This is the end of PogusPlugin.Load()".Log(1);
@@ -111,6 +112,10 @@ namespace Polus {
         public override bool Unload() {
             "Unload is never used".Log();
             return base.Unload();
+        }
+
+        public class ModPackage {
+            [JsonProperty("version")] public int Version;
         }
     }
 }

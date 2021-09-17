@@ -7,7 +7,7 @@ namespace Polus.Patches.Permanent {
         [PermanentPatch]
         [HarmonyPostfix]
         public static void DoShow(DisconnectPopup __instance) {
-            __instance.TextArea.text += $"\n(Location: {AmongUsClient.Instance.networkAddress}:{AmongUsClient.Instance.networkPort})";
+            __instance.TextArea.text += $"\n(Server location: {AmongUsClient.Instance.networkAddress}:{AmongUsClient.Instance.networkPort})";
         }
     }
 }
