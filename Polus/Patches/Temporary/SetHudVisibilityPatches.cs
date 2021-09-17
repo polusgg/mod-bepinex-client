@@ -17,6 +17,7 @@ namespace Polus.Patches.Temporary
             useButtonEnabled = true;
             ventButtonEnabled = true;
             meetingButtonEnabled = true;
+            adminTableEnabled = true;
             TaskPanelUpdatePatch.enabled = true;
             ReportButtonDisablePatch.enabled = true;
         }
@@ -57,6 +58,7 @@ namespace Polus.Patches.Temporary
         public static bool sabotageButtonEnabled = true;
         public static bool useButtonEnabled = true;
         public static bool meetingButtonEnabled = true;
+        public static bool adminTableEnabled = true;
         [HarmonyPrefix]
         public static bool Prefix(UseButtonManager __instance, IUsable target) {
             __instance.currentTarget = target;
@@ -169,6 +171,40 @@ namespace Polus.Patches.Temporary
                 return false;
             }
 
+            return true;
+        }
+    }
+    
+    [HarmonyPatch(typeof(MapConsole), nameof(MapConsole.SetOutline))]
+    public static class AdminTableOutlinePatch {
+        [HarmonyPrefix]
+        public static bool Prefix(MapConsole __instance)
+        {
+            if (!adminTableEnabled && __instance.Image)
+            {
+                __instance.Image.material.SetFloat("_Outline", 0f);
+                __instance.Image.material.SetColor("_OutlineColor", Color.white);
+                __instance.Image.material.SetColor("_AddColor", Color.clear);
+                return false;
+            }
+
+            return true;
+        }
+    }
+
+    [HarmonyPatch(typeof(MapConsole), nameof(MapConsole.CanUse))]
+    public static class AdminTableUsePatch
+    {
+        [HarmonyPrefix]
+        public static bool Prefix(MapConsole __instance, [HarmonyArgument(1)] out bool canUse)
+        {
+            canUse = false;
+            
+            if (!adminTableEnabled && __instance.Image)
+            {
+                return false;
+            }
+            
             return true;
         }
     }

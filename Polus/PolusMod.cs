@@ -375,6 +375,11 @@ namespace Polus {
                             UseButtonTargetPatch.meetingButtonEnabled = enabled;
                             break;
                         }
+                        case HudItem.AdminTable:
+                        {
+                            UseButtonTargetPatch.adminTableEnabled = enabled;
+                            break;
+                        }
                         default:
                             throw new ArgumentOutOfRangeException($"Invalid hud item sent: {item}");
                     }

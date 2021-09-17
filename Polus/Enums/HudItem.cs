@@ -21,5 +21,7 @@
         ReportButton,
         // Disables Meeting button (which is included into Use button)
         CallMeetingButton,
+        // Disables use of the table table
+        AdminTable
     }
 }
