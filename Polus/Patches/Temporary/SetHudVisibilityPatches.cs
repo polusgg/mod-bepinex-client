@@ -208,12 +208,8 @@ namespace Polus.Patches.Temporary
     public static class AdminTableUsePatch
     {
         [HarmonyPrefix]
-        public static bool Use(MapConsole __instance)
-        {
-            if (!adminTableEnabled)
-                return false;
-
-            return true;
+        public static bool Use(MapConsole __instance) {
+            return adminTableEnabled;
         }
     }
 
@@ -225,10 +221,7 @@ namespace Polus.Patches.Temporary
         {
             canUse = couldUse = false;
 
-            if (!adminTableEnabled && __instance.Image)
-                return false;
-
-            return true;
+            return adminTableEnabled || !__instance.Image;
         }
     }
 

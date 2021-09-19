@@ -77,8 +77,8 @@ namespace Polus.Behaviours.Inner {
         private void CheckLocks() {
             $"yeah,,, {locks[0]} {locks[1]} {locks.Any(lck => lck)}".Log(3);
             if (anyLocked == IsLocked) return;
-            anyLocked = locks.Any(lck => lck);
-                SetCountingDown(!anyLocked);
+            anyLocked = locks[(int) ButtonLocks.PlayerCanMove];
+            SetCountingDown(!anyLocked);
         }
 
         private static void CheckAllLocks() {

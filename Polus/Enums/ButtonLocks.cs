@@ -1,5 +1,5 @@
 ﻿namespace Polus.Enums {
-    public enum ButtonLocks : int {
+    public enum ButtonLocks {
         SetHudActive,
         PlayerCanMove
     }
