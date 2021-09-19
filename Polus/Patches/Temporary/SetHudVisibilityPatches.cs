@@ -65,29 +65,41 @@ namespace Polus.Patches.Temporary
             __instance.RefreshButtons();
             if (target != null) // Has target? yes
             {
-                if(target.UseIcon == ImageNames.VentButton) // Is target a vent? yes
-                {
-                    if (ventButtonEnabled) // ventButtonEnabled? yes
-                    {
-                        DisplayButton(__instance, true, target.UseIcon, target.PercentCool);
+                switch (target.UseIcon) {
+                    // Is target a vent? yes
+                    case ImageNames.VentButton: {
+                        if (ventButtonEnabled) // ventButtonEnabled? yes
+                        {
+                            DisplayButton(__instance, true, target.UseIcon, target.PercentCool);
+                            return false;
+                        }
+                        // ventButtonEnabled? no
+                        // fall through
+                        break;
+                    }
+                    case ImageNames.AdminMapButton:
+                    case ImageNames.MIRAAdminButton:
+                    case ImageNames.PolusAdminButton:
+                    case ImageNames.AirshipAdminButton:
+                        if (adminTableEnabled) // adminTableEnabled? yes
+                        {
+                            DisplayButton(__instance, true, target.UseIcon, target.PercentCool);
+                            return false;
+                        }
+                        break;
+                    default: {
+                        if (target.TryCast<SystemConsole>() != null &&
+                            target.TryCast<SystemConsole>()?.MinigamePrefab.TryCast<EmergencyMinigame>() != null &&
+                            !meetingButtonEnabled)
+                        {
+                            DisplayButton(__instance, false, ImageNames.UseButton);
+                        }
+                        else
+                        {
+                            DisplayButton(__instance, useButtonEnabled, target.UseIcon, target.PercentCool);
+                        }
                         return false;
                     }
-                    // ventButtonEnabled? no
-                    // fall through
-                }
-                else // Is target a vent? no
-                {
-                    if (target.TryCast<SystemConsole>() != null &&
-                        target.TryCast<SystemConsole>()?.MinigamePrefab.TryCast<EmergencyMinigame>() != null &&
-                        !meetingButtonEnabled)
-                    {
-                        DisplayButton(__instance, false, ImageNames.UseButton);
-                    }
-                    else
-                    {
-                        DisplayButton(__instance, useButtonEnabled, target.UseIcon, target.PercentCool);
-                    }
-                    return false;
                 }
             }// Has target? no
             PlayerControl localPlayer = PlayerControl.LocalPlayer;
@@ -192,19 +204,30 @@ namespace Polus.Patches.Temporary
         }
     }
 
-    [HarmonyPatch(typeof(MapConsole), nameof(MapConsole.CanUse))]
+    [HarmonyPatch(typeof(MapConsole), nameof(MapConsole.Use))]
     public static class AdminTableUsePatch
+    {
+        [HarmonyPrefix]
+        public static bool Use(MapConsole __instance)
+        {
+            if (!adminTableEnabled)
+                return false;
+
+            return true;
+        }
+    }
+
+    [HarmonyPatch(typeof(MapConsole), nameof(MapConsole.CanUse))]
+    public static class AdminTableCanUsePatch
     {
         [HarmonyPrefix]
         public static bool CanUse(MapConsole __instance, [HarmonyArgument(1)] out bool canUse, [HarmonyArgument(1)] out bool couldUse)
         {
             canUse = couldUse = false;
-            
-            if (!adminTableEnabled)
-            {
+
+            if (!adminTableEnabled && __instance.Image)
                 return false;
-            }
-            
+
             return true;
         }
     }
@@ -214,8 +237,8 @@ namespace Polus.Patches.Temporary
         [HarmonyPrefix]
         public static bool CanUse(SystemConsole __instance, [HarmonyArgument(1)] out bool canUse, [HarmonyArgument(1)] out bool couldUse) {
             canUse = couldUse = false;
-            
-            if (__instance.MinigamePrefab.TryCast<EmergencyMinigame>() != null && !meetingButtonEnabled)
+
+            if (__instance.MinigamePrefab.TryCast<EmergencyMinigame>() != null && !meetingButtonEnabled && __instance.Image)
                 return false;
 
             return true;
