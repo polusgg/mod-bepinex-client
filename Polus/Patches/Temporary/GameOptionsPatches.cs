@@ -230,12 +230,7 @@ namespace Polus.Patches.Temporary {
                 UpdateHudString();
             }
 
-            private static ushort _nextSequenceReceived;
-            private static Dictionary<ushort, GameOptionPacket> _packetQueue = new();
-
             public static void Reset() {
-                _packetQueue = new Dictionary<ushort, GameOptionPacket>();
-                _nextSequenceReceived = 0;
                 Categories = new Dictionary<string, List<GameOption>>();
                 OptionMap = new Dictionary<string, GameOption>();
                 NoCategory = new List<GameOption>();

@@ -343,44 +343,44 @@ namespace Polus {
                             break;
                         }
                         case HudItem.MapSabotageButtons: {
-                            HudShowMapPatch.sabotagesEnabled = enabled;
+                            SetHudVisibilityPatches.HudShowMapPatch.sabotagesEnabled = enabled;
                             break;
                         }
                         case HudItem.MapDoorButtons: {
-                            HudShowMapPatch.doorsEnabled = enabled;
+                            SetHudVisibilityPatches.HudShowMapPatch.doorsEnabled = enabled;
                             break;
                         }
                         case HudItem.SabotageButton: {
-                            UseButtonTargetPatch.sabotageButtonEnabled = enabled;
+                            SetHudVisibilityPatches.sabotageButtonEnabled = enabled;
                             break;
                         }
                         case HudItem.VentButton: {
-                            UseButtonTargetPatch.ventButtonEnabled = enabled;
+                            SetHudVisibilityPatches.ventButtonEnabled = enabled;
                             break;
                         }
                         case HudItem.UseButton: {
-                            UseButtonTargetPatch.useButtonEnabled = enabled;
+                            SetHudVisibilityPatches.useButtonEnabled = enabled;
                             break;
                         }
                         case HudItem.TaskListPopup: {
-                            TaskPanelUpdatePatch.enabled = enabled;
+                            SetHudVisibilityPatches.TaskPanelUpdatePatch.enabled = enabled;
                             break;
                         }
                         case HudItem.TaskProgressBar: {
-                            ProgressTrackerUpdatePatch.enabled = enabled;
+                            SetHudVisibilityPatches.ProgressTrackerUpdatePatch.enabled = enabled;
                             break;
                         }
                         case HudItem.ReportButton: {
-                            ReportButtonDisablePatch.enabled = enabled;
+                            SetHudVisibilityPatches.ReportButtonDisablePatch.enabled = enabled;
                             break;
                         }
                         case HudItem.CallMeetingButton: {
-                            UseButtonTargetPatch.meetingButtonEnabled = enabled;
+                            SetHudVisibilityPatches.meetingButtonEnabled = enabled;
                             break;
                         }
                         case HudItem.AdminTable:
                         {
-                            UseButtonTargetPatch.adminTableEnabled = enabled;
+                            SetHudVisibilityPatches.adminTableEnabled = enabled;
                             break;
                         }
                         default:
@@ -560,7 +560,7 @@ namespace Polus {
             RoomTrackerTextPatch.RoomText = null;
             GameOptionsPatches.OnEnablePatch.Reset();
             StupidModStampPatches.Reset();
-            SearsPatches.Reset();
+            StupidModStampPatches.QrToggled = false;
             CosmeticManager.Instance.Reset();
         }
 
@@ -580,7 +580,9 @@ namespace Polus {
         }
 
         public override void PlayerDestroyed(PlayerControl player) {
-            
+            if (player == PlayerControl.LocalPlayer) {
+                SearsPatches.Reset();
+            }
         }
 
         public override void BecameHost() {

@@ -29,7 +29,6 @@ namespace Polus.Patches.Permanent {
 
         public static void Reset() {
             QrActuallyVisible = false;
-            QrToggled = true;
             QrVisible = false;
             TextColor = null;
             Suffix = "";
