@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Polus.Enums;
 using Polus.Extensions;
+using Polus.Patches.Permanent;
 using Reactor;
 using UnhollowerRuntimeLib;
 using UnityEngine;
@@ -14,7 +15,8 @@ namespace Polus.Behaviours {
         public static SecondaryHatSpriteBehaviour GetHelper(HatParent hat) => Cache.ContainsKey(hat) ? Cache[hat] : Cache[hat] = Create(hat);
         public HatParent parent;
         public SpriteRenderer thirdLayer;
-        public int color = int.MaxValue;
+        public Color backColor = Color.magenta;
+        public Color bodyColor = Color.magenta;
         public HatState state;
 
         private static SecondaryHatSpriteBehaviour Create(HatParent parent) {
@@ -25,14 +27,19 @@ namespace Polus.Behaviours {
             return sec;
         }
 
-        public void SetColor(int colorParam) {
-            color = colorParam;
+        public void SetColor(int colorParam) => SetColor(Palette.ShadowColors[colorParam], Palette.PlayerColors[colorParam]);
+
+        public void SetColor(Color back, Color body) {
+            backColor = back;
+            bodyColor = body;
             
             Update();
         }
 
         public void Update() {
-            PlayerControl.SetPlayerMaterialColors(color, thirdLayer);
+            thirdLayer.SetPlayerMaterialColors(backColor, bodyColor);
+            parent.FrontLayer.SetPlayerMaterialColors(backColor, bodyColor);
+            parent.BackLayer.SetPlayerMaterialColors(backColor, bodyColor);
         }
     }
 }

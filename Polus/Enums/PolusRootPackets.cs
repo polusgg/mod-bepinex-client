@@ -17,6 +17,8 @@
         ChangeScene = 0x9A,
         MarkAssBrown = 0x9B,
         StampSetString = 0x9C,
+        SendMessage = 0x9D,
+        DeleteMessage = 0x9E,
         DisplaySystemAnnouncement = 0xFA,
         UpdateDiscordRichPresence = 0xFB,
         SetQrCodeContents = 0xFC

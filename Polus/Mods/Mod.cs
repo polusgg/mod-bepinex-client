@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 namespace Polus.Mods {
     public abstract class Mod : MarshalByRefObject {
         public abstract string Name { get; }
+        public abstract byte ProtocolId { get; }
         public abstract ManualLogSource Logger { get; set; }
 
         /// <summary>

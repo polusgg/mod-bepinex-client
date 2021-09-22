@@ -5,7 +5,7 @@ namespace Polus.Patches.Permanent {
     public class ColorTabResetPatch {
         [HarmonyPostfix]
         public static void SelectColor(PlayerTab __instance) {
-            __instance.HatImage.SetHat(SaveManager.LastHat, PlayerControl.LocalPlayer.Data.ColorId);
+            // __instance.HatImage.SetHat(SaveManager.LastHat, PlayerControl.LocalPlayer.Data.ColorId);
         }
     }
 }

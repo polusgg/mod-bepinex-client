@@ -64,7 +64,7 @@ namespace Polus.Patches.Permanent {
 
         [HarmonyPatch(typeof(HatParent), nameof(HatParent.SetHat), typeof(int))]
         public static class HatParentSetHat {
-            [HarmonyPostfix]
+            [HarmonyPrefix]
             public static void SetHat(HatParent __instance, [HarmonyArgument(0)] int color) {
                 SecondaryHatSpriteBehaviour sec = SecondaryHatSpriteBehaviour.GetHelper(__instance);
                 sec.SetColor(color);

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using Hazel;
+using UnhollowerBaseLib;
 using UnityEngine;
 
 namespace Polus.Extensions {
@@ -12,12 +13,13 @@ namespace Polus.Extensions {
             return reader.ReadMessageAsNewBuffer();
         }
 
-        public static void WriteStringNoLength(this BinaryWriter writer, string value) {
-            writer.Write(value.ToCharArray()[..]);
+        public static Guid ReadGuid(this MessageReader reader) {
+            byte[] guidData = reader.ReadBytes(16);
+            return new Guid(guidData);
         }
 
-        public static void ReadStringNoLength(this BinaryWriter writer, string value) {
-            writer.Write(value.ToCharArray()[..]);
+        public static void WriteGuid(this MessageWriter writer, Guid guid) {
+            writer.Write(guid.ToByteArray());
         }
     }
 }

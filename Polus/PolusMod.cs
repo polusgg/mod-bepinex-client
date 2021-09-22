@@ -45,10 +45,11 @@ namespace Polus {
         private static List<Action> TempQueue = new();
         public bool CannotMove;
         public bool HudActive;
-        private QRCodeGenerator qrGenerator = new();
-        private object fetchLock = new();
+        private readonly QRCodeGenerator qrGenerator = new();
+        private readonly object fetchLock = new();
 
         public override string Name => "PolusMod";
+        public override byte ProtocolId => 0; //first mod baybee
 
         public override ManualLogSource Logger {
             get => _loggee;
@@ -378,8 +379,7 @@ namespace Polus {
                             SetHudVisibilityPatches.meetingButtonEnabled = enabled;
                             break;
                         }
-                        case HudItem.AdminTable:
-                        {
+                        case HudItem.AdminTable: {
                             SetHudVisibilityPatches.adminTableEnabled = enabled;
                             break;
                         }
@@ -414,7 +414,7 @@ namespace Polus {
                     // $"Got QR Code {StupidModStampPatches.QrVisible} {StupidModStampPatches.QrActuallyVisible}".Log(10);
                     if (StupidModStampPatches.QrActuallyVisible) {
                         string data = reader.ReadString();
-                    
+
                         AddDispatch(() => {
                             QRCodeData qrCodeData = qrGenerator.CreateQrCode(data, QRCodeGenerator.ECCLevel.M, true, false, QRCodeGenerator.EciMode.Default, -1);
                             UnityQRCode qrCode = new(qrCodeData);
@@ -425,11 +425,20 @@ namespace Polus {
 
                     break;
                 }
+                case PolusRootPackets.SendMessage: {
+                    ChatManager.Instance?.ReceiveChatMessage(reader);
+                    break;
+                }
+                case PolusRootPackets.DeleteMessage:
+                    Guid guid = reader.ReadGuid();
+                    ChatManager.Instance.DeleteMessage(guid);
+                    break;
                 default: {
                     Logger.LogError($"Invalid packet with id {reader.Tag}");
                     break;
                 }
             }
+
             reader.Recycle();
         }
 
@@ -504,16 +513,19 @@ namespace Polus {
                 }
             }
 
-            if (AmongUsClient.Instance && AmongUsClient.Instance.AmConnected && AmongUsClient.Instance.connection.State == ConnectionState.Connected){
+            if (AmongUsClient.Instance && AmongUsClient.Instance.AmConnected && AmongUsClient.Instance.connection.State == ConnectionState.Connected) {
                 foreach (Action t in TempQueue) {
                     CatchHelper.TryCatch(() => t());
                 }
+
                 TempQueue.Clear();
             }
+
             if (LobbyBehaviour.Instance != lobbyExisted) {
                 lobbyExisted = LobbyBehaviour.Instance;
                 if (lobbyExisted) optionsDirty = true;
             }
+
             if (HudManager.InstanceExists) HudManager.Instance.GameSettings.gameObject.SetActive(LobbyBehaviour.Instance);
             if (!optionsDirty) return;
             GameSettingMenu menu = Object.FindObjectOfType<GameSettingMenu>();
@@ -570,9 +582,11 @@ namespace Polus {
                 if (id >= CosmeticManager.CosmeticStartId && player.Data.HatId == id - 1) {
                     player.SetHat(id - 1, player.Data.ColorId);
                 }
+
                 if (id >= CosmeticManager.CosmeticStartId && player.Data.PetId == id - 1) {
                     player.SetHat(id - 1, player.Data.ColorId);
                 }
+
                 if (id >= CosmeticManager.CosmeticStartId && player.Data.SkinId == id - 1) {
                     player.SetHat(id - 1, player.Data.ColorId);
                 }
