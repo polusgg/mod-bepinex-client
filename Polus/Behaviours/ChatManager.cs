@@ -52,6 +52,7 @@ namespace Polus.Behaviours {
             uint petId = reader.ReadPackedUInt32();
             Color backColor = reader.ReadColor();
             Color bodyColor = reader.ReadColor();
+            Color visorColor = reader.ReadColor();
             float pitch = reader.ReadSingle(); //TODO: pitch baybeeeeee
             string text = reader.ReadBoolean() ? QuickChatNetData.Deserialize(reader) : reader.ReadString();
             
@@ -86,6 +87,8 @@ namespace Polus.Behaviours {
                 chatBubble.Player.PetSlot.material.SetInt(MaskLayer, num);
                 chatBubble.Background.material.SetInt(MaskLayer, num);
                 chatBubble.Player.Body.SetPlayerMaterialColors(backColor, bodyColor);
+                chatBubble.Player.Body.material.SetColor("_VisorColor", visorColor);
+                chatBubble.Xmark.material.SetInt(MaskLayer, num);
                 SecondaryHatSpriteBehaviour hat = SecondaryHatSpriteBehaviour.GetHelper(chatBubble.Player.HatSlot);
                 hat.parent.SetHat(hatId, 0);
                 hat.SetColor(backColor, bodyColor);
@@ -109,7 +112,8 @@ namespace Polus.Behaviours {
             }
         }
 
-        public void DeleteMessage(Guid guid) {
+        public void DeleteMessage(Guid guid)
+        {
             ChatBubble bubble = Bubbles[guid];
             string text = bubble.TextArea.text;
             Chat.chatBubPool.Reclaim(bubble);
