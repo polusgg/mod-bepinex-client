@@ -49,7 +49,7 @@ namespace Polus {
         private readonly object fetchLock = new();
 
         public override string Name => "PolusMod";
-        public override byte ProtocolId => 0; //first mod baybee
+        public override byte? ProtocolId => 0; //first mod baybee
 
         public override ManualLogSource Logger {
             get => _loggee;
@@ -536,12 +536,24 @@ namespace Polus {
         }
 
         public override void ConnectionEstablished() {
-            //todo write code that calls this
             WhyDidntHazelHave.PacketOrderingPatch.Reset();
         }
 
         public override void ConnectionDestroyed() {
-            //todo write code that calls this
+            
+        }
+
+        public override void WriteExtraData(MessageWriter writer) {
+            (DateTime date, int? packageVersion) = StereotypicalClientModderVersionShowerPatch.Ver;
+            writer.Write(Constants.GetVersion(date.Year, date.Month, date.Day, packageVersion ?? 0));
+            writer.WritePacked(Screen.width);
+            writer.WritePacked(Screen.height);
+            
+            if (Constants.GetPlatformType() != Platforms.Android) writer.Write((byte) Constants.GetPlatformType());        //trollface
+            else writer.Write((byte) HelloAnalytics.Platform.PlayStore); // todo: android lmao
+            writer.Write(SystemInfo.operatingSystem);
+            writer.WritePacked(SystemInfo.graphicsMemorySize);
+            writer.WritePacked(SystemInfo.systemMemorySize);
         }
 
         [HarmonyPatch(typeof(InnerNetClient), nameof(InnerNetClient.SendClientReady))]
@@ -549,7 +561,7 @@ namespace Polus {
             [PermanentPatch]
             [HarmonyPrefix]
             public static void Ready() {
-                "Ready Called (this logs three times, please tell sanae if this calls more than that for whatever stupid reason)".Log(3);
+                "Ready Called (tell sanae if this calls more than once in one game)".Log();
             }
         }
 
@@ -559,7 +571,6 @@ namespace Polus {
             PingTrackerTextPatch.PingText = null;
             RoomTrackerTextPatch.RoomText = null;
             StupidModStampPatches.Reset();
-            ResizeHandlerPatch.SetResolution(Screen.width, Screen.height);
             AmongUsClient.Instance.mode = MatchMakerModes.Client;
         }
 

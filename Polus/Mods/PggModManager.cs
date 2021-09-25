@@ -5,11 +5,13 @@ using System.Linq;
 using System.Reflection;
 using BepInEx.Logging;
 using HarmonyLib;
+using Hazel;
 using Polus.Behaviours;
 using Polus.Enums;
 using Polus.Extensions;
 using Polus.Mods;
 using Polus.Patches.Permanent;
+using UnhollowerBaseLib;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -120,6 +122,7 @@ namespace Polus {
             private void Start() {
                 PlayerSpawnedEventPatch.ModManager = ModManager;
                 PlayerDestroyedEventPatch.ModManager = ModManager;
+                GetConnectionDataPatch.ModManager = ModManager;
             }
 
             public EventHandlerBehaviour(IntPtr ptr) : base(ptr) { }
@@ -158,6 +161,31 @@ namespace Polus {
                 [HarmonyPostfix]
                 public static void OnDestroy(PlayerControl __instance) {
                     foreach ((PggMod _, Mod mod) in ModManager.TemporaryMods) mod.PlayerDestroyed(__instance);
+                }
+            }
+        
+            [HarmonyPatch(typeof(AmongUsClient), nameof(AmongUsClient.GetConnectionData))]
+            internal class GetConnectionDataPatch {
+                public static PggModManager ModManager;
+                [HarmonyPrefix]
+                public static bool GetConnectionData(AmongUsClient __instance, out Il2CppStructArray<byte> __result) {
+                    MessageWriter writer = MessageWriter.Get(SendOption.None);
+                    writer.Write(Constants.GetBroadcastVersion());
+                    writer.Write(SaveManager.PlayerName);
+                    writer.Write(SaveManager.LastLanguage);
+                    writer.Write(0); // AuthManager.Instance.LastNonceReceived
+                    writer.Write((byte)SaveManager.ChatModeType);
+                    foreach (Mod mod in ModManager.TemporaryMods.Select(mods => mods.Item2))
+                        if (mod.ProtocolId.HasValue) {
+                            writer.StartMessage(mod.ProtocolId.Value);
+                            mod.WriteExtraData(writer);
+                            writer.EndMessage();    
+                        }
+
+                    __result = writer.ToByteArray(false);
+                    writer.Recycle();
+
+                    return false;
                 }
             }
         }

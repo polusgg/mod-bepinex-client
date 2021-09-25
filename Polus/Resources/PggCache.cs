@@ -42,7 +42,6 @@ namespace Polus.Resources {
             }
 
             if (!IsCachedAndValid(id, hash)) {
-
                 if (type != ResourceType.Asset) {
                     responseTask =
                         Client.GetAsync(location.Log(comment: "Requesting at"),
@@ -76,17 +75,21 @@ namespace Polus.Resources {
                     case ResourceType.AssetBundle: {
                         if (CachedFiles.ContainsKey(id) && CachedFiles[id] is {Type: ResourceType.AssetBundle} oldAssetBundle) oldAssetBundle.Unload();
                         data = responseMessage.Content.ReadAsByteArrayAsync().Result;
-                        using (FileStream fs = GetFileStream(path, FileMode.Create, FileAccess.Write, FileShare.None)) fs.Write(data);
+                        // using (FileStream fs = GetFileStream(path, FileMode.Create, FileAccess.Write, FileShare.None)) fs.Write(data);
+                        File.WriteAllBytes(path, data);
                         AssetBundle bundle = AssetBundle.LoadFromFile(path);
                         cacheFile.InternalData = bundle;
                         Bundle? bundopt = null;
+                        if (!bundle) {
+                            "MY BUNDLE IS NULL WHYYYYYYY".Log(level: LogLevel.Error);
+                        }
                         try {
                             bundopt =
                                 JsonConvert.DeserializeObject<Bundle>(bundle.LoadAsset("Assets/AssetListing.json")
                                     .Cast<TextAsset>().text);
                         } catch (Exception e) {
                             e.Log(level: LogLevel.Fatal, comment: "What the hell why is this brokened");
-                            foreach (string allScenePath in PogusPlugin.Bundle.GetAllAssetNames())
+                            foreach (string allScenePath in bundle.GetAllAssetNames())
                                 allScenePath.Log(comment: "    grrrr");
                         }
 

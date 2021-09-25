@@ -13,17 +13,27 @@ EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
+		Release|Desktop = Release|Desktop
+		Release|Android = Release|Android
+		Debug|Desktop = Debug|Desktop
+		Debug|Android = Debug|Android
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{22F88CA4-9316-4E27-A28E-99E78EF6D1D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{22F88CA4-9316-4E27-A28E-99E78EF6D1D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{22F88CA4-9316-4E27-A28E-99E78EF6D1D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{22F88CA4-9316-4E27-A28E-99E78EF6D1D1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{31BDE005-C467-475C-9750-7949DAB8AD8A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{31BDE005-C467-475C-9750-7949DAB8AD8A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{31BDE005-C467-475C-9750-7949DAB8AD8A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{31BDE005-C467-475C-9750-7949DAB8AD8A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22F88CA4-9316-4E27-A28E-99E78EF6D1D1}.Release|Desktop.ActiveCfg = Release|Desktop
+		{22F88CA4-9316-4E27-A28E-99E78EF6D1D1}.Release|Desktop.Build.0 = Release|Desktop
+		{22F88CA4-9316-4E27-A28E-99E78EF6D1D1}.Release|Android.ActiveCfg = Release|Android
+		{22F88CA4-9316-4E27-A28E-99E78EF6D1D1}.Release|Android.Build.0 = Release|Android
+		{22F88CA4-9316-4E27-A28E-99E78EF6D1D1}.Debug|Desktop.ActiveCfg = Debug|Desktop
+		{22F88CA4-9316-4E27-A28E-99E78EF6D1D1}.Debug|Desktop.Build.0 = Debug|Desktop
+		{22F88CA4-9316-4E27-A28E-99E78EF6D1D1}.Debug|Android.ActiveCfg = Debug|Android
+		{22F88CA4-9316-4E27-A28E-99E78EF6D1D1}.Debug|Android.Build.0 = Debug|Android
+		{31BDE005-C467-475C-9750-7949DAB8AD8A}.Release|Desktop.ActiveCfg = Release|Desktop
+		{31BDE005-C467-475C-9750-7949DAB8AD8A}.Release|Desktop.Build.0 = Release|Desktop
+		{31BDE005-C467-475C-9750-7949DAB8AD8A}.Release|Android.ActiveCfg = Release|Android
+		{31BDE005-C467-475C-9750-7949DAB8AD8A}.Release|Android.Build.0 = Release|Android
+		{31BDE005-C467-475C-9750-7949DAB8AD8A}.Debug|Desktop.ActiveCfg = Debug|Desktop
+		{31BDE005-C467-475C-9750-7949DAB8AD8A}.Debug|Desktop.Build.0 = Debug|Desktop
+		{31BDE005-C467-475C-9750-7949DAB8AD8A}.Debug|Android.ActiveCfg = Debug|Android
+		{31BDE005-C467-475C-9750-7949DAB8AD8A}.Debug|Android.Build.0 = Debug|Android
 	EndGlobalSection
 EndGlobal

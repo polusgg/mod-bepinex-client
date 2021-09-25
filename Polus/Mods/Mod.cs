@@ -5,10 +5,19 @@ using UnityEngine.SceneManagement;
 
 namespace Polus.Mods {
     public abstract class Mod : MarshalByRefObject {
+        /// <summary>
+        /// The name of the mod to be logged and saved 
+        /// </summary>
         public abstract string Name { get; }
-        public abstract byte ProtocolId { get; }
+        /// <summary>
+        /// If this is null, no extra data will be written to the Hello packet 
+        /// </summary>
+        /// <seealso cref="WriteExtraData"/>
+        public abstract byte? ProtocolId { get; }
+        /// <summary>
+        /// The logger which can be used by the 
+        /// </summary>
         public abstract ManualLogSource Logger { get; set; }
-
         /// <summary>
         /// Called when the mod is started up
         ///
@@ -44,6 +53,11 @@ namespace Polus.Mods {
         /// Called when the game ends a connection (game only, does not include announcement protocol)
         /// </summary>
         public abstract void ConnectionDestroyed();
+        /// <summary>
+        /// Called for the mod to write data onto a Hello packet (game only, does not include announcement protocol)
+        /// </summary>
+        /// <returns>Whether </returns>
+        public abstract void WriteExtraData(MessageWriter writer);
         /// <summary>
         /// Called when the user joins a lobby
         /// </summary>

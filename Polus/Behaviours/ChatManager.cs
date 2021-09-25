@@ -53,7 +53,7 @@ namespace Polus.Behaviours {
             Color backColor = reader.ReadColor();
             Color bodyColor = reader.ReadColor();
             Color visorColor = reader.ReadColor();
-            float pitch = reader.ReadSingle(); //TODO: pitch baybeeeeee
+            float pitch = reader.ReadSingle();
             string text = reader.ReadBoolean() ? QuickChatNetData.Deserialize(reader) : reader.ReadString();
             
             $"New chat message {guid} - {playerName}: {text}".Log();
@@ -62,7 +62,7 @@ namespace Polus.Behaviours {
 
             ChatBubble chatBubble = Chat.chatBubPool.GetBetter<ChatBubble>();
 
-            try {
+            CatchHelper.TryCatch(() => {
                 chatBubble.transform.SetParent(Chat.scroller.Inner);
                 chatBubble.transform.localScale = Vector3.one;
                 switch (align) {
@@ -106,10 +106,9 @@ namespace Polus.Behaviours {
 
                 if (Math.Abs(pitch - DisabledPitch) > 0.0001f) SoundManager.Instance.PlaySound(Chat.MessageSound, false, 1f).pitch = pitch;
                 Bubbles.Add(guid, chatBubble);
-            } catch (Exception ex) {
+            }, catchAction: () => {
                 CatchHelper.TryCatch(() => Chat.chatBubPool.Reclaim(chatBubble));
-                ex.Log(level: LogLevel.Error);
-            }
+            });
         }
 
         public void DeleteMessage(Guid guid)

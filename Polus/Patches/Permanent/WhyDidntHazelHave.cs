@@ -5,6 +5,7 @@ using BepInEx.Logging;
 using HarmonyLib;
 using Hazel;
 using Hazel.Udp;
+using Polus.Enums;
 using Polus.Extensions;
 using Polus.Mods.Patching;
 using Polus.Utils;
@@ -61,7 +62,7 @@ namespace Polus.Patches.Permanent {
                 public static bool HandleReceive(UdpConnection __instance, [HarmonyArgument(0)] MessageReader reader, [HarmonyArgument(1)] int bytesReceived) {
                     if (reader.Buffer[0] == 12) {
                         __instance.pingsSinceAck = 0;
-                        __instance.Statistics.LogUnreliableSend(bytesReceived - 1, bytesReceived);
+                        __instance.Statistics.LogUnreliableReceive(bytesReceived - 1, bytesReceived);
                         reader.Recycle();
                         return false;
                     }
@@ -78,6 +79,25 @@ namespace Polus.Patches.Permanent {
                     __instance.WriteBytesToConnection(new byte[]{ 12 }, 1);
                     __instance.Statistics.LogUnreliableSend(0, 1);
                     return false;
+                }
+            }
+        }
+
+        public static class PacketFragmentationPatches {
+            [HarmonyPatch(typeof(UdpConnection), nameof(UdpConnection.HandleReceive))]
+            public static class HandleReceivePatch {
+                [PermanentPatch]
+                [HarmonyPrefix]
+                public static bool HandleReceive(UdpConnection __instance, [HarmonyArgument(0)] MessageReader reader, [HarmonyArgument(1)] int bytesReceived) {
+                    if (reader.Buffer[0] == (byte) (SendOptionPlus.Reliable | SendOptionPlus.Fragmented)) {
+                        //todo merge packet buffers 
+                        __instance.pingsSinceAck = 0;
+                        __instance.Statistics.LogReliableReceive(bytesReceived - 1, bytesReceived);
+                        reader.Recycle();
+                        return false;
+                    }
+
+                    return true;
                 }
             }
         }

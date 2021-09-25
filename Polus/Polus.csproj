@@ -3,6 +3,8 @@
         <TargetFramework>netstandard2.1</TargetFramework>
         <LangVersion>latest</LangVersion>
         <SourceRevisionId>$([System.DateTime]::UtcNow.ToString("yyyyMMddHHmmss"))</SourceRevisionId>
+        <Configurations>Release;Debug</Configurations>
+        <Platforms>Desktop;Android</Platforms>
 <!--        <DebugType>embedded</DebugType>-->
     </PropertyGroup>
 
@@ -13,6 +15,7 @@
         </PackageReference>
         <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
         <PackageReference Include="DokanNet" Version="1.5.0" />
+        <PackageReference Include="Sentry" Version="3.9.3" />
     </ItemGroup>
 
     <ItemGroup>

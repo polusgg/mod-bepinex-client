@@ -224,7 +224,7 @@ namespace Polus.Patches.Temporary {
             }
         }
 
-        [HarmonyPatch(typeof(Vent), nameof(Vent.CanUse))]
+        [HarmonyPatch(typeof(Vent), nameof(Vent.Use))]
         public static class VentUsePatch {
             [HarmonyPrefix]
             public static bool Use(SystemConsole __instance) {

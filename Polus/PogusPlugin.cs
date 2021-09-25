@@ -36,6 +36,7 @@ namespace Polus {
         public static TMP_SpriteAsset spriteSheet;
 
         public static int? Revision = null;
+        public static int LauncherBuild;
 
         public static AssetBundle Bundle {
             get {
@@ -64,49 +65,66 @@ namespace Polus {
 
         public override void Load() {
             Logger = Log;
-            ObjectManager = new PggObjectManager();
-
-            CatchHelper.TryCatch(() => {
-                if (File.Exists("modpackage.manifest.json")) {
-                    //todo move to a version management class and periodically check for updates :)
-                    ModPackage modPackage = JsonConvert.DeserializeObject<ModPackage>(File.ReadAllText("modpackage.manifest.json"));
-                    if (modPackage != null) {
-                        Revision = modPackage.Version;
-                    }
-                }
-            });
+            
+            BetterErrorPatches.DebugLogTrace.Initialize();
 
             try {
-                if (File.Exists(PggConstants.CacheLocation)) {
-                    using (FileStream stream = PggCache.GetFileStream(PggConstants.CacheLocation, FileMode.Open, FileAccess.Read, FileShare.None))
-                        Cache.Deserialize(new BinaryReader(stream));
+                CatchHelper.TryCatch(() => {
+                    if (File.Exists("modpackage.manifest.json")) {
+                        //todo move to a version management class and periodically check for updates :)
+                        ModPackage modPackage = JsonConvert.DeserializeObject<ModPackage>(File.ReadAllText("modpackage.manifest.json"));
+                        if (modPackage != null) {
+                            Revision = modPackage.Version;
+                        }
+                    }
+                }, false);
+
+                CatchHelper.Init();
+
+                ObjectManager = new PggObjectManager();
+
+                try {
+                    LauncherInfo launcherInfo = JsonConvert.DeserializeObject<LauncherInfo>(File.ReadAllText("launcher.info.json"));
+                    if (launcherInfo != null) {
+                        LauncherBuild = launcherInfo.Version;
+                    }
+                } catch {
+                    #if RELEASE
+                    CrashAndBurn.Die("Unable to get launcher version!\nAre you really running this from the launcher?");
+                    #endif
                 }
 
-                PermanentMod.LoadPatches("gg.polus.permanent",
-                    Assembly.GetExecutingAssembly().GetTypes()
-                        .Where(x => x.GetCustomAttribute(typeof(HarmonyPatch)) != null).ToArray());
-                PermanentMod.Patch();
-                ModManager = new PggModManager(Log);
-                ModManager.LoadMods();
-            } catch (Exception e) {
-                Log.LogFatal("Failed to load!");
-                Log.LogFatal(e);
-                throw;
+                CatchHelper.TryCatch(() => {
+                    if (File.Exists(PggConstants.CacheLocation)) {
+                        using FileStream stream = PggCache.GetFileStream(PggConstants.CacheLocation, FileMode.Open, FileAccess.Read, FileShare.None);
+                        Cache.Deserialize(new BinaryReader(stream));
+                    }
+
+                    PermanentMod.LoadPatches("gg.polus.permanent",
+                        Assembly.GetExecutingAssembly().GetTypes()
+                            .Where(x => x.GetCustomAttribute(typeof(HarmonyPatch)) != null).ToArray());
+                    PermanentMod.Patch();
+                    ModManager = new PggModManager(Log);
+                    ModManager.LoadMods();
+                });
+
+                // font = Bundle.LoadAsset("Assets/Fonts/AmongUsButton2-Regular SDF.asset").Cast<TMP_FontAsset>();
+                font = Bundle.LoadAsset("Assets/Fonts/ComicSansMs3 SDF.asset").Cast<TMP_FontAsset>();
+                spriteSheet = Bundle.LoadAsset("Assets/Mods/Emojis/Emotes.asset").Cast<TMP_SpriteAsset>();
+                TMP_Settings.instance.m_defaultSpriteAsset = spriteSheet;
+                // font = Bundle.LoadAsset("Assets/Fonts/Inter-SemiBold SDF.asset").Cast<TMP_FontAsset>();
+                // FontMwenuwuPatches.Load();
+                CatchHelper.TryCatch(CreditsMainMenuPatches.Load);
+
+                CosmeticsWindowButton.Load();
+
+                ModManager.PostLoad = true;
+
+                "This is the end of PogusPlugin.Load()".Log(1);
+            } catch (Exception ex) {
+                
+                CrashAndBurn.Die(ex);
             }
-
-            // font = Bundle.LoadAsset("Assets/Fonts/AmongUsButton2-Regular SDF.asset").Cast<TMP_FontAsset>();
-            font = Bundle.LoadAsset("Assets/Fonts/ComicSansMs3 SDF.asset").Cast<TMP_FontAsset>();
-            spriteSheet = Bundle.LoadAsset("Assets/Mods/Emojis/Emotes.asset").Cast<TMP_SpriteAsset>();
-            TMP_Settings.instance.m_defaultSpriteAsset = spriteSheet;
-            // font = Bundle.LoadAsset("Assets/Fonts/Inter-SemiBold SDF.asset").Cast<TMP_FontAsset>();
-            // FontMwenuwuPatches.Load();
-            CatchHelper.TryCatch(CreditsMainMenuPatches.Load);
-
-            CosmeticsWindowButton.Load();
-
-            ModManager.PostLoad = true;
-
-            "This is the end of PogusPlugin.Load()".Log(1);
         }
 
         public override bool Unload() {
@@ -115,6 +133,10 @@ namespace Polus {
         }
 
         public class ModPackage {
+            [JsonProperty("version")] public int Version;
+        }
+
+        public class LauncherInfo {
             [JsonProperty("version")] public int Version;
         }
     }

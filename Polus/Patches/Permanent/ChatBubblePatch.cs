@@ -10,8 +10,6 @@ namespace Polus.Patches.Permanent {
         [HarmonyPostfix]
         public static void Update(ChatBubble __instance) {
             __instance.TextArea.richText = true;
-            __instance.TextArea.outlineColor = Color.black;
-            __instance.TextArea.outlineWidth = 0.1745f;
         }
     }
 }
