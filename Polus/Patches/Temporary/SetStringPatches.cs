@@ -1,5 +1,6 @@
 ﻿using System;
 using HarmonyLib;
+using InnerNet;
 using Polus.Extensions;
 using TMPro;
 using UnhollowerBaseLib;
@@ -56,6 +57,10 @@ namespace Polus.Patches.Temporary {
                 }
             }
 #endif
+            // if (AmongUsClient.Instance.GameState == InnerNetClient.GameStates.Joined)
+            // {
+                __instance.text.text += "\nRegion: " + ServerManager.Instance.CurrentRegion.Name;
+            // }
 
             if (PingText is not null) __instance.text.text = PingText.Replace("%s", AmongUsClient.Instance.Ping.ToString());
         }
