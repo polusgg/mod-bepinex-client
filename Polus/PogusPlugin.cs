@@ -90,7 +90,7 @@ namespace Polus {
                     }
                 } catch {
                     #if RELEASE
-                    CrashAndBurn.Die("Unable to get launcher version!\nAre you really running this from the launcher?");
+                    CrashAndBurn.Die("Unable to get launcher version!");
                     #endif
                 }
 

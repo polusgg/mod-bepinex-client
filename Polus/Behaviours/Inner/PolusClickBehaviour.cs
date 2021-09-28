@@ -31,7 +31,7 @@ namespace Polus.Behaviours.Inner {
         private KeyCode[] keys;
 
         public bool IsHudButton => netTransform.IsHudButton;
-        public bool IsLocked => IsHudButton && locks.Any(lck => lck);
+        public bool IsLocked => IsHudButton && locks[(int) ButtonLocks.PlayerCanMove];
 
         static PolusClickBehaviour() {
             ClassInjector.RegisterTypeInIl2Cpp<PolusClickBehaviour>();
@@ -54,6 +54,7 @@ namespace Polus.Behaviours.Inner {
             }
             graphic.renderer.SetMaterial(_funnyButtonMaterial);
             timerText = Instantiate(kb.TimerText, transform);
+            CheckLocks();
         }
 
         private void Update() {

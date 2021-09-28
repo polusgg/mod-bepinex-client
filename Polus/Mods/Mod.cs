@@ -4,7 +4,7 @@ using Hazel;
 using UnityEngine.SceneManagement;
 
 namespace Polus.Mods {
-    public abstract class Mod : MarshalByRefObject {
+    public abstract class Mod {
         /// <summary>
         /// The name of the mod to be logged and saved 
         /// </summary>
@@ -14,10 +14,6 @@ namespace Polus.Mods {
         /// </summary>
         /// <seealso cref="WriteExtraData"/>
         public abstract byte? ProtocolId { get; }
-        /// <summary>
-        /// The logger which can be used by the 
-        /// </summary>
-        public abstract ManualLogSource Logger { get; set; }
         /// <summary>
         /// Called when the mod is started up
         ///

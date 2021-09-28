@@ -11,9 +11,12 @@ namespace Polus.Patches.Permanent
         public static void CreateCosmeticsButton()
         {
             GameObject storeObj = GameObject.Find("StoreButton");
-            storeObj = Object.Instantiate(storeObj, GameObject.Find("BottomButtons").transform);
+            GameObject bottomButtons = GameObject.Find("BottomButtons");
+            DotAligner aligner = bottomButtons.GetComponent<DotAligner>();
+            storeObj = Object.Instantiate(storeObj, bottomButtons.transform);
             PassiveButton storeButton = storeObj.GetComponent<PassiveButton>();
             SpriteRenderer storeSprite = storeObj.GetComponent<SpriteRenderer>();
+            aligner.Start();
 
             (storeButton.OnClick = new Button.ButtonClickedEvent())
                 .AddListener(new Action(() => Application.OpenURL("steam://run/1653240//--window=cosmetics/")));

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using BepInEx.Logging;
 using Polus.Extensions;
 using Polus.Patches.Permanent;
@@ -40,7 +42,7 @@ namespace Polus.Utils {
 
         public static void Init() {
             SentrySdk.Init(o => {
-                o.Dsn = "https://bfac99d5507b4156948e7c0682756702@o1008735.ingest.sentry.io/5972745";
+                o.Dsn = "https://1d7e56371934416e84bd9ddc1596b1ba@o1016669.ingest.sentry.io/5982062";
                 // When configuring for the first time, to see what the SDK is doing:
                 o.Debug = false;
                 o.DiagnosticLogger = new PolusDiagnosticLogger();
@@ -51,13 +53,18 @@ namespace Polus.Utils {
                 o.TracesSampleRate = 1.0;
             });
             SentrySdk.StartSession();
+            // SentrySdk.AddBreadcrumb("Lmaoooo");
+            // SentrySdk.CaptureMessage("so true!1");
         }
+
+        public static void AddBreadcrumb(this string value, Dictionary<string, object> data) => SentrySdk.AddBreadcrumb(value, data: data.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToString()));
 
         public static SentryId ReportException(this Exception ex) => SentrySdk.CaptureException(ex);
 
         public static SentryId ReportMessage(this string message, SentryLevel level = SentryLevel.Error) {
             return SentrySdk.CaptureEvent(new SentryEvent {
                 Message = message,
+                
                 Level = level
             });
         }

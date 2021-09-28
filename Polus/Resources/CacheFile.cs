@@ -29,9 +29,10 @@ namespace Polus.Resources {
                 throw new InvalidOperationException(
                     $"Invalid Get call to non-asset {Type} {PogusPlugin.Cache.CachedFiles.First(x => x.Value == this).Key}");
 
-            if (InternalData == null)
+            if (InternalData == null) {
                 return (T) (InternalData = PogusPlugin.Cache.CachedFiles[(uint) ExtraData].LoadAssetBundle().LoadAsset(Location)
                     .DontDestroy().Cast<T>());
+            }
 
             return (T) InternalData;
         }

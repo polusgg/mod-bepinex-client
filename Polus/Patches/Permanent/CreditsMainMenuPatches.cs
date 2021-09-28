@@ -16,7 +16,7 @@ using Object = UnityEngine.Object;
 
 namespace Polus.Patches.Permanent {
     public class CreditsMainMenuPatches {
-        private static Sprite _crunchuSprite;
+        public static Sprite _crunchuSprite;
         private static CreditsMenuHolder _creditsMenu;
         private static WebClient client = new() {
             BaseAddress = "https://static.polus.gg"

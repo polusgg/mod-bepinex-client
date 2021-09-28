@@ -11,7 +11,9 @@ using BepInEx.Logging;
 using Newtonsoft.Json;
 using Polus.Extensions;
 using Polus.Utils;
+using Sentry;
 using UnityEngine;
+using Debug = System.Diagnostics.Debug;
 
 namespace Polus.Resources {
     public class PggCache : ICache {
@@ -74,14 +76,15 @@ namespace Polus.Resources {
                     }
                     case ResourceType.AssetBundle: {
                         if (CachedFiles.ContainsKey(id) && CachedFiles[id] is {Type: ResourceType.AssetBundle} oldAssetBundle) oldAssetBundle.Unload();
+                        
                         data = responseMessage.Content.ReadAsByteArrayAsync().Result;
                         // using (FileStream fs = GetFileStream(path, FileMode.Create, FileAccess.Write, FileShare.None)) fs.Write(data);
                         File.WriteAllBytes(path, data);
-                        AssetBundle bundle = AssetBundle.LoadFromFile(path);
+                        AssetBundle bundle = AssetBundle.LoadFromMemory(data);
                         cacheFile.InternalData = bundle;
                         Bundle? bundopt = null;
                         if (!bundle) {
-                            "MY BUNDLE IS NULL WHYYYYYYY".Log(level: LogLevel.Error);
+                            $"MY BUNDLE IS NULL WHYYYYYYY {path} {data.Length} {bundle == null} grrrrrr {responseMessage.StatusCode}".ReportMessage().Log();
                         }
                         try {
                             bundopt =
@@ -89,8 +92,8 @@ namespace Polus.Resources {
                                     .Cast<TextAsset>().text);
                         } catch (Exception e) {
                             e.Log(level: LogLevel.Fatal, comment: "What the hell why is this brokened");
-                            foreach (string allScenePath in bundle.GetAllAssetNames())
-                                allScenePath.Log(comment: "    grrrr");
+                            "Bundle is currently null!".AddBreadcrumb(bundle?.GetAllAssetNames().ToDictionary(str => str, _ => (object) null));
+                            e.ReportException();
                         }
 
                         if (bundopt.HasValue) {
@@ -121,6 +124,7 @@ namespace Polus.Resources {
                     } catch (Exception ex) {
                         $"Failed to cache {location}!".Log(level: LogLevel.Warning);
                         ex.Log(level: LogLevel.Warning);
+                        ex.ReportException();
                     }
                 }
 

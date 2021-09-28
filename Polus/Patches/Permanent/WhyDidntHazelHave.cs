@@ -83,23 +83,24 @@ namespace Polus.Patches.Permanent {
             }
         }
 
-        public static class PacketFragmentationPatches {
-            [HarmonyPatch(typeof(UdpConnection), nameof(UdpConnection.HandleReceive))]
-            public static class HandleReceivePatch {
-                [PermanentPatch]
-                [HarmonyPrefix]
-                public static bool HandleReceive(UdpConnection __instance, [HarmonyArgument(0)] MessageReader reader, [HarmonyArgument(1)] int bytesReceived) {
-                    if (reader.Buffer[0] == (byte) (SendOptionPlus.Reliable | SendOptionPlus.Fragmented)) {
-                        //todo merge packet buffers 
-                        __instance.pingsSinceAck = 0;
-                        __instance.Statistics.LogReliableReceive(bytesReceived - 1, bytesReceived);
-                        reader.Recycle();
-                        return false;
-                    }
-
-                    return true;
-                }
-            }
-        }
+        // public static class PacketFragmentationPatches {
+        //     [HarmonyPatch(typeof(UdpConnection), nameof(UdpConnection.HandleReceive))]
+        //     public static class HandleReceivePatch {
+        //         public static Dictionary<uint, byte[][]> Fragments = new(); 
+        //         [PermanentPatch]
+        //         [HarmonyPrefix]
+        //         public static bool HandleReceive(UdpConnection __instance, [HarmonyArgument(0)] MessageReader reader, [HarmonyArgument(1)] int bytesReceived) {
+        //             if (reader.Buffer[0] == (byte) (SendOptionPlus.Reliable | SendOptionPlus.Fragmented)) {
+        //                 //todo merge packet buffers 
+        //                 __instance.pingsSinceAck = 0;
+        //                 __instance.Statistics.LogReliableReceive(bytesReceived - 1, bytesReceived);
+        //                 reader.Recycle();
+        //                 return false;
+        //             }
+        //
+        //             return true;
+        //         }
+        //     }
+        // }
     }
 }

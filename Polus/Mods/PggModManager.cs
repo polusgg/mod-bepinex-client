@@ -61,9 +61,10 @@ namespace Polus {
             // Directory.Delete(PggConstants.DownloadFolder, true);
 
             IEnumerable<Type> enumerable =
-                Assembly.GetExecutingAssembly().GetTypes().Where(x => x.IsSubclassOf(typeof(Mod)));
+                AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes()).Where(t => t.BaseType == typeof(Mod));
             foreach (Type type in enumerable) {
                 Mod mod;
+                type.FullName.Log(comment: "Loading");
                 mod = (Mod) Activator.CreateInstance(type);
                 LoadMod(mod);
             }
@@ -84,7 +85,7 @@ namespace Polus {
         public void PatchMods() {
             Logger.LogInfo(TemporaryMods.Count);
             foreach ((PggMod pggMod, Mod mod) in TemporaryMods) {
-                mod.Logger = Logger;
+                // mod.Logger = Logger;
                 mod.Start();
                 pggMod.Patch();
             }
@@ -175,12 +176,13 @@ namespace Polus {
                     writer.Write(SaveManager.LastLanguage);
                     writer.Write(0); // AuthManager.Instance.LastNonceReceived
                     writer.Write((byte)SaveManager.ChatModeType);
-                    foreach (Mod mod in ModManager.TemporaryMods.Select(mods => mods.Item2))
+                    foreach (Mod mod in ModManager.TemporaryMods.Select(mods => mods.Item2)) {
                         if (mod.ProtocolId.HasValue) {
                             writer.StartMessage(mod.ProtocolId.Value);
                             mod.WriteExtraData(writer);
                             writer.EndMessage();    
                         }
+                    }
 
                     __result = writer.ToByteArray(false);
                     writer.Recycle();

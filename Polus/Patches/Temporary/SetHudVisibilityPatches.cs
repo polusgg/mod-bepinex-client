@@ -6,28 +6,28 @@ using UnityEngine;
 
 namespace Polus.Patches.Temporary {
     public static class SetHudVisibilityPatches {
-        public static bool ventButtonEnabled = true;
-        public static bool sabotageButtonEnabled = true;
-        public static bool useButtonEnabled = true;
-        public static bool meetingButtonEnabled = true;
-        public static bool adminTableEnabled = true;
+        public static bool VentButtonEnabled = true;
+        public static bool SabotageButtonEnabled = true;
+        public static bool UseButtonEnabled = true;
+        public static bool MeetingButtonEnabled = true;
+        public static bool AdminTableEnabled = true;
         public static void Reset() {
-            HudShowMapPatch.doorsEnabled = true;
-            HudShowMapPatch.sabotagesEnabled = true;
-            sabotageButtonEnabled = true;
-            useButtonEnabled = true;
-            ventButtonEnabled = true;
-            meetingButtonEnabled = true;
-            adminTableEnabled = true;
-            TaskPanelUpdatePatch.enabled = true;
-            ReportButtonDisablePatch.enabled = true;
+            HudShowMapPatch.DoorsEnabled = true;
+            HudShowMapPatch.SabotagesEnabled = true;
+            SabotageButtonEnabled = true;
+            UseButtonEnabled = true;
+            VentButtonEnabled = true;
+            MeetingButtonEnabled = true;
+            AdminTableEnabled = true;
+            TaskPanelUpdatePatch.Enabled = true;
+            ReportButtonDisablePatch.Enabled = true;
         }
 
         [HarmonyPatch(typeof(Vent), nameof(Vent.SetOutline))]
         public static class VentDisablePatch {
             [HarmonyPrefix]
             public static void Prefix(Vent __instance, [HarmonyArgument(0)] ref bool on, [HarmonyArgument(1)] ref bool mainTarget) {
-                if (on && !ventButtonEnabled) {
+                if (on && !VentButtonEnabled) {
                     on = false;
                     mainTarget = false;
                 }
@@ -36,17 +36,13 @@ namespace Polus.Patches.Temporary {
 
         [HarmonyPatch(typeof(InfectedOverlay), nameof(InfectedOverlay.FixedUpdate))]
         public static class HudShowMapPatch {
-            public static bool doorsEnabled = true;
-            public static bool sabotagesEnabled = true;
+            public static bool DoorsEnabled = true;
+            public static bool SabotagesEnabled = true;
 
             [HarmonyPostfix]
             public static void Postfix(InfectedOverlay __instance) {
-                foreach (var button in __instance.allButtons) {
-                    if (button.gameObject.name == "closeDoors" || button.gameObject.name == "Doors") {
-                        button.gameObject.SetActive(doorsEnabled);
-                    } else {
-                        button.gameObject.SetActive(sabotagesEnabled);
-                    }
+                foreach (ButtonBehavior button in __instance.allButtons) {
+                    button.gameObject.SetActive(button.gameObject.name is "closeDoors" or "Doors" ? DoorsEnabled : SabotagesEnabled);
                 }
             }
         }
@@ -62,7 +58,7 @@ namespace Polus.Patches.Temporary {
                     switch (target.UseIcon) {
                         // Is target a vent? yes
                         case ImageNames.VentButton: {
-                            if (ventButtonEnabled) // ventButtonEnabled? yes
+                            if (VentButtonEnabled) // ventButtonEnabled? yes
                             {
                                 DisplayButton(__instance, true, target.UseIcon, target.PercentCool);
                                 return false;
@@ -76,7 +72,7 @@ namespace Polus.Patches.Temporary {
                         case ImageNames.MIRAAdminButton:
                         case ImageNames.PolusAdminButton:
                         case ImageNames.AirshipAdminButton:
-                            if (adminTableEnabled) // adminTableEnabled? yes
+                            if (AdminTableEnabled) // adminTableEnabled? yes
                             {
                                 DisplayButton(__instance, true, target.UseIcon, target.PercentCool);
                                 return false;
@@ -86,10 +82,10 @@ namespace Polus.Patches.Temporary {
                         default: {
                             if (target.TryCast<SystemConsole>() != null &&
                                 target.TryCast<SystemConsole>()?.MinigamePrefab.TryCast<EmergencyMinigame>() != null &&
-                                !meetingButtonEnabled) {
+                                !MeetingButtonEnabled) {
                                 DisplayButton(__instance, false, ImageNames.UseButton);
                             } else {
-                                DisplayButton(__instance, useButtonEnabled, target.UseIcon, target.PercentCool);
+                                DisplayButton(__instance, UseButtonEnabled, target.UseIcon, target.PercentCool);
                             }
 
                             return false;
@@ -98,7 +94,7 @@ namespace Polus.Patches.Temporary {
                 } // Has target? no
 
                 PlayerControl localPlayer = PlayerControl.LocalPlayer;
-                if (((localPlayer != null) ? localPlayer.Data : null) != null && PlayerControl.LocalPlayer.Data.IsImpostor && PlayerControl.LocalPlayer.CanMove && sabotageButtonEnabled) {
+                if (((localPlayer != null) ? localPlayer.Data : null) != null && PlayerControl.LocalPlayer.Data.IsImpostor && PlayerControl.LocalPlayer.CanMove && SabotageButtonEnabled) {
                     DisplayButton(__instance, true, ImageNames.SabotageButton);
                     return false;
                 }
@@ -131,20 +127,20 @@ namespace Polus.Patches.Temporary {
 
                 GameData.PlayerInfo data = PlayerControl.LocalPlayer.Data;
                 if (__instance.currentTarget != null) {
-                    if (__instance.currentTarget.UseIcon == ImageNames.VentButton && ventButtonEnabled) {
+                    if (__instance.currentTarget.UseIcon == ImageNames.VentButton && VentButtonEnabled) {
                         PlayerControl.LocalPlayer.UseClosest();
                         return false;
                     }
 
-                    if (__instance.currentTarget.UseIcon == ImageNames.VentButton && !ventButtonEnabled) {
+                    if (__instance.currentTarget.UseIcon == ImageNames.VentButton && !VentButtonEnabled) {
                         HudManager.Instance.ShowMap(new Action<MapBehaviour>(m => m.ShowInfectedMap()));
                         return false;
                     }
 
-                    if (__instance.currentTarget.UseIcon != ImageNames.VentButton && useButtonEnabled) {
+                    if (__instance.currentTarget.UseIcon != ImageNames.VentButton && UseButtonEnabled) {
                         if (__instance.currentTarget.TryCast<SystemConsole>() != null &&
                             __instance.currentTarget.TryCast<SystemConsole>()?.MinigamePrefab.TryCast<EmergencyMinigame>() != null &&
-                            !meetingButtonEnabled) {
+                            !MeetingButtonEnabled) {
                             return false;
                         }
 
@@ -155,7 +151,7 @@ namespace Polus.Patches.Temporary {
                     return false;
                 }
 
-                if (data != null && data.IsImpostor && sabotageButtonEnabled) {
+                if (data != null && data.IsImpostor && SabotageButtonEnabled) {
                     HudManager.Instance.ShowMap(new Action<MapBehaviour>(m => m.ShowInfectedMap()));
                 }
 
@@ -167,7 +163,7 @@ namespace Polus.Patches.Temporary {
         public static class MeetingConsoleOutlinePatch {
             [HarmonyPrefix]
             public static bool Prefix(SystemConsole __instance) {
-                if (__instance.MinigamePrefab.TryCast<EmergencyMinigame>() != null && !meetingButtonEnabled && __instance.Image) {
+                if (__instance.MinigamePrefab.TryCast<EmergencyMinigame>() != null && !MeetingButtonEnabled && __instance.Image) {
                     __instance.Image.material.SetFloat("_Outline", 0f);
                     __instance.Image.material.SetColor("_OutlineColor", Color.white);
                     __instance.Image.material.SetColor("_AddColor", Color.clear);
@@ -182,7 +178,7 @@ namespace Polus.Patches.Temporary {
         public static class AdminTableOutlinePatch {
             [HarmonyPrefix]
             public static bool Prefix(MapConsole __instance) {
-                if (!adminTableEnabled && __instance.Image) {
+                if (!AdminTableEnabled && __instance.Image) {
                     __instance.Image.material.SetFloat("_Outline", 0f);
                     __instance.Image.material.SetColor("_OutlineColor", Color.white);
                     __instance.Image.material.SetColor("_AddColor", Color.clear);
@@ -197,7 +193,7 @@ namespace Polus.Patches.Temporary {
         public static class AdminTableUsePatch {
             [HarmonyPrefix]
             public static bool Use(MapConsole __instance) {
-                return adminTableEnabled;
+                return AdminTableEnabled;
             }
         }
 
@@ -207,7 +203,7 @@ namespace Polus.Patches.Temporary {
             public static bool CanUse(MapConsole __instance, [HarmonyArgument(1)] out bool canUse, [HarmonyArgument(1)] out bool couldUse) {
                 canUse = couldUse = false;
 
-                return adminTableEnabled || !__instance.Image;
+                return AdminTableEnabled || !__instance.Image;
             }
         }
 
@@ -217,66 +213,60 @@ namespace Polus.Patches.Temporary {
             public static bool CanUse(SystemConsole __instance, [HarmonyArgument(1)] out bool canUse, [HarmonyArgument(1)] out bool couldUse) {
                 canUse = couldUse = false;
 
-                if (__instance.MinigamePrefab.TryCast<EmergencyMinigame>() != null && !meetingButtonEnabled && __instance.Image)
-                    return false;
-
-                return true;
+                return __instance.MinigamePrefab.TryCast<EmergencyMinigame>() == null || MeetingButtonEnabled || !__instance.Image;
             }
         }
 
         [HarmonyPatch(typeof(Vent), nameof(Vent.Use))]
         public static class VentUsePatch {
             [HarmonyPrefix]
-            public static bool Use(SystemConsole __instance) {
-                if (!ventButtonEnabled && __instance.Image)
-                    return false;
-
-                return true;
+            public static bool Use(Vent __instance) {
+                return VentButtonEnabled;
             }
         }
 
         [HarmonyPatch(typeof(TaskPanelBehaviour), nameof(TaskPanelBehaviour.Update))]
         public static class TaskPanelUpdatePatch {
-            public static bool enabled = true;
+            public static bool Enabled = true;
 
             [HarmonyPrefix]
             public static bool Prefix(TaskPanelBehaviour __instance) {
-                __instance.background.enabled = enabled;
-                __instance.tab.enabled = enabled;
-                __instance.TaskText.enabled = enabled;
+                __instance.background.enabled = Enabled;
+                __instance.tab.enabled = Enabled;
+                __instance.TaskText.enabled = Enabled;
                 try {
-                    __instance.tab.GetComponentInChildren<TextMeshPro>().enabled = enabled;
+                    __instance.tab.GetComponentInChildren<TextMeshPro>().enabled = Enabled;
                 } catch (Exception e) {
                     PogusPlugin.Logger.LogWarning(e);
                 }
 
-                return enabled;
+                return Enabled;
             }
         }
 
         [HarmonyPatch(typeof(ProgressTracker), nameof(ProgressTracker.FixedUpdate))]
         public static class ProgressTrackerUpdatePatch {
-            public static bool enabled = true;
+            public static bool Enabled = true;
 
             [HarmonyPrefix]
             public static bool Prefix(ProgressTracker __instance) {
                 var renderers = __instance.GetComponentsInChildren<MeshRenderer>();
-                foreach (var rend in renderers) rend.enabled = enabled;
+                foreach (var rend in renderers) rend.enabled = Enabled;
                 var srenderers = __instance.GetComponentsInChildren<SpriteRenderer>();
-                foreach (var rend in srenderers) rend.enabled = enabled;
+                foreach (var rend in srenderers) rend.enabled = Enabled;
 
-                return enabled;
+                return Enabled;
             }
         }
 
         [HarmonyPatch(typeof(HudManager), nameof(HudManager.Update))]
         public static class ReportButtonDisablePatch {
-            public static bool enabled = true;
+            public static bool Enabled = true;
 
             [HarmonyPostfix]
             public static void Postfix(HudManager __instance) {
                 if (__instance.ReportButton == null) return;
-                if (__instance.ReportButton.gameObject != null && __instance.ReportButton.gameObject.active) __instance.ReportButton.gameObject.SetActive(enabled);
+                if (__instance.ReportButton.gameObject != null && __instance.ReportButton.gameObject.active) __instance.ReportButton.gameObject.SetActive(Enabled);
             }
         }
     }

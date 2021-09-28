@@ -48,7 +48,7 @@ namespace Polus.Patches.Permanent {
                 // return true;
                 sdf.filePath = Path.Combine(Application.persistentDataPath, "secureNew");
                 sdf.Loaded = true;
-                $"Loading secure: {sdf.filePath}".Log(30);
+                $"Loading secure: {sdf.filePath}".Log();
                 if (File.Exists(sdf.filePath)) {
                     byte[] array;
                     try {

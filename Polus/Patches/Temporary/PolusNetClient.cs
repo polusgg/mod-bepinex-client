@@ -37,12 +37,8 @@ namespace Polus.Patches.Temporary {
                 [HarmonyArgument(1)] SendOption yoMama) {
                 PlayerControl.LocalPlayer.SetThickAssAndBigDumpy(true, true);
                 if (reader.Tag >= 0x80) {
-                    foreach ((_, Mod mod) in PogusPlugin.ModManager.TemporaryMods) {
-                        // PogusPlugin.Logger.LogInfo($"Handling packet {reader.Tag:X2} for {mod.Name}");
-                        MessageReader dispatchReader = reader.Clone();
-                        PolusMod.AddDispatch(() => CatchHelper.TryCatch(() => mod.RootPacketReceived(dispatchReader)));
-                        // PolusMod.AddDispatch(() => CatchHelper.TryCatch(() => mod.RootPacketReceived(dispatchReader)));
-                    }
+                    MessageReader dispatchReader = reader.Clone();
+                    foreach ((_, Mod mod) in PogusPlugin.ModManager.TemporaryMods) PolusMod.AddDispatch(() => CatchHelper.TryCatch(() => mod.RootPacketReceived(dispatchReader)));
 
                     return false;
                 }
@@ -125,7 +121,7 @@ namespace Polus.Patches.Temporary {
                         PolusNetObject polusNetObject =
                             objectManager.FindObjectByNetId(num6);
                         $"Despawning {num6}, but is it a pno? {polusNetObject != null}".Log(level: LogLevel.Warning);
-                        if ((polusNetObject != null).Log(2, "waawoo")) {
+                        if (polusNetObject != null) {
                             objectManager.RemoveNetObject(polusNetObject);
                             return false;
                         }

@@ -31,7 +31,6 @@ namespace Polus {
     public class PolusMod : Mod {
         private const string Id = "PolusMain";
         public static RoleData RoleData = new();
-        public static ManualLogSource _loggee;
         private static readonly int OutlineColor = Shader.PropertyToID("_OutlineColor");
         private static readonly int Outline = Shader.PropertyToID("_Outline");
         private ICache Cache;
@@ -51,10 +50,7 @@ namespace Polus {
         public override string Name => "PolusMod";
         public override byte? ProtocolId => 0; //first mod baybee
 
-        public override ManualLogSource Logger {
-            get => _loggee;
-            set => _loggee = value;
-        }
+        public ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("Polus");
 
         public override void Start() {
             Instance = this;
@@ -344,43 +340,43 @@ namespace Polus {
                             break;
                         }
                         case HudItem.MapSabotageButtons: {
-                            SetHudVisibilityPatches.HudShowMapPatch.sabotagesEnabled = enabled;
+                            SetHudVisibilityPatches.HudShowMapPatch.SabotagesEnabled = enabled;
                             break;
                         }
                         case HudItem.MapDoorButtons: {
-                            SetHudVisibilityPatches.HudShowMapPatch.doorsEnabled = enabled;
+                            SetHudVisibilityPatches.HudShowMapPatch.DoorsEnabled = enabled;
                             break;
                         }
                         case HudItem.SabotageButton: {
-                            SetHudVisibilityPatches.sabotageButtonEnabled = enabled;
+                            SetHudVisibilityPatches.SabotageButtonEnabled = enabled;
                             break;
                         }
                         case HudItem.VentButton: {
-                            SetHudVisibilityPatches.ventButtonEnabled = enabled;
+                            SetHudVisibilityPatches.VentButtonEnabled = enabled;
                             break;
                         }
                         case HudItem.UseButton: {
-                            SetHudVisibilityPatches.useButtonEnabled = enabled;
+                            SetHudVisibilityPatches.UseButtonEnabled = enabled;
                             break;
                         }
                         case HudItem.TaskListPopup: {
-                            SetHudVisibilityPatches.TaskPanelUpdatePatch.enabled = enabled;
+                            SetHudVisibilityPatches.TaskPanelUpdatePatch.Enabled = enabled;
                             break;
                         }
                         case HudItem.TaskProgressBar: {
-                            SetHudVisibilityPatches.ProgressTrackerUpdatePatch.enabled = enabled;
+                            SetHudVisibilityPatches.ProgressTrackerUpdatePatch.Enabled = enabled;
                             break;
                         }
                         case HudItem.ReportButton: {
-                            SetHudVisibilityPatches.ReportButtonDisablePatch.enabled = enabled;
+                            SetHudVisibilityPatches.ReportButtonDisablePatch.Enabled = enabled;
                             break;
                         }
                         case HudItem.CallMeetingButton: {
-                            SetHudVisibilityPatches.meetingButtonEnabled = enabled;
+                            SetHudVisibilityPatches.MeetingButtonEnabled = enabled;
                             break;
                         }
                         case HudItem.AdminTable: {
-                            SetHudVisibilityPatches.adminTableEnabled = enabled;
+                            SetHudVisibilityPatches.AdminTableEnabled = enabled;
                             break;
                         }
                         default:
@@ -486,8 +482,7 @@ namespace Polus {
                     PolusClickBehaviour.SetLock(ButtonLocks.PlayerCanMove, CannotMove);
                 }
             } else {
-                CannotMove = false;
-                PolusClickBehaviour.SetLock(ButtonLocks.PlayerCanMove, CannotMove);
+                PolusClickBehaviour.SetLock(ButtonLocks.PlayerCanMove, CannotMove = false);
             }
 
             if (HudManager.InstanceExists) {
@@ -576,7 +571,7 @@ namespace Polus {
 
         public override void LobbyLeft() {
             Logger.LogInfo("Left Lobby!");
-            Object.Destroy(maintenance);
+            Object.Destroy(maintenance.gameObject);
             maintenance = null;
             PolusClickBehaviour.Buttons.Clear();
             PingTrackerTextPatch.PingText = null;
@@ -620,6 +615,7 @@ namespace Polus {
 
         public override void GameEnded() {
             StupidModStampPatches.Reset();
+            SetHudVisibilityPatches.Reset();
         }
 
         public override void SceneChanged(Scene scene) {
@@ -651,6 +647,7 @@ namespace Polus {
                     } catch (Exception e) {
                         Logger.LogError($"Failed to cache {resource} ({location})");
                         Logger.LogError(e);
+                        e.ReportException();
                         writer = StartSendResourceResponse(resource, ResponseType.DownloadFailed);
                         if (e is CacheRequestException exception)
                             writer.WritePacked((uint) exception.Code);
