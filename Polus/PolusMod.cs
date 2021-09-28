@@ -535,12 +535,13 @@ namespace Polus {
         }
 
         public override void ConnectionDestroyed() {
-            
+            //lol there is literally no shit here
         }
 
         public override void WriteExtraData(MessageWriter writer) {
             (DateTime date, int? packageVersion) = StereotypicalClientModderVersionShowerPatch.Ver;
             writer.Write(Constants.GetVersion(date.Year, date.Month, date.Day, packageVersion ?? 0));
+            writer.Write(PogusPlugin.LauncherBuild);
             writer.WritePacked(Screen.width);
             writer.WritePacked(Screen.height);
             

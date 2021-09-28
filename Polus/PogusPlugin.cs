@@ -89,9 +89,10 @@ namespace Polus {
                         LauncherBuild = launcherInfo.Version;
                     }
                 } catch {
-                    #if RELEASE
-                    CrashAndBurn.Die("Unable to get launcher version!");
-                    #endif
+                    // #if RELEASE
+                    // CrashAndBurn.Die("Unable to get launcher version!");
+                    // #endif
+                    LauncherBuild = 0;
                 }
 
                 CatchHelper.TryCatch(() => {

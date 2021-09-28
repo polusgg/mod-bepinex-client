@@ -14,7 +14,6 @@ namespace Polus.Behaviours {
         public ChatManager(IntPtr ptr) : base(ptr) { }
         static ChatManager() => ClassInjector.RegisterTypeInIl2Cpp<ChatManager>();
         private static readonly int MaskLayer = Shader.PropertyToID("_MaskLayer");
-        private static ChatManager _instance;
         private Dictionary<Guid, ChatBubble> Bubbles = new();
         public ChatController Chat;
         public const float DisabledPitch = -1000f;
@@ -31,10 +30,6 @@ namespace Polus.Behaviours {
         public void Reset() {
             ":throwinghandsup:".Log();
             Bubbles = new Dictionary<Guid, ChatBubble>();
-        }
-
-        private void OnDestroy() {
-            _instance = null;
         }
 
         public void ReceiveChatMessage(MessageReader reader) {

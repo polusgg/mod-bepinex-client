@@ -12,8 +12,6 @@ namespace Polus.Utils {
     public static class CatchHelper {
         // trollface emote goes here
 
-        private static bool initialized;
-
         public static void TryCatch(Action action, bool logs = true, Action catchAction = null) {
             try {
                 action();
