@@ -34,6 +34,8 @@ namespace Polus.Patches.Permanent {
                 new StaticRegionInfo(server.Name, StringNames.NoTranslation, server.Ip, new[] {
                     new ServerInfo(server.Name, server.Ip, 22023)
                 }).Cast<IRegionInfo>());
+            
+            #if DEBUG
             if (!PogusPlugin.Revision.HasValue) {
                 newServers = newServers.Append(new DnsRegionInfo("hall.ly", "Rose's server", StringNames.NoTranslation, "72.68.129.83", 22023).Duplicate())
                     .AddItem(new StaticRegionInfo("Localhost", StringNames.NoTranslation, "127.0.0.1", new[] {
@@ -43,6 +45,7 @@ namespace Polus.Patches.Permanent {
                     newServers = newServers.Append(PggConstants.Region).ToArray();
                 }
             }
+            #endif
 
             ServerManager.DefaultRegions = ServerManager.Instance.AvailableRegions = newServers.ToArray();
 
