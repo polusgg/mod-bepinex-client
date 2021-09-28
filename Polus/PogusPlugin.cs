@@ -69,6 +69,8 @@ namespace Polus {
             BetterErrorPatches.DebugLogTrace.Initialize();
 
             try {
+                CatchHelper.Init();
+
                 CatchHelper.TryCatch(() => {
                     if (File.Exists("modpackage.manifest.json")) {
                         //todo move to a version management class and periodically check for updates :)
@@ -77,9 +79,7 @@ namespace Polus {
                             Revision = modPackage.Version;
                         }
                     }
-                }, false);
-
-                CatchHelper.Init();
+                });
 
                 ObjectManager = new PggObjectManager();
 
