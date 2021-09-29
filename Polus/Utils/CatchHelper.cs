@@ -52,7 +52,7 @@ namespace Polus.Utils {
             });
             SentrySdk.StartSession();
             // SentrySdk.AddBreadcrumb("Lmaoooo");
-            // SentrySdk.CaptureMessage("so true!1");
+            // SentrySdk.CaptureMessage("so true!1111");
         }
 
         public static void AddBreadcrumb(this string value, Dictionary<string, object> data) => SentrySdk.AddBreadcrumb(value, data: data.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToString()));

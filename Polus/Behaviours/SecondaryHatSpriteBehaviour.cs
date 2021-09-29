@@ -17,6 +17,7 @@ namespace Polus.Behaviours {
         public SpriteRenderer thirdLayer;
         public Color backColor = Color.magenta;
         public Color bodyColor = Color.magenta;
+        public float hatOpacity = 1f;
         public HatState state;
 
         private static SecondaryHatSpriteBehaviour Create(HatParent parent) {
@@ -37,6 +38,9 @@ namespace Polus.Behaviours {
         }
 
         public void Update() {
+            thirdLayer.SetAlpha(hatOpacity);
+            parent.FrontLayer.SetAlpha(hatOpacity);
+            parent.BackLayer.SetAlpha(hatOpacity);
             thirdLayer.SetPlayerMaterialColors(backColor, bodyColor);
             parent.FrontLayer.SetPlayerMaterialColors(backColor, bodyColor);
             parent.BackLayer.SetPlayerMaterialColors(backColor, bodyColor);

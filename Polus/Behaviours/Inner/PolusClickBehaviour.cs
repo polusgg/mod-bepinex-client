@@ -7,6 +7,7 @@ using Polus.Enums;
 using Polus.Extensions;
 using Polus.Net.Objects;
 using TMPro;
+using UnhollowerBaseLib.Attributes;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 using UnityEngine.UI;
@@ -30,14 +31,23 @@ namespace Polus.Behaviours.Inner {
         private TMP_Text timerText;
         private KeyCode[] keys;
 
-        public bool IsHudButton => netTransform.IsHudButton;
+        public bool IsHudButton => netTransform.IsOnHud;
         public bool IsLocked => IsHudButton && locks[(int) ButtonLocks.PlayerCanMove];
+
+        public static bool GetLock(ButtonLocks key) {
+            return locks[(int) key];
+        }
 
         static PolusClickBehaviour() {
             ClassInjector.RegisterTypeInIl2Cpp<PolusClickBehaviour>();
         }
 
         public PolusClickBehaviour(IntPtr ptr) : base(ptr) { }
+        
+        [HideFromIl2Cpp]
+        public static void UnlockAll() {
+            locks = new[]{false, false};
+        }
 
         private void Start() {
             Buttons.Add(this);
@@ -59,7 +69,7 @@ namespace Polus.Behaviours.Inner {
 
         private void Update() {
             if (pno.HasData()) {
-                Deserialize(pno.GetSpawnData());
+                Deserialize(pno.GetData());
                 CooldownHelpers.SetCooldownNormalizedUvs(graphic.renderer);
             }
 
@@ -76,8 +86,8 @@ namespace Polus.Behaviours.Inner {
         }
 
         private void CheckLocks() {
-            $"yeah,,, {locks[0]} {locks[1]} {locks.Any(lck => lck)}".Log(3);
             if (anyLocked == IsLocked) return;
+            $"yeah,,, {locks[0]} {locks[1]} {locks.Any(lck => lck)}".Log(3);
             anyLocked = locks[(int) ButtonLocks.PlayerCanMove];
             SetCountingDown(!anyLocked);
         }
@@ -88,9 +98,9 @@ namespace Polus.Behaviours.Inner {
             }
         }
 
-        public static void SetLock(ButtonLocks index, bool value) {
+        public static void SetLock(ButtonLocks key, bool value) {
             lock (locks) {
-                locks[(int) index] = value;
+                locks[(int) key] = value;
                 CheckAllLocks();
             }
         }

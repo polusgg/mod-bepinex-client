@@ -18,7 +18,7 @@ namespace Polus.Behaviours.Inner {
         }
 
         private void FixedUpdate() {
-            if (pno.HasData()) Deserialize(pno.GetSpawnData());
+            if (pno.HasData()) Deserialize(pno.GetData());
         }
 
         private void Deserialize(MessageReader reader) {

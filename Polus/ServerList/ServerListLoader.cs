@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
@@ -9,6 +10,7 @@ namespace Polus.ServerList
 {
     public static class ServerListLoader
     {
+        private static readonly HttpClient Client = new();
         public static async Task<ServerModel[]> Load()
         {
             try
@@ -16,7 +18,7 @@ namespace Polus.ServerList
                 var successfulServers = new List<ServerModel>();
 
                 var servers = JsonConvert.DeserializeObject<ServerModel[]>(
-                    await PogusPlugin.Cache.Client.GetStringAsync("https://serverlist.polus.gg/regions.json")
+                    await Client.GetStringAsync("https://serverlist.polus.gg/regions.json")
                 ) ?? Array.Empty<ServerModel>();
 
                 foreach (var server in servers)

@@ -28,7 +28,7 @@ namespace Polus {
 
         public PggModManager(ManualLogSource logger) {
             Logger = logger;
-            GameObject gameObject = new("ModManager");
+            GameObject gameObject = new("PolousModManager");
             gameObject.DontDestroy();
             gameObject.AddComponent<EventHandlerBehaviour>().ModManager = this;
 
@@ -106,7 +106,7 @@ namespace Polus {
                 mod.Stop();
             }
 
-            PogusPlugin.ObjectManager.UnregisterAll();
+            ((PggObjectManager)PogusPlugin.ObjectManager).UnregisterAll();
 
             AllPatched = false;
         }

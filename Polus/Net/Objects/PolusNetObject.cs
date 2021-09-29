@@ -16,7 +16,7 @@ namespace Polus.Net.Objects {
         public uint NetId;
         public PnoBehaviour PnoBehaviour;
 
-        public MessageReader GetSpawnData() {
+        public MessageReader GetData() {
             _data.TryDequeue(out MessageReader reader);
             return reader;
         }

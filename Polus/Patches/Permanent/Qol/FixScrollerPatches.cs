@@ -22,6 +22,7 @@ namespace Polus.Patches.Permanent {
 
                 Vector2 mouseScrollDelta = Input.mouseScrollDelta;
                 if (mouseScrollDelta.y == 0f) return;
+                __instance.velocity = Vector2.zero;
                 mouseScrollDelta.y = -mouseScrollDelta.y;
                 __instance.ScrollRelative(mouseScrollDelta);
             }

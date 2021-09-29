@@ -31,7 +31,7 @@ namespace Polus.Behaviours.Inner {
         }
 
         private void Update() {
-            if (pno.HasData()) Deserialize(pno.GetSpawnData());
+            if (pno.HasData()) Deserialize(pno.GetData());
             if (pno.HasRpc()) HandleRpc(pno.GetRpcData());
             if (fullScreen.transform.parent == null && HudManager.Instance) {
                 fullScreen.transform.parent = HudManager.Instance.transform;

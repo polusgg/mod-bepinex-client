@@ -10,6 +10,7 @@ using HarmonyLib;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Polus.Extensions;
+using Polus.Net.Objects;
 using Polus.Patches.Permanent;
 using Polus.Resources;
 using Polus.Utils;
@@ -27,15 +28,15 @@ namespace Polus {
 
         public static PggMod PermanentMod = new PermanentPggMod();
         public static PggModManager ModManager;
-        public static PggObjectManager ObjectManager;
-        public static PggCache Cache = new();
+        public static IObjectManager ObjectManager;
+        public static ICache Cache = new PggCache();
 
         private static AssetBundle _bundle;
 
         public static TMP_FontAsset font;
         public static TMP_SpriteAsset spriteSheet;
 
-        public static int? Revision = null;
+        public static int? Revision;
         public static int LauncherBuild;
 
         public static AssetBundle Bundle {
@@ -98,7 +99,7 @@ namespace Polus {
                 CatchHelper.TryCatch(() => {
                     if (File.Exists(PggConstants.CacheLocation)) {
                         using FileStream stream = PggCache.GetFileStream(PggConstants.CacheLocation, FileMode.Open, FileAccess.Read, FileShare.None);
-                        Cache.Deserialize(new BinaryReader(stream));
+                        ((PggCache) Cache).Deserialize(new BinaryReader(stream));
                     }
 
                     PermanentMod.LoadPatches("gg.polus.permanent",

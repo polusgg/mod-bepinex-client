@@ -18,6 +18,7 @@ namespace Polus.Patches.Permanent {
         public static Color? TextColor;
         public static string Suffix = "";
         public static QRStamp qr;
+        private static int UILayer = LayerMask.NameToLayer("UI");
 
         public static bool QrActuallyVisible;
         public static bool QrToggled = true;
@@ -36,6 +37,7 @@ namespace Polus.Patches.Permanent {
 
         [HarmonyPatch(typeof(ModManager), nameof(ModManager.ShowModStamp))]
         public static class ShowThatStupidStampPatch {
+
             [PermanentPatch]
             [HarmonyPrefix]
             public static void ShowModStamp(ModManager __instance) {
@@ -44,6 +46,7 @@ namespace Polus.Patches.Permanent {
                         .Cast<GameObject>()
                         .GetComponent<TextMeshPro>();
                 textObj.transform.localPosition = new Vector3(0.75f, 0, 100f);
+                textObj.gameObject.layer = UILayer;
                 GameObject qrObject = new("QR");
                 qr = qrObject.AddComponent<QRStamp>();
                 qrObject.transform.parent = __instance.transform;

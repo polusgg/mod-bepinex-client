@@ -16,6 +16,18 @@ namespace Polus.Extensions {
             rend.material.SetColor(VisorColor, visor ?? DefaultVisorColor);
         }
 
+        public static void SetAlpha(this ref Color color, float alpha) {
+            color.a = alpha;
+        }
+
+        public static Color SetAlpha(this Color color, float alpha) {
+            return new Color(color.r, color.g, color.b, alpha);
+        }
+        
+        public static void SetAlpha(this SpriteRenderer color, float alpha) {
+            color.color = SetAlpha(color.color, alpha);
+        }
+
         public static void SetPetImage(this SpriteRenderer rend, uint petId, Color backColor, Color bodyColor) {
             rend.sprite = HatManager.Instance.GetPetById(petId).rend.sprite;
             rend.material = new Material(rend.sharedMaterial);

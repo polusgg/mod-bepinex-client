@@ -64,6 +64,17 @@ namespace Polus.Patches.Permanent {
         }
     }
 
+    [HarmonyPatch(typeof(SaveManager), nameof(SaveManager.AccountLoginStatus), MethodType.Getter)]
+    public static class DisableRunLogin {
+        [PermanentPatch]
+        [HarmonyPrefix]
+        public static bool AccountLoginStatus(out EOSManager.AccountLoginStatus __result) {
+            __result = EOSManager.AccountLoginStatus.Offline;
+            EOSManager.Instance.hasRunLoginFlow = true;
+            return false;
+        }
+    }
+
     [HarmonyPatch(typeof(EOSManager), nameof(EOSManager.InitializePlatformInterface))]
     public static class EosManagerInitializePlatformInterfacePatch {
         [PermanentPatch]

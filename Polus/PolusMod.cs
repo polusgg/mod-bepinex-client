@@ -43,7 +43,7 @@ namespace Polus {
         public static List<Action> Dispatcher = new();
         private static List<Action> TempQueue = new();
         public bool CannotMove;
-        public bool HudActive;
+        public bool HudInactive;
         private readonly QRCodeGenerator qrGenerator = new();
         private readonly object fetchLock = new();
 
@@ -125,7 +125,7 @@ namespace Polus {
                     PlayerAnimPlayer animator = netObject.gameObject.EnsureComponent<PlayerAnimPlayer>();
                     float alpha = reader.ReadByte() / 255.0f;
                     animator.playerColor.a = alpha;
-                    animator.hatColor.a = alpha;
+                    animator.hatOpacity = alpha;
                     animator.petColor.a = alpha;
                     animator.skinColor.a = alpha;
                     animator.nameAlpha = alpha;
@@ -476,23 +476,14 @@ namespace Polus {
 
         public override void Update() {
             if (PlayerControl.LocalPlayer) {
-                if (CannotMove != !PlayerControl.LocalPlayer.CanMove) {
-                    CannotMove = !PlayerControl.LocalPlayer.CanMove;
-                    CannotMove.Log(comment: "Cannot move changed");
-                    PolusClickBehaviour.SetLock(ButtonLocks.PlayerCanMove, CannotMove);
-                }
+                if (PolusClickBehaviour.GetLock(ButtonLocks.PlayerCanMove) == PlayerControl.LocalPlayer.CanMove)
+                    PolusClickBehaviour.SetLock(ButtonLocks.PlayerCanMove, (!PlayerControl.LocalPlayer.CanMove).Log(comment: "Cannot move changed"));
             } else {
-                PolusClickBehaviour.SetLock(ButtonLocks.PlayerCanMove, CannotMove = false);
+                PolusClickBehaviour.SetLock(ButtonLocks.PlayerCanMove, false);
             }
 
-            if (HudManager.InstanceExists) {
-                if (HudActive != HudManager.Instance.ReportButton.gameObject.active) {
-                    HudActive = HudManager.Instance.ReportButton.gameObject.active;
-                    HudActive.Log(comment: "Hud activity changed");
-                    PolusClickBehaviour.SetLock(ButtonLocks.SetHudActive, !HudActive);
-                }
-            } else {
-                HudActive = false;
+            if (!HudManager.InstanceExists) {
+                PolusClickBehaviour.SetLock(ButtonLocks.SetHudActive, false);
             }
 
             if (maintenance && !maintenance.WasCollected && !maintenance.coroutineRunning && Input.GetKeyDown(KeyCode.F5)) {
@@ -591,11 +582,11 @@ namespace Polus {
                 }
 
                 if (id >= CosmeticManager.CosmeticStartId && player.Data.PetId == id - 1) {
-                    player.SetHat(id - 1, player.Data.ColorId);
+                    player.SetPet(id - 1);
                 }
 
                 if (id >= CosmeticManager.CosmeticStartId && player.Data.SkinId == id - 1) {
-                    player.SetHat(id - 1, player.Data.ColorId);
+                    player.SetSkin(id - 1);
                 }
             }));
         }
@@ -617,6 +608,7 @@ namespace Polus {
         public override void GameEnded() {
             StupidModStampPatches.Reset();
             SetHudVisibilityPatches.Reset();
+            PolusClickBehaviour.UnlockAll();
         }
 
         public override void SceneChanged(Scene scene) {
@@ -768,12 +760,12 @@ namespace Polus {
     }
 
     // used to test whether secureNew parsing works now, can be used in any other scenario which requires steam
-    [HarmonyPatch(typeof(SteamManager), nameof(SteamManager.Awake))]
-    public static class TempDisableSteam {
-        [PermanentPatch]
-        [HarmonyPrefix]
-        public static bool Disable() => false;
-    }
+    // [HarmonyPatch(typeof(SteamManager), nameof(SteamManager.Awake))]
+    // public static class TempDisableSteam {
+    //     [PermanentPatch]
+    //     [HarmonyPrefix]
+    //     public static bool Disable() => false;
+    // }
 
     public class RoleData {
         public Color IntroColor = Color.white;

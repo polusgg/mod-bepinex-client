@@ -10,6 +10,11 @@ namespace Polus.Resources {
 
         public Dictionary<uint, CacheFile> CachedFiles { get; }
 
+        public CacheFile GetCacheFile(uint id) {
+            CachedFiles.TryGetValue(id, out CacheFile result);
+            return result;
+        }
+
         public IEnumerator<CacheAddResult> AddToCache(uint id, string location, byte[] hash, ResourceType type,
             uint parentId = uint.MaxValue);
 

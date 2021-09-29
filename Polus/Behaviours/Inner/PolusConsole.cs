@@ -13,7 +13,7 @@ namespace Polus.Behaviours.Inner {
         public PolusConsole(IntPtr ptr) : base(ptr) { }
 
         private void Update() {
-            if (pno.HasData()) Deserialize(pno.GetSpawnData());
+            if (pno.HasData()) Deserialize(pno.GetData());
         }
 
         private void Deserialize(MessageReader reader) { }

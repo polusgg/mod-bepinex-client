@@ -23,7 +23,7 @@ namespace Polus.Behaviours.Inner {
         }
 
         private void FixedUpdate() {
-            if (pno.HasData()) Deserialize(pno.GetSpawnData());
+            if (pno.HasData()) Deserialize(pno.GetData());
 
             if (PlayerControl.LocalPlayer) {
                 source.rolloffMode = AudioRolloffMode.Linear;
@@ -33,7 +33,7 @@ namespace Polus.Behaviours.Inner {
         }
 
         private void Deserialize(MessageReader reader) {
-            source.clip = PogusPlugin.Cache.CachedFiles[reader.ReadPackedUInt32()].Get<AudioClip>();
+            source.clip = PogusPlugin.Cache.CachedFiles[reader.ReadPackedUInt32()].Get<AudioClip>();//todo listen for cache update for this
             source.pitch = reader.ReadSingle();
             source.volume = reader.ReadSingle();
             source.loop = reader.ReadBoolean();

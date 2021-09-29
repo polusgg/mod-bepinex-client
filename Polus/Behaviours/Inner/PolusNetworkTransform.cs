@@ -16,7 +16,7 @@ namespace Polus.Behaviours.Inner {
         // private Vector2 _start;
         // private Vector2 _target;
 
-        public bool IsHudButton => AspectPosition.Alignment != 0;
+        public bool IsOnHud => AspectPosition.Alignment != 0;
         public bool CannotParent => !parent.HasValue;
         public bool MissingParent => parent.HasValue && !transform.parent;
 
@@ -44,10 +44,10 @@ namespace Polus.Behaviours.Inner {
         }
 
         public void Update() {
-            if (pno.HasData()) Deserialize(pno.GetSpawnData());
+            if (pno.HasData()) Deserialize(pno.GetData());
             if (pno.HasRpc()) HandleRpc(pno.GetRpcData());
             
-            if (!IsHudButton && MissingParent) {
+            if (!IsOnHud && MissingParent) {
                 transform.parent = PogusPlugin.ObjectManager.GetNetObject((uint) parent.Value);
                 if (!ManuallyUsesPosition) transform.localPosition = Position;
             }

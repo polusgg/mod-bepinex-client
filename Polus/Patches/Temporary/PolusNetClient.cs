@@ -58,7 +58,7 @@ namespace Polus.Patches.Temporary {
                 MessageReader reader = __instance.reader;
                 int pos = reader.Position;
 
-                PggObjectManager objectManager = PogusPlugin.ObjectManager;
+                PggObjectManager objectManager = (PggObjectManager) PogusPlugin.ObjectManager;
                 switch (reader.Tag.Log(comment: "HandleGameDataInner")) {
                     case 1: {
                         uint netId = reader.ReadPackedUInt32();

@@ -14,9 +14,9 @@ namespace Polus.Behaviours.Inner {
         public PolusPrefabHandle(IntPtr ptr) : base(ptr) { }
 
         private void Update() {
-            if (pno.GetSpawnData() is MessageReader reader) {
+            if (pno.GetData() is MessageReader reader) {
                 Instantiate(PogusPlugin.Cache.CachedFiles[reader.ReadPackedUInt32()].Get<GameObject>(),
-                    transform);
+                    transform); //
             }
         }
     }

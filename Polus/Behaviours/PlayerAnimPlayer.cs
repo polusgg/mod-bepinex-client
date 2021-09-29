@@ -14,8 +14,9 @@ namespace Polus.Behaviours {
         private static readonly int VisorColorID = Shader.PropertyToID("_VisorColor");
         private readonly List<IEnumerator> AllCoroutines = new();
         public PlayerControl Player;
+        public SecondaryHatSpriteBehaviour hsb;
         public Color playerColor = Color.white;
-        public Color hatColor = Color.white;
+        public float hatOpacity = 1f;
         public Color petColor = Color.white;
         public Color skinColor = Color.white;
         public float nameAlpha = 1.0f;
@@ -28,11 +29,12 @@ namespace Polus.Behaviours {
 
         private void Start() {
             Player = GetComponent<PlayerControl>();
+            hsb = SecondaryHatSpriteBehaviour.GetHelper(Player.HatRenderer);
         }
 
         private void Update() {
             Player.myRend.color = playerColor;
-            Player.HatRenderer.color = hatColor;
+            hsb.hatOpacity = hatOpacity;
             Player.MyPhysics.Skin.layer.color = skinColor;
             Player.nameText.color = Color.white;
             Player.nameText.alpha = nameAlpha;
@@ -205,7 +207,7 @@ namespace Polus.Behaviours {
             public float? HatOpacity {
                 get => _hatOpacity;
                 set {
-                    if (value != null) _animPlayer.hatColor.a = value.Value;
+                    if (value != null) _animPlayer.hatOpacity = value.Value;
                 }
             }
 

@@ -29,6 +29,13 @@ namespace Polus.Behaviours {
             return routine;
         }
 
+        [HideFromIl2Cpp]
+        // ReSharper disable once Unity.IncorrectMethodSignature
+        public IEnumerator Start(object owner, IEnumerator routine) {
+            ProcessNextOfCoroutine(routine);
+            return routine;
+        }
+
         private void Update() {
             for (int i = coroutinesStore.Count - 1; i >= 0; i--) {
                 CoroutineTuple tuple = coroutinesStore[i];
@@ -141,6 +148,7 @@ namespace Polus.Behaviours {
 
         private struct CoroutineTuple {
             public object WaitCondition;
+            public object Owner;
             public IEnumerator Coroutine;
         }
 

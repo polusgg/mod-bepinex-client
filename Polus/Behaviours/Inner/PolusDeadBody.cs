@@ -36,7 +36,7 @@ namespace Polus.Behaviours.Inner {
         }
 
         private void FixedUpdate() {
-            if (pno.HasData()) Deserialize(pno.GetSpawnData());
+            if (pno.HasData()) Deserialize(pno.GetData());
             this.gameObject.transform.position = netTransform.Position;
         }
 
