@@ -46,7 +46,7 @@ namespace Polus.Patches.Permanent {
                         .Cast<GameObject>()
                         .GetComponent<TextMeshPro>();
                 textObj.transform.localPosition = new Vector3(0.75f, 0, 100f);
-                textObj.gameObject.layer = UILayer;
+                // textObj.gameObject.layer = UILayer; // :hahaa:
                 GameObject qrObject = new("QR");
                 qr = qrObject.AddComponent<QRStamp>();
                 qrObject.transform.parent = __instance.transform;
