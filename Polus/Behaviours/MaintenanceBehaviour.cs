@@ -19,7 +19,7 @@ namespace Polus.Behaviours {
 
         static MaintenanceBehaviour() {
             ClassInjector.RegisterTypeInIl2Cpp<MaintenanceBehaviour>();
-            DisguisedToast = PogusPlugin.Bundle.LoadAsset("Assets/Mods/Generic UI/Toast.prefab").Cast<GameObject>()
+            DisguisedToast = PogusPlugin.Bundle.LoadAsset("Assets/Mods/UI/Toast.prefab").Cast<GameObject>()
                 .DontDestroy();
             DisguisedToast.SetActive(false);
             DisguisedToast.layer = LayerMask.NameToLayer("UI");
@@ -50,7 +50,7 @@ namespace Polus.Behaviours {
             Transform toastransform = toast.transform;
             if (HudManager.InstanceExists) toastransform.parent = HudManager.Instance.transform;
             toastransform.localPosition =
-                AspectPosition.ComputePosition(AspectPosition.EdgeAlignments.Top, new Vector3(0, -Distance, 0));
+                AspectPosition.ComputePosition(AspectPosition.EdgeAlignments.Top, new Vector3(0, -Distance, -10f));
             toastransform.localScale = new Vector3(0.5f, 0.5f, 1f);
             toast.GetComponentInChildren<TMP_Text>().text = text;
 

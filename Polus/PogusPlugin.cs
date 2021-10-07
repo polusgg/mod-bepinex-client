@@ -70,6 +70,12 @@ namespace Polus {
             BetterErrorPatches.DebugLogTrace.Initialize();
 
             try {
+                throw new Exception("Hello world!");
+            } catch (Exception ex) {
+                ex.Log(comment: "Hello!");
+            }
+
+            try {
                 CatchHelper.Init();
 
                 CatchHelper.TryCatch(() => {

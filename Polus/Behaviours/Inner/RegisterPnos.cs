@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 namespace Polus.Behaviours.Inner {
-    public class RegisterPnos {
+    public static class RegisterPnos {
         public static PnoBehaviour CreateDeadBodyPrefab(IObjectManager objectManager) {
             PlayerControl pc = AmongUsClient.Instance.PlayerPrefab;
             DeadBody prefab = Object.Instantiate(pc.KillAnimations[0].bodyPrefab);

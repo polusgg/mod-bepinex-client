@@ -42,8 +42,7 @@ namespace Polus {
         private static CoroutineManager coMan;
         public static List<Action> Dispatcher = new();
         private static List<Action> TempQueue = new();
-        public bool CannotMove;
-        public bool HudInactive;
+        public bool GameCodeHidden;
         private readonly QRCodeGenerator qrGenerator = new();
         private readonly object fetchLock = new();
 
@@ -379,6 +378,10 @@ namespace Polus {
                             SetHudVisibilityPatches.AdminTableEnabled = enabled;
                             break;
                         }
+                        case HudItem.GameCode: {
+                            GameCodeHidden = true;
+                            break;
+                        }
                         default:
                             throw new ArgumentOutOfRangeException($"Invalid hud item sent: {item}");
                     }
@@ -475,6 +478,17 @@ namespace Polus {
         }
 
         public override void Update() {
+            if (GameStartManager.InstanceExists) {
+                GameStartManager.Instance.GameRoomName.renderer.enabled = GameCodeHidden;
+                if (GameCodeHidden) {
+                    GameStartManager.Instance.StartButton.transform.localPosition = new Vector3(0f, -0.2f, 0f);
+                    GameStartManager.Instance.PlayerCounter.transform.localPosition = new Vector3(0f, -0.8f, 0f);
+                } else {
+                    GameStartManager.Instance.StartButton.transform.localPosition = new Vector3(0f, -0.2f, 0f);
+                    GameStartManager.Instance.PlayerCounter.transform.localPosition = new Vector3(0f, -0.8f, 0f);
+                }
+            }
+            
             if (PlayerControl.LocalPlayer) {
                 if (PolusClickBehaviour.GetLock(ButtonLocks.PlayerCanMove) == PlayerControl.LocalPlayer.CanMove)
                     PolusClickBehaviour.SetLock(ButtonLocks.PlayerCanMove, (!PlayerControl.LocalPlayer.CanMove).Log(comment: "Cannot move changed"));
@@ -572,6 +586,7 @@ namespace Polus {
             StupidModStampPatches.Reset();
             StupidModStampPatches.QrToggled = false;
             CosmeticManager.Instance.Reset();
+            GameCodeHidden = false;
         }
 
         public override void PlayerSpawned(PlayerControl player) {

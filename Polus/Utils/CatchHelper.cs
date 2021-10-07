@@ -49,10 +49,10 @@ namespace Polus.Utils {
                 // Set traces_sample_rate to 1.0 to capture 100% of transactions for performance monitoring.
                 // We recommend adjusting this value in production.
                 o.TracesSampleRate = 1.0;
+                o.AttachStacktrace = true;
             });
-            SentrySdk.StartSession();
-            // SentrySdk.AddBreadcrumb("Lmaoooo");
-            // SentrySdk.CaptureMessage("so true!1111");
+            SentrySdk.AddBreadcrumb("Lmaoooo");
+            SentrySdk.CaptureMessage("so true!1111");
         }
 
         public static void AddBreadcrumb(this string value, Dictionary<string, object> data) => SentrySdk.AddBreadcrumb(value, data: data.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToString()));

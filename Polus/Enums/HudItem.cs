@@ -22,6 +22,8 @@
         // Disables Meeting button (which is included into Use button)
         CallMeetingButton,
         // Disables use of the table table
-        AdminTable
+        AdminTable,
+        // Hides the game code when in the lobby
+        GameCode
     }
 }

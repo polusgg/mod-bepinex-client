@@ -146,7 +146,13 @@ namespace Polus {
             private void FixedUpdate() {
                 foreach ((PggMod _, Mod mod) in ModManager.TemporaryMods) mod.FixedUpdate();
             }
-        
+
+            private void OnGUI() {
+                #if DEBUG
+                // foreach ((PggMod _, Mod mod) in ModManager.TemporaryMods) mod.DebugGui();
+                #endif
+            }
+
             [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.Start))]
             internal class PlayerSpawnedEventPatch {
                 public static PggModManager ModManager;

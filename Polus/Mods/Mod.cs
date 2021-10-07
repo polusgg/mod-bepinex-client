@@ -88,5 +88,9 @@ namespace Polus.Mods {
         /// Called when the scene is changed
         /// </summary>
         public abstract void SceneChanged(Scene scene);
+        /// <summary>
+        /// Called whenever the debug GUI is painted
+        /// </summary>
+        // public abstract void DebugGui();
     }
 }

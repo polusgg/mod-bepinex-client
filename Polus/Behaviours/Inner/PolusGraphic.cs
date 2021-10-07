@@ -22,7 +22,7 @@ namespace Polus.Behaviours.Inner {
             renderer.sprite = ModManager.Instance.ModStamp.sprite;
             $"Renderer start called first {pno.NetId}".Log(10);
             gameObject.EnsureComponent<CacheListenerBehaviour>().Initialize(new CacheListener(id, (current, old) => {
-                Texture2D tex = PogusPlugin.Cache.GetCacheFile(id)?.Get<Texture2D>();
+                Texture2D tex = current.Get<Texture2D>();
                 if (tex) SetSprite(tex);
             }));
         }

@@ -5,6 +5,8 @@
         <SourceRevisionId>$([System.DateTime]::UtcNow.ToString("yyyyMMddHHmmss"))</SourceRevisionId>
         <Configurations>Release;Debug</Configurations>
         <Platforms>Desktop;Android</Platforms>
+        <DebugType>Full</DebugType>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>
