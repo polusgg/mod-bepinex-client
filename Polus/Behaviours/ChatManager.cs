@@ -43,8 +43,8 @@ namespace Polus.Behaviours {
             bool dead = reader.ReadBoolean();
             bool voted = reader.ReadBoolean();
             uint hatId = reader.ReadPackedUInt32();
-            uint skinId = reader.ReadPackedUInt32();
             uint petId = reader.ReadPackedUInt32();
+            uint skinId = reader.ReadPackedUInt32();
             Color backColor = reader.ReadColor();
             Color bodyColor = reader.ReadColor();
             Color visorColor = reader.ReadColor();
