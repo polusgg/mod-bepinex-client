@@ -21,6 +21,7 @@ using QRCoder;
 using QRCoder.Unity;
 using TMPro;
 using UnhollowerBaseLib;
+using UnhollowerRuntimeLib;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
@@ -379,7 +380,7 @@ namespace Polus {
                             break;
                         }
                         case HudItem.GameCode: {
-                            GameCodeHidden = true;
+                            GameCodeHidden = enabled;
                             break;
                         }
                         default:
@@ -479,13 +480,13 @@ namespace Polus {
 
         public override void Update() {
             if (GameStartManager.InstanceExists) {
-                GameStartManager.Instance.GameRoomName.renderer.enabled = GameCodeHidden;
+                GameStartManager.Instance.GameRoomName.renderer.enabled = !GameCodeHidden;
                 if (GameCodeHidden) {
-                    GameStartManager.Instance.StartButton.transform.localPosition = new Vector3(0f, -0.2f, 0f);
-                    GameStartManager.Instance.PlayerCounter.transform.localPosition = new Vector3(0f, -0.8f, 0f);
+                    GameStartManager.Instance.PlayerCounter.transform.localPosition = new Vector3(1.1135f, -0.96f, 0f);
+                    GameStartManager.Instance.MakePublicButton.transform.localPosition = new Vector3(-0.75f, -0.95f, 0f);
                 } else {
-                    GameStartManager.Instance.StartButton.transform.localPosition = new Vector3(0f, -0.2f, 0f);
-                    GameStartManager.Instance.PlayerCounter.transform.localPosition = new Vector3(0f, -0.8f, 0f);
+                    GameStartManager.Instance.PlayerCounter.transform.localPosition = new Vector3(1.627f, -0.96f, 0f);
+                    GameStartManager.Instance.MakePublicButton.transform.localPosition = new Vector3(-1.5f, -0.95f, 0f);
                 }
             }
             
