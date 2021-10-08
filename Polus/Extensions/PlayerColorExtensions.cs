@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Polus.Behaviours;
+using UnityEngine;
 
 namespace Polus.Extensions {
     public static class PlayerColorExtensions {
@@ -6,6 +7,10 @@ namespace Polus.Extensions {
         private static readonly int BackColor = Shader.PropertyToID("_BackColor");
         private static readonly int BodyColor = Shader.PropertyToID("_BodyColor");
         private static readonly int VisorColor = Shader.PropertyToID("_VisorColor");
+
+        public static SecondaryHatSpriteBehaviour GetSecondary(this HatParent parent) {
+            return SecondaryHatSpriteBehaviour.GetHelper(parent);
+        }
 
         public static void SetPlayerMaterialColors(this SpriteRenderer rend, Color back, Color body, Color? visor = null) {
             if (!rend)

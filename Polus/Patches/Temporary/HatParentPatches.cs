@@ -1,12 +1,11 @@
-﻿using BepInEx.Logging;
-using HarmonyLib;
+﻿using HarmonyLib;
 using Polus.Behaviours;
 using Polus.Enums;
 using Polus.Extensions;
 using PowerTools;
 using UnityEngine;
 
-namespace Polus.Patches.Permanent {
+namespace Polus.Patches.Temporary {
     public static class HatParentPatches {
         public static void SetSprites(HatParent parent) {
             if (parent.Hat.MainImage || parent.Hat.LeftMainImage) {
@@ -28,7 +27,7 @@ namespace Polus.Patches.Permanent {
             public static bool LateUpdate(HatParent __instance) {
                 if (__instance.Hat == null) return false;
                 HatBehaviour behaviour = __instance.Hat;
-                SecondaryHatSpriteBehaviour sec = SecondaryHatSpriteBehaviour.GetHelper(__instance);
+                SecondaryHatSpriteBehaviour sec = __instance.GetSecondary();
                 if (CosmeticManager.Instance.GetIdByHat(behaviour) < CosmeticManager.CosmeticStartId) return true;
                 if (__instance.Parent && __instance.Hat && sec.state == HatState.Idle) {
                     __instance.FrontLayer.sprite = behaviour.MainImage ?? behaviour.LeftMainImage;
@@ -46,7 +45,7 @@ namespace Polus.Patches.Permanent {
         public static class HatParentSetFloor {
             [HarmonyPrefix]
             public static void SetFloorAnim(HatParent __instance) {
-                SecondaryHatSpriteBehaviour sec = SecondaryHatSpriteBehaviour.GetHelper(__instance);
+                SecondaryHatSpriteBehaviour sec = __instance.GetSecondary();
                 sec.state = HatState.Floor;
                 sec.thirdLayer.enabled = false;
             }
@@ -56,7 +55,7 @@ namespace Polus.Patches.Permanent {
         public static class HatParentSetClimb {
             [HarmonyPrefix]
             public static void SetClimbAnim(HatParent __instance) {
-                SecondaryHatSpriteBehaviour sec = SecondaryHatSpriteBehaviour.GetHelper(__instance);
+                SecondaryHatSpriteBehaviour sec = __instance.GetSecondary();
                 sec.state = HatState.Climb;
                 sec.thirdLayer.enabled = false;
             }
@@ -66,17 +65,21 @@ namespace Polus.Patches.Permanent {
         public static class HatParentSetHat {
             [HarmonyPrefix]
             public static void SetHat(HatParent __instance, [HarmonyArgument(0)] int color) {
-                SecondaryHatSpriteBehaviour sec = SecondaryHatSpriteBehaviour.GetHelper(__instance);
+                SecondaryHatSpriteBehaviour sec = __instance.GetSecondary();
                 sec.SetColor(color);
             }
         }
 
-        [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.SetColor))]
-        public static class PlayerSetHat {
-            [HarmonyPostfix]
-            public static void SetHat(PlayerControl __instance, [HarmonyArgument(0)] int color) {
-                SecondaryHatSpriteBehaviour sec = SecondaryHatSpriteBehaviour.GetHelper(__instance.HatRenderer);
+        [HarmonyPatch(typeof(HatParent), nameof(HatParent.SetColor))]
+        public static class HatParentSetColor {
+            [HarmonyPrefix]
+            public static void SetColor(HatParent __instance, [HarmonyArgument(0)] int color) {
+                SecondaryHatSpriteBehaviour sec = __instance.GetSecondary();
+                color.Log(comment: "New funky color mode:");
                 sec.SetColor(color);
+                PlayerTab tab = Object.FindObjectOfType<PlayerTab>();
+                color.Log(comment: $"New cute color {tab is null} mode:");
+                tab?.HatImage.GetSecondary().SetColor(color);
             }
         }
 
@@ -87,7 +90,7 @@ namespace Polus.Patches.Permanent {
                 if (!__instance.Hat)
                     return false;
 
-                SecondaryHatSpriteBehaviour sec = SecondaryHatSpriteBehaviour.GetHelper(__instance);
+                SecondaryHatSpriteBehaviour sec = __instance.GetSecondary();
 
                 sec.state = HatState.Idle;
 

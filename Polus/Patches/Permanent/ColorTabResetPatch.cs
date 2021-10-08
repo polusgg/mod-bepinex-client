@@ -1,11 +1,12 @@
 ﻿using HarmonyLib;
+using Polus.Extensions;
 
 namespace Polus.Patches.Permanent {
-    [HarmonyPatch(typeof(PlayerTab), nameof(PlayerTab.UpdateAvailableColors))]
+    [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.SetColor))]
     public class ColorTabResetPatch {
-        [HarmonyPostfix]
-        public static void SelectColor(PlayerTab __instance) {
-            // __instance.HatImage.SetHat(SaveManager.LastHat, PlayerControl.LocalPlayer.Data.ColorId);
+        [HarmonyPrefix]
+        public static void SetColor(PlayerControl __instance, [HarmonyArgument(0)] int bodyColor) {
+            // __instance.HatRenderer.GetSecondary().SetColor(bodyColor);
         }
     }
 }

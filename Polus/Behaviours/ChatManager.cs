@@ -84,7 +84,7 @@ namespace Polus.Behaviours {
                 chatBubble.Player.Body.SetPlayerMaterialColors(backColor, bodyColor);
                 chatBubble.Player.Body.material.SetColor("_VisorColor", visorColor);
                 chatBubble.Xmark.material.SetInt(MaskLayer, num);
-                SecondaryHatSpriteBehaviour hat = SecondaryHatSpriteBehaviour.GetHelper(chatBubble.Player.HatSlot);
+                SecondaryHatSpriteBehaviour hat = chatBubble.Player.HatSlot.GetSecondary();
                 hat.parent.SetHat(hatId, 0);
                 hat.SetColor(backColor, bodyColor);
                 chatBubble.Player.PetSlot.SetPetImage(petId, backColor, bodyColor);

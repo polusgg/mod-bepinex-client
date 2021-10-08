@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using HarmonyLib;
 using Hazel;
 using Polus.Extensions;
 using UnhollowerRuntimeLib;
@@ -29,7 +30,7 @@ namespace Polus.Behaviours {
 
         private void Start() {
             Player = GetComponent<PlayerControl>();
-            hsb = SecondaryHatSpriteBehaviour.GetHelper(Player.HatRenderer);
+            hsb = Player.HatRenderer.GetSecondary();
         }
 
         private void Update() {
@@ -58,7 +59,7 @@ namespace Polus.Behaviours {
                 MessageReader message = reader.ReadMessage();
                 uint offset = message.ReadPackedUInt32();
                 uint duration = message.ReadPackedUInt32();
-                
+
                 playerKeyframes.Add(new PlayerKeyframe(
                     offset,
                     duration,
@@ -67,12 +68,18 @@ namespace Polus.Behaviours {
                     field[2] ? message.ReadSingle() : null,
                     field[3] ? message.ReadSingle() : null,
                     field[4] ? message.ReadSingle() : null,
-                    field[5] ? new Color32(message.ReadByte(), message.ReadByte(), message.ReadByte(),
-                        message.ReadByte()) : null,
-                    field[6] ? new Color32(message.ReadByte(), message.ReadByte(), message.ReadByte(),
-                        message.ReadByte()) : null,
-                    field[7] ? new Color32(message.ReadByte(), message.ReadByte(), message.ReadByte(),
-                        message.ReadByte()) : null,
+                    field[5]
+                        ? new Color32(message.ReadByte(), message.ReadByte(), message.ReadByte(),
+                            message.ReadByte())
+                        : null,
+                    field[6]
+                        ? new Color32(message.ReadByte(), message.ReadByte(), message.ReadByte(),
+                            message.ReadByte())
+                        : null,
+                    field[7]
+                        ? new Color32(message.ReadByte(), message.ReadByte(), message.ReadByte(),
+                            message.ReadByte())
+                        : null,
                     field[8] ? message.ReadVector2() : null,
                     field[9] ? message.ReadVector2() : null,
                     field[10] ? message.ReadSingle() : null,
@@ -92,7 +99,6 @@ namespace Polus.Behaviours {
             int i = 0;
 
             foreach (PlayerKeyframe current in frames) {
-
                 yield return new WaitForSeconds(current.Offset / 1000f);
                 yield return Effects.Lerp(current.Duration / 1000f, new Action<float>(dt => {
                     // $"amogn suu s {playerColor.a} {dt} {i}".Log();
@@ -134,6 +140,7 @@ namespace Polus.Behaviours {
                 output[i] = (value & (1 << i)) != 0;
                 // PogusPlugin.Logger.LogInfo($"{i} {output[i]}");
             }
+
             return output;
         }
 
