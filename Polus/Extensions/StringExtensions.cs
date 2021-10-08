@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using BepInEx.Logging;
 using HarmonyLib;
 
@@ -17,20 +18,9 @@ namespace Polus.Extensions {
                 .ToArray();
         }
 
+        public static string SanitizationRegex = "(:?<size.+?(=?</size>))|(:?<voffset.+?(=?</voffset>))|(:?<sprite[^>]*>)";
         public static string SanitizeName(this string name) {
-            while (true) {
-                int pos;
-                if ((pos = name.IndexOf("<sprite", StringComparison.Ordinal)) != -1 && name.IndexOf('>', pos) != -1) {
-                    int second = name.IndexOf('>', pos) + 1;
-                    while (second + 1 < name.Length && name[second] == ' ') second++;
-                    name = name[..pos] + name[second..];
-                    continue;
-                }
-
-                break;
-            }
-
-            return name;
+            return Regex.Replace(name, SanitizationRegex, "");
         }
     }
 }
