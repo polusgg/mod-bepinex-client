@@ -30,9 +30,9 @@ namespace Polus.Behaviours {
 
         public void SetColor(int colorParam) => SetColor(Palette.ShadowColors[colorParam], Palette.PlayerColors[colorParam]);
 
-        public void SetColor(Color back, Color body) {
-            backColor = back;
-            bodyColor = body;
+        public void SetColor(Color? back, Color? body) {
+            if (back.HasValue) backColor = back.Value;
+            if (body.HasValue) bodyColor = body.Value;
             
             Update();
         }

@@ -264,16 +264,14 @@ namespace Polus.Behaviours {
                 if (playerColor.HasValue) {
                     _playerControl.myRend.material.SetColor(BodyColorID, playerColor.Value);
                     if (_playerControl.HatRenderer && _playerControl.HatRenderer.Hat.AltShader != null) {
-                        _playerControl.HatRenderer.FrontLayer.material.SetColor(BodyColorID, playerColor.Value);
-                        _playerControl.HatRenderer.BackLayer.material.SetColor(BodyColorID, playerColor.Value);
+                        _animPlayer.hsb.SetColor(null, playerColor);
                     }
                 }
 
                 if (shadowColor.HasValue) {
                     _playerControl.myRend.material.SetColor(BackColorID, shadowColor.Value);
                     if (_playerControl.HatRenderer && _playerControl.HatRenderer.Hat.AltShader != null) {
-                        _playerControl.HatRenderer.FrontLayer.material.SetColor(BackColorID, shadowColor.Value);
-                        _playerControl.HatRenderer.BackLayer.material.SetColor(BackColorID, shadowColor.Value);
+                        _animPlayer.hsb.SetColor(shadowColor, null);
                     }
                 }
 
@@ -282,6 +280,7 @@ namespace Polus.Behaviours {
                     if (_playerControl.HatRenderer && _playerControl.HatRenderer.Hat.AltShader != null) {
                         _playerControl.HatRenderer.FrontLayer.material.SetColor(VisorColorID, visorColor.Value);
                         _playerControl.HatRenderer.BackLayer.material.SetColor(VisorColorID, visorColor.Value);
+                        _animPlayer.hsb.thirdLayer.material.SetColor(VisorColorID, visorColor.Value); //lolw
                     }
                 }
             }
