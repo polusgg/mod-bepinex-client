@@ -38,8 +38,7 @@ namespace Polus.Patches.Temporary {
         public class SetHatPatch {
             [HarmonyPostfix]
             public static void SetHat(PlayerControl __instance, [HarmonyArgument(0)] uint id) {
-                if (PlayerControl.LocalPlayer) id.Log(comment: "");
-                if (PlayerControl.LocalPlayer && id != 9999999) SaveManager.LastHat = id;
+                if (PlayerControl.LocalPlayer is not null && PlayerControl.LocalPlayer.Pointer == __instance.Pointer && id != 9999999) SaveManager.LastHat = id;
             }
         }
 
@@ -47,7 +46,7 @@ namespace Polus.Patches.Temporary {
         public class SetPetPatch {
             [HarmonyPostfix]
             public static void SetPet(PlayerControl __instance, [HarmonyArgument(0)] uint id) {
-                if (PlayerControl.LocalPlayer && id != 9999999) SaveManager.LastPet = id;
+                if (PlayerControl.LocalPlayer is not null && PlayerControl.LocalPlayer.Pointer == __instance.Pointer && id != 9999999) SaveManager.LastPet = id;
             }
         }
 
@@ -55,7 +54,7 @@ namespace Polus.Patches.Temporary {
         public class SetSkinPatch {
             [HarmonyPostfix]
             public static void SetSkin(PlayerControl __instance, [HarmonyArgument(0)] uint id) {
-                if (PlayerControl.LocalPlayer && id != 9999999) SaveManager.LastSkin = id;
+                if (PlayerControl.LocalPlayer is not null && PlayerControl.LocalPlayer.Pointer == __instance.Pointer && id != 9999999) SaveManager.LastSkin = id;
             }
         }
 
