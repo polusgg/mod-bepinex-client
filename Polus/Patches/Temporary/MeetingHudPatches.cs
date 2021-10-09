@@ -49,9 +49,19 @@ namespace Polus.Patches.Temporary {
             }
         }
 
-        [HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.SetForegroundForDead))]
-        public static class DisableWeirdSetForegroundThing {
-            public static bool SetForegroundForDead() => false;
+        [HarmonyPatch(typeof(MeetingHud.__c), nameof(MeetingHud.__c._SortButtons_b__69_0))]
+        public static class MeetingButtonSorting {
+            [HarmonyPrefix]
+            public static bool SetForegroundForDead(PlayerVoteArea p, out int __result) {
+                PvaManager pvam = p.GetComponent<PvaManager>();
+                __result = pvam.dead switch {
+                    false when pvam.disabled => 512,
+                    true when pvam.disabled => 256,
+                    true => 128,
+                    false => 0
+                };
+                return false;
+            }
         }
 
         [HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.UpdateButtons))]
@@ -59,7 +69,6 @@ namespace Polus.Patches.Temporary {
             private static bool IsDead(MeetingHud mhud, PlayerControl control) => mhud.playerStates.First(state => state.TargetPlayerId == control.PlayerId).AmDead; 
             [HarmonyPostfix]
             public static void UpdateButtons(MeetingHud __instance) {
-                __instance.SortButtons();
                 bool shouldBeDead = IsDead(__instance, PlayerControl.LocalPlayer);
                 if (shouldBeDead == __instance.amDead) return;
                 __instance.amDead = shouldBeDead;
@@ -71,7 +80,7 @@ namespace Polus.Patches.Temporary {
 
         [HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.Update))]
         public static class UpdateSortingPatch {
-            [HarmonyPostfix]
+            [HarmonyPrefix]
             public static void Update(MeetingHud __instance) {
                 __instance.SortButtons();
             }

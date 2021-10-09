@@ -25,6 +25,7 @@ namespace Polus {
         public readonly HashSet<(PggMod, Mod)> TemporaryMods = new();
         private bool _wasOnline;
         private string _previousSceneName;
+        public static bool DebugEnabled = false;
 
         public PggModManager(ManualLogSource logger) {
             Logger = logger;
@@ -148,9 +149,7 @@ namespace Polus {
             }
 
             private void OnGUI() {
-                #if DEBUG
-                // foreach ((PggMod _, Mod mod) in ModManager.TemporaryMods) mod.DebugGui();
-                #endif
+                if (DebugEnabled) foreach ((PggMod _, Mod mod) in ModManager.TemporaryMods) mod.DebugGui();
             }
 
             [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.Start))]

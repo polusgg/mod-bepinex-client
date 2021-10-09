@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Linq;
+using Il2CppSystem.Collections;
+using Il2CppSystem.Collections.Generic;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 
@@ -21,7 +23,7 @@ namespace Polus.Behaviours {
         public void Initialize(PlayerVoteArea voteArea, byte targetId) {
             pva = voteArea;
             renderer = GetComponent<SpriteRenderer>();
-            if (targetId < 252) player = PlayerControl.AllPlayerControls.Find((Func<PlayerControl, bool>)(pc => pc.PlayerId == targetId));
+            if (targetId < 252) player = PlayerControl.AllPlayerControls.Find((Func<PlayerControl, bool>) (pc => pc.PlayerId == targetId));
         }
 
         public void Update() {
@@ -33,6 +35,7 @@ namespace Polus.Behaviours {
                 pva.NameText.text = player.nameText.text;
                 pva.NameText.color = Color.white;
             }
+
             bool disable = dead || disabled || disabledState;
             if (disable) ControllerManager.Instance.RemoveSelectableUiElement(pva.PlayerButton);
             else ControllerManager.Instance.AddSelectableUiElement(pva.PlayerButton);
@@ -43,9 +46,13 @@ namespace Polus.Behaviours {
             else {
                 pva.Flag.enabled = pva.DidVote && !pva.resultsShowing;
                 pva.Megaphone.enabled = reported;
-                // if (!disable) return;
                 pva.Overlay.gameObject.SetActive(disable);
                 pva.XMark.gameObject.SetActive(dead);
+
+                if ((disabled || pva.voteComplete) && pva.Buttons.active/* && ControllerManager.Instance.IsMenuActiveAtAll(name)*/) {
+                    ControllerManager.Instance.CloseOverlayMenu(name);
+                    pva.Buttons.active = false;
+                }
             }
         }
 
@@ -53,6 +60,25 @@ namespace Polus.Behaviours {
             this.dead = dead;
             this.disabled = disabled;
             this.reported = reported;
+        }
+
+        public void Select() {
+            if (PlayerControl.LocalPlayer.Data.IsDead || dead || pva.Parent)
+                return;
+
+            if (!pva.voteComplete && pva.Parent.Select(pva.TargetPlayerId)) {
+                if (pva.Buttons.active) return;
+                pva.Buttons.SetActive(true);
+                float startPos = pva.AnimateButtonsFromLeft ? 0.2f : 1.95f;
+                StartCoroutine(Effects.All(new[] {
+                    Effects.Lerp(0.25f, (Action<float>) (t => pva.CancelButton.transform.localPosition = Vector2.Lerp(Vector2.right * startPos, Vector2.right * 1.3f, Effects.ExpOut(t)))),
+                    Effects.Lerp(0.35f, (Action<float>) (t => pva.ConfirmButton.transform.localPosition = Vector2.Lerp(Vector2.right * startPos, Vector2.right * 0.65f, Effects.ExpOut(t))))
+                }));
+                List<UiElement> selectableElements = new();
+                selectableElements.Add(pva.CancelButton);
+                selectableElements.Add(pva.ConfirmButton);
+                ControllerManager.Instance.OpenOverlayMenu(name, pva.CancelButton, pva.ConfirmButton, selectableElements);
+            }
         }
     }
 }

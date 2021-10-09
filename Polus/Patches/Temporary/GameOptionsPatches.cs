@@ -85,7 +85,7 @@ namespace Polus.Patches.Temporary {
                                 option.FormatString = value.FormatString;
                                 option.ZeroIsInfinity = value.IsInfinity;
                                 option.TitleText.text = gameOption.Title.SanitizeName();
-                                option.ValueText.text = option.ZeroIsInfinity && value.Value == 0 ? "∞" : string.Format(option.FormatString, option.Value);
+                                option.ValueText.text = (option.ZeroIsInfinity && value.Value == 0 ? "∞" : string.Format(option.FormatString, option.Value)).SanitizeName();
                                 if (!AmongUsClient.Instance.AmHost) option.SetAsPlayer();
                                 options.Add(option.transform);
                                 break;
@@ -117,7 +117,7 @@ namespace Polus.Patches.Temporary {
                                     });
 
                                 option.Selected = (int) value.OptionIndex;
-                                option.ValueText.text = (value.Values[value.OptionIndex].SanitizeName());
+                                option.ValueText.text = value.Values[value.OptionIndex].SanitizeName();
                                 option.TitleText.text = gameOption.Title.SanitizeName();
 
                                 if (!AmongUsClient.Instance.AmHost) option.SetAsPlayer();

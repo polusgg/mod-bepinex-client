@@ -397,7 +397,7 @@ namespace Polus {
                     uint address = reader.ReadUInt32();
                     ushort port = reader.ReadUInt16();
                     AmongUsClient.Instance.SetEndpoint(InnerNetClient.AddressToString(address), port);
-                    Debug.Log($"Redirected to: {AmongUsClient.Instance.networkAddress}:{AmongUsClient.Instance.networkPort}");
+                    $"Redirected to: {AmongUsClient.Instance.networkAddress}:{AmongUsClient.Instance.networkPort}".Log();
                     AmongUsClient.Instance.Connect(AmongUsClient.Instance.mode);
                     ServerMigrationPatches.HostGamePacketChange.Migrated = true;
                     break;
@@ -629,6 +629,10 @@ namespace Polus {
 
         public override void SceneChanged(Scene scene) {
             if (scene.name == GameScenes.MMOnline) RemoveHostGameMenuPatches.ChangeCreateGame();
+        }
+
+        public override void DebugGui() {
+            
         }
 
         private IEnumerator FetchResource(MessageReader reader) {

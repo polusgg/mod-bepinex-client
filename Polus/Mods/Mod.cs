@@ -91,6 +91,6 @@ namespace Polus.Mods {
         /// <summary>
         /// Called whenever the debug GUI is painted
         /// </summary>
-        // public abstract void DebugGui();
+        public abstract void DebugGui();
     }
 }
