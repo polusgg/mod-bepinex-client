@@ -15,6 +15,7 @@ namespace Polus.Behaviours.Inner {
         private Camera camera;
         private FollowerCamera follower;
         private SpriteRenderer fullScreen;
+        public static readonly LayerMask DefaultLayer = LayerMask.NameToLayer("Default");
 
         static PolusCameraController() {
             ClassInjector.RegisterTypeInIl2Cpp<PolusCameraController>();
@@ -27,6 +28,7 @@ namespace Polus.Behaviours.Inner {
             camera = follower.GetComponent<Camera>();
             fullScreen = Instantiate(HudManager.Instance.FullScreen.gameObject, HudManager.Instance.transform, true).GetComponent<SpriteRenderer>();
             fullScreen.name = "FullScreen499";
+            fullScreen.gameObject.layer = DefaultLayer;
             fullScreen.transform.position += new Vector3(0, 0, 1);
         }
 

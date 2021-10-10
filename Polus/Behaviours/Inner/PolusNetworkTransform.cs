@@ -11,6 +11,8 @@ namespace Polus.Behaviours.Inner {
     public class PolusNetworkTransform : PnoBehaviour {
         public static readonly FloatRange XRange = new(-50f, 50f);
         public static readonly FloatRange YRange = new(-50f, 50f);
+        public static readonly LayerMask UILayer = LayerMask.NameToLayer("UI");
+        public static readonly LayerMask DefaultLayer = LayerMask.NameToLayer("Default");
 
         private int? parent;
         // private Vector2 _start;
@@ -67,6 +69,7 @@ namespace Polus.Behaviours.Inner {
                 AspectPosition.enabled = true;
                 AspectPosition.DistanceFromEdge = new Vector3(0, 0, z) - pos;
                 AspectPosition.AdjustPosition();
+                gameObject.layer = UILayer;
             } else {
                 AspectPosition.enabled = false;
                 parent = reader.ReadPackedInt32() switch {
@@ -74,6 +77,7 @@ namespace Polus.Behaviours.Inner {
                     int x => x
                 };
                 Position = new Vector3(pos.x, pos.y, z);
+                gameObject.layer = DefaultLayer;
             }
         }
     }
