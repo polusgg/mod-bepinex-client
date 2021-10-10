@@ -272,6 +272,7 @@ namespace Polus.Behaviours {
                     _playerControl.myRend.material.SetColor(BodyColorID, playerColor.Value);
                     if (_playerControl.HatRenderer && _playerControl.HatRenderer.Hat.AltShader != null) {
                         _animPlayer.hsb.SetColor(null, playerColor);
+                        _playerControl.CurrentPet.rend.material.SetColor(BodyColorID, playerColor.Value);
                     }
                 }
 
@@ -279,6 +280,7 @@ namespace Polus.Behaviours {
                     _playerControl.myRend.material.SetColor(BackColorID, shadowColor.Value);
                     if (_playerControl.HatRenderer && _playerControl.HatRenderer.Hat.AltShader != null) {
                         _animPlayer.hsb.SetColor(shadowColor, null);
+                        _playerControl.CurrentPet.rend.material.SetColor(BackColorID, shadowColor.Value);
                     }
                 }
 
@@ -288,6 +290,7 @@ namespace Polus.Behaviours {
                         _playerControl.HatRenderer.FrontLayer.material.SetColor(VisorColorID, visorColor.Value);
                         _playerControl.HatRenderer.BackLayer.material.SetColor(VisorColorID, visorColor.Value);
                         _animPlayer.hsb.thirdLayer.material.SetColor(VisorColorID, visorColor.Value); //lolw
+                        _playerControl.CurrentPet.rend.material.SetColor(VisorColorID, visorColor.Value);
                     }
                 }
             }
